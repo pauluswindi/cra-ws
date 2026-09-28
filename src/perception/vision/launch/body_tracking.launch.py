@@ -52,7 +52,7 @@ def generate_launch_description():
     # Static Transform Publisher (Connects Robot Base to Camera)
     # base_link currently coincides with the camera mount. When the robot base
     # frame gets a physical definition, fill the measured values here; the
-    # bounds in monitor_node must follow the same convention.
+    # workspace polygon in workspace_monitor_node must follow the same convention.
     static_tf_publisher = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -66,12 +66,34 @@ def generate_launch_description():
         output='screen',
     )
 
+    # Robot workspace definition in base_link frame, consumed by
+    # workspace_monitor_node.
+    # workspace_polygon: ordered corner points [x, y] viewed from top; the
+    #   polygon closes automatically and may take any shape, symmetric or not.
+    # workspace_z: vertical extent of the zone above base_link.
+    # exit_timeout_s: hysteresis before a human is dropped from
+    #   /perception/humans_in_zone after leaving the zone.
+    workspace_params = {
+        'workspace_polygon': [
+            0.2, -0.5,
+            0.8, -0.5,
+            0.9,  0.1,
+            0.6,  0.5,
+            0.2,  0.4,
+        ],
+        'workspace_z': [0.0, 0.6],
+        'exit_timeout_s': 0.5,
+    }
+
     return LaunchDescription([
         kinect_node,
         static_tf_publisher,
 
         # Vision package nodes
-        Node(package='vision', executable='tracker_node', name='tracker_node', output='screen'),
-        Node(package='vision', executable='monitor_node', name='monitor_node', output='screen'),
-        Node(package='vision', executable='visual_node', name='visual_node', output='screen'),
+        Node(package='vision', executable='skeleton_transform_node',
+             name='skeleton_transform_node', output='screen'),
+        Node(package='vision', executable='workspace_monitor_node',
+             name='workspace_monitor_node', parameters=[workspace_params], output='screen'),
+        Node(package='vision', executable='visual_node',
+             name='visual_node', output='screen'),
     ])

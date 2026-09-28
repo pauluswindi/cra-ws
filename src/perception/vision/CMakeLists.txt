@@ -35,20 +35,20 @@ ament_target_dependencies(frame_transformer_lib
   rclcpp geometry_msgs visualization_msgs tf2 tf2_ros tf2_geometry_msgs)
 target_link_libraries(frame_transformer_lib body_tracker_lib)
 
-add_library(workspace_monitor_lib src/workspace_monitor/workspace_monitor.cpp)
-ament_target_dependencies(workspace_monitor_lib rclcpp geometry_msgs)
-target_link_libraries(workspace_monitor_lib body_tracker_lib)
+add_library(workspace_robot_lib src/workspace_robot/workspace_robot.cpp)
+ament_target_dependencies(workspace_robot_lib rclcpp geometry_msgs)
+target_link_libraries(workspace_robot_lib body_tracker_lib)
 
 # Executables
-add_executable(tracker_node src/nodes/tracker_node.cpp)
-ament_target_dependencies(tracker_node
+add_executable(skeleton_transform_node src/nodes/skeleton_transform_node.cpp)
+ament_target_dependencies(skeleton_transform_node
   rclcpp geometry_msgs visualization_msgs tf2 tf2_ros tf2_geometry_msgs)
-target_link_libraries(tracker_node body_tracker_lib frame_transformer_lib)
+target_link_libraries(skeleton_transform_node body_tracker_lib frame_transformer_lib)
 
-add_executable(monitor_node src/nodes/monitor_node.cpp)
-ament_target_dependencies(monitor_node
+add_executable(workspace_monitor_node src/nodes/workspace_monitor_node.cpp)
+ament_target_dependencies(workspace_monitor_node
   rclcpp geometry_msgs std_msgs visualization_msgs)
-target_link_libraries(monitor_node body_tracker_lib workspace_monitor_lib)
+target_link_libraries(workspace_monitor_node body_tracker_lib workspace_robot_lib)
 
 add_executable(visual_node src/nodes/visual_node.cpp)
 ament_target_dependencies(visual_node
@@ -56,20 +56,23 @@ ament_target_dependencies(visual_node
   tf2 tf2_ros tf2_geometry_msgs)
 target_link_libraries(visual_node frame_transformer_lib ${OpenCV_LIBS})
 
-# Install
+# Install libraries
 install(TARGETS
   body_tracker_lib
   frame_transformer_lib
-  workspace_monitor_lib
+  workspace_robot_lib
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
 )
+
+# Install executables
 install(TARGETS
-  tracker_node
-  monitor_node
+  skeleton_transform_node
+  workspace_monitor_node
   visual_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
+
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/launch)
 
@@ -79,7 +82,7 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(body_tracker_lib frame_transformer_lib workspace_monitor_lib)
+ament_export_libraries(body_tracker_lib frame_transformer_lib workspace_robot_lib)
 ament_export_dependencies(
   rclcpp builtin_interfaces sensor_msgs std_msgs geometry_msgs visualization_msgs
   tf2 tf2_ros tf2_geometry_msgs cv_bridge)

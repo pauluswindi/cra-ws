@@ -133,15 +133,15 @@ public:
             std::bind(&VisualNode::cameraInfoCallback, this, std::placeholders::_1));
 
         camera_skeleton_sub_ = create_subscription<visualization_msgs::msg::MarkerArray>(
-            "/vision/skeleton/upper_body_camera", latest_only,
+            "/vision/skeleton/camera_frame", latest_only,
             std::bind(&VisualNode::cameraSkeletonCallback, this, std::placeholders::_1));
 
         base_skeleton_sub_ = create_subscription<visualization_msgs::msg::MarkerArray>(
-            "/vision/skeleton/upper_body_base", latest_only,
+            "/vision/skeleton/base_frame", latest_only,
             std::bind(&VisualNode::baseSkeletonCallback, this, std::placeholders::_1));
 
         status_sub_ = create_subscription<std_msgs::msg::String>(
-            "/robot/safety_status", 10,
+            "/perception/workspace_status", 10,
             std::bind(&VisualNode::statusCallback, this, std::placeholders::_1));
 
         timer_ = create_wall_timer(33ms, std::bind(&VisualNode::displayCallback, this));
@@ -154,7 +154,17 @@ private:
     void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg) {
         cv::Mat frame;
         try {
-            frame = cv_bridge::toCvCopy(msg, "bgr8")->image;
+            if (msg->encoding == "jpeg" || msg->encoding == "mjpeg" || msg->encoding == "mjpg") {
+                const cv::Mat buf(1, static_cast<int>(msg->data.size()), CV_8UC1,
+                                  const_cast<uint8_t*>(msg->data.data()));
+                frame = cv::imdecode(buf, cv::IMREAD_COLOR);
+                if (frame.empty()) {
+                    RCLCPP_ERROR(get_logger(), "Failed to decode jpeg color image");
+                    return;
+                }
+            } else {
+                frame = cv_bridge::toCvCopy(msg, "bgr8")->image;
+            }
         } catch (const cv_bridge::Exception& e) {
             RCLCPP_ERROR(get_logger(), "cv_bridge exception: %s", e.what());
             return;
