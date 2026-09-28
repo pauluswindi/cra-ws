@@ -1,0 +1,6 @@
+# Request: enable or disable torque for a specific joint
+uint8 id
+bool enable
+---
+# Response: operation result
+bool success

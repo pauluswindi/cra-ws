@@ -1,0 +1,48 @@
+# Colcon build artifacts, never belong in version control
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+
+# C++ leftovers outside build dirs, just in case
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.out
+
+# CMake scratch files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CMakeLists.txt.user
+
+# ROS recordings and Kinect capture files, can be huge
+*.bag
+*.db3
+*.mkv
+rosbag2_*
+
+# Editor and IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating system junk
+.DS_Store
+Thumbs.db
+
+# Secrets and credentials
+.env
+*.pem
+*.key

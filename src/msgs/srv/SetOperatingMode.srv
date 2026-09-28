@@ -1,0 +1,7 @@
+# Request: change operating mode for a specific joint
+# Mode values: 0 = Current, 1 = Velocity, 3 = Position, 4 = Extended Position
+uint8 id
+uint8 mode
+---
+# Response: operation result
+bool success

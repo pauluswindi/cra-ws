@@ -1,0 +1,9 @@
+# Request
+uint8 id
+---
+# Response
+bool success
+string message
+float64 position
+float64 velocity
+float64 current
