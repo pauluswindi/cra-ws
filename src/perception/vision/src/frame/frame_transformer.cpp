@@ -16,8 +16,6 @@ FrameTransformer::FrameTransformer(rclcpp::Node* node)
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 
-FrameTransformer::~FrameTransformer() {}
-
 bool FrameTransformer::lookupTransform(const std::string& target_frame,
                                        const std::string& source_frame,
                                        tf2::Transform& out) const {
@@ -26,8 +24,7 @@ bool FrameTransformer::lookupTransform(const std::string& target_frame,
         return true;
     }
     try {
-        const auto stamped = tf_buffer_->lookupTransform(
-            target_frame, source_frame, tf2::TimePointZero);
+        const auto stamped = tf_buffer_->lookupTransform(target_frame, source_frame, tf2::TimePointZero);
         const auto& t = stamped.transform;
         out.setOrigin(tf2::Vector3(t.translation.x, t.translation.y, t.translation.z));
         out.setRotation(tf2::Quaternion(t.rotation.x, t.rotation.y, t.rotation.z, t.rotation.w));
@@ -43,7 +40,7 @@ bool FrameTransformer::lookupTransform(const std::string& target_frame,
 geometry_msgs::msg::Point FrameTransformer::transformPoint(
     const geometry_msgs::msg::Point& point_in,
     const std::string& target_frame,
-    const std::string& source_frame)
+    const std::string& source_frame) const
 {
     geometry_msgs::msg::PointStamped point_stamped;
     point_stamped.header.frame_id = source_frame;
@@ -61,46 +58,9 @@ geometry_msgs::msg::Point FrameTransformer::transformPoint(
     }
 }
 
-body_tracking::SkeletonData FrameTransformer::transformSkeleton(
-    const body_tracking::SkeletonData& camera_skeleton,
-    const std::string& target_frame,
-    const std::string& source_frame)
-{
-    body_tracking::SkeletonData out = camera_skeleton;
-
-    tf2::Transform tf;
-    if (!lookupTransform(target_frame, source_frame, tf)) {
-        return out;
-    }
-
-    const tf2::Quaternion rotation = tf.getRotation();
-    for (size_t i = 0; i < out.joints.size(); ++i) {
-        if (!out.is_tracked[i]) {
-            continue;
-        }
-
-        const auto& p = out.joints[i];
-        const tf2::Vector3 p_out = tf * tf2::Vector3(p.x, p.y, p.z);
-        out.joints[i].x = p_out.x();
-        out.joints[i].y = p_out.y();
-        out.joints[i].z = p_out.z();
-
-        const auto& o = out.orientations[i];
-        tf2::Quaternion q_out = rotation * tf2::Quaternion(o.x, o.y, o.z, o.w);
-        q_out.normalize();
-        out.orientations[i].x = q_out.x();
-        out.orientations[i].y = q_out.y();
-        out.orientations[i].z = q_out.z();
-        out.orientations[i].w = q_out.w();
-    }
-
-    out.frame_id = target_frame;
-    return out;
-}
-
 bool FrameTransformer::transformMarkers(const visualization_msgs::msg::MarkerArray& markers_in,
                                         visualization_msgs::msg::MarkerArray& markers_out,
-                                        const std::string& target_frame) {
+                                        const std::string& target_frame) const {
     markers_out = visualization_msgs::msg::MarkerArray();
     if (markers_in.markers.empty()) {
         return true;
@@ -116,7 +76,7 @@ bool FrameTransformer::transformMarkers(const visualization_msgs::msg::MarkerArr
     markers_out.markers.reserve(markers_in.markers.size());
 
     for (const auto& marker : markers_in.markers) {
-        auto transformed = marker;  // keep every driver field untouched
+        auto transformed = marker; 
 
         const auto& p = marker.pose.position;
         const tf2::Vector3 p_out = tf * tf2::Vector3(p.x, p.y, p.z);
@@ -144,5 +104,5 @@ bool FrameTransformer::canTransform(const std::string& target_frame,
     return lookupTransform(target_frame, source_frame, unused);
 }
 
-} // namespace frame
-} // namespace vision
+}  // namespace frame
+}  // namespace vision

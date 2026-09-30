@@ -11,6 +11,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/camera_info.hpp"
+#include "sensor_msgs/msg/compressed_image.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
@@ -52,13 +53,15 @@ constexpr double kMinValidDepthM = 0.1;
 constexpr double kBaseDataTimeoutS = 0.5;
 constexpr double kImageTimeoutS = 1.0;
 constexpr double kStaleDataTimeoutS = 0.5;
+// How long the raw topic must stay silent before the compressed topic
+// takes over. The fork driver publishes color either as raw Image (bgra)
+// or as CompressedImage (jpeg), never both, so one second is plenty.
+constexpr double kRawSourceTimeoutS = 1.0;
 
 constexpr double kDefaultDisplayFps = 30.0;
 constexpr double kMinDisplayFps = 1.0;
 constexpr double kMaxDisplayFps = 60.0;
 
-// Bones follow the official Azure Kinect connectivity, with the arm chain
-// rooted at the chest and no lines drawn for eyes and ears.
 const std::vector<std::pair<int, int>> kBones = {
     {ID_NECK, ID_SPINE_CHEST},
     {ID_SPINE_CHEST, ID_SPINE_NAVEL},
@@ -81,7 +84,6 @@ const std::vector<std::pair<int, int>> kBones = {
     {ID_HAND_RIGHT, ID_THUMB_RIGHT},
 };
 
-// One distinct color per person so multiple skeletons never get confused.
 const std::vector<cv::Scalar> kPersonColors = {
     cv::Scalar(0, 255, 0),
     cv::Scalar(0, 255, 255),
@@ -128,6 +130,7 @@ public:
     VisualNode() : Node("visual_node") {
         tf_transformer_ = std::make_unique<vision::frame::FrameTransformer>(this);
 
+        // Display FPS parameter (must be passed as double in launch, e.g., 20.0)
         double display_fps = declare_parameter("display_target_fps", kDefaultDisplayFps);
         if (display_fps < kMinDisplayFps || display_fps > kMaxDisplayFps) {
             RCLCPP_WARN(get_logger(),
@@ -138,11 +141,24 @@ public:
         const auto display_period =
             std::chrono::milliseconds(static_cast<int64_t>(1000.0 / display_fps));
 
+        // Display scale parameter (0.5 = half resolution, 0.25 = quarter resolution)
+        display_scale_ = declare_parameter("display_scale", 1.0);
+        if (display_scale_ <= 0.0 || display_scale_ > 1.0) {
+            RCLCPP_WARN(get_logger(), "display_scale %.2f invalid, using 1.0", display_scale_);
+            display_scale_ = 1.0;
+        }
+
         auto latest_only = rclcpp::QoS(rclcpp::KeepLast(1)).best_effort();
 
         image_sub_ = create_subscription<sensor_msgs::msg::Image>(
             "/rgb/image_raw", latest_only,
             std::bind(&VisualNode::imageCallback, this, std::placeholders::_1));
+
+        // Fallback color source: carries the MJPG bytes when the driver runs
+        // in jpeg mode and leaves /rgb/image_raw silent.
+        compressed_image_sub_ = create_subscription<sensor_msgs::msg::CompressedImage>(
+            "/rgb/image_raw/compressed", latest_only,
+            std::bind(&VisualNode::compressedImageCallback, this, std::placeholders::_1));
 
         camera_info_sub_ = create_subscription<sensor_msgs::msg::CameraInfo>(
             "/rgb/camera_info", latest_only,
@@ -169,15 +185,19 @@ public:
 
         joint_colors_ = getJointColors();
         RCLCPP_INFO(get_logger(),
-                    "Visual node started (FPV view, multi-person, workspace-filtered, display %.0f fps)",
-                    display_fps);
+                    "Visual node started (FPV view, multi-person, workspace-filtered, "
+                    "display %.0f fps, scale %.2f, auto color source)",
+                    display_fps, display_scale_);
     }
 
 private:
     void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg) {
+        const double now_s = now().seconds();
+
         cv::Mat frame;
         try {
-            if (msg->encoding == "jpeg" || msg->encoding == "mjpeg" || msg->encoding == "mjpg") {
+            if (msg->encoding == "jpeg" || msg->encoding == "mjpeg" ||
+                msg->encoding == "mjpg" || msg->encoding == "jpg") {
                 const cv::Mat buf(1, static_cast<int>(msg->data.size()), CV_8UC1,
                                   const_cast<uint8_t*>(msg->data.data()));
                 frame = cv::imdecode(buf, cv::IMREAD_COLOR);
@@ -188,13 +208,70 @@ private:
             } else {
                 frame = cv_bridge::toCvCopy(msg, "bgr8")->image;
             }
+            if (display_scale_ < 1.0 && !frame.empty()) {
+                const int target_w = static_cast<int>(frame.cols * display_scale_);
+                const int target_h = static_cast<int>(frame.rows * display_scale_);
+                cv::resize(frame, frame, cv::Size(target_w, target_h));
+            }
         } catch (const cv_bridge::Exception& e) {
             RCLCPP_ERROR(get_logger(), "cv_bridge exception: %s", e.what());
             return;
         }
 
-        const double now_s = now().seconds();
         std::lock_guard<std::mutex> lock(mutex_);
+        last_raw_msg_time_s_ = now_s;
+        if (using_compressed_) {
+            RCLCPP_INFO(get_logger(), "Color source switched back to /rgb/image_raw");
+            using_compressed_ = false;
+        }
+        current_image_ = frame;
+        has_image_ = true;
+        last_image_size_ = frame.size();
+        if (last_image_time_s_ > 0.0) {
+            const double dt = now_s - last_image_time_s_;
+            if (dt > 1e-6) {
+                fps_ = 0.9 * fps_ + 0.1 / dt;
+            }
+        }
+        last_image_time_s_ = now_s;
+    }
+
+    void compressedImageCallback(const sensor_msgs::msg::CompressedImage::SharedPtr msg) {
+        // Automatic source switch: accept compressed frames only while the raw
+        // topic has been silent, so a stray compressed duplicate in bgra mode
+        // is ignored with a single time comparison and no decode cost.
+        const double now_s = now().seconds();
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            if ((now_s - last_raw_msg_time_s_) < kRawSourceTimeoutS) {
+                return;
+            }
+        }
+
+        cv::Mat frame;
+        try {
+            const cv::Mat buf(1, static_cast<int>(msg->data.size()), CV_8UC1,
+                              const_cast<uint8_t*>(msg->data.data()));
+            frame = cv::imdecode(buf, cv::IMREAD_COLOR);
+        } catch (const cv::Exception& e) {
+            RCLCPP_ERROR(get_logger(), "compressed decode exception: %s", e.what());
+            return;
+        }
+        if (frame.empty()) {
+            RCLCPP_ERROR(get_logger(), "Failed to decode compressed color image");
+            return;
+        }
+        if (display_scale_ < 1.0) {
+            const int target_w = static_cast<int>(frame.cols * display_scale_);
+            const int target_h = static_cast<int>(frame.rows * display_scale_);
+            cv::resize(frame, frame, cv::Size(target_w, target_h));
+        }
+
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!using_compressed_) {
+            RCLCPP_INFO(get_logger(), "Color source switched to /rgb/image_raw/compressed");
+            using_compressed_ = true;
+        }
         current_image_ = frame;
         has_image_ = true;
         last_image_size_ = frame.size();
@@ -241,9 +318,10 @@ private:
                     projected_people_[person.first][joint.first] = cv::Point(-1, -1);
                     continue;
                 }
+                // Scale projection to match downscaled display
                 projected_people_[person.first][joint.first] =
-                    cv::Point(static_cast<int>(p.x * fx / p.z + cx),
-                              static_cast<int>(p.y * fy / p.z + cy));
+                    cv::Point(static_cast<int>((p.x * fx / p.z + cx) * display_scale_),
+                              static_cast<int>((p.y * fy / p.z + cy) * display_scale_));
             }
         }
     }
@@ -262,7 +340,7 @@ private:
         active_body_ids_.clear();
         for (const auto& marker : msg->markers) {
             if (marker.action != visualization_msgs::msg::Marker::ADD) {
-                continue;  // DELETE markers mean "gone", not "here"
+                continue;
             }
             active_body_ids_.insert(marker.id / 100);
         }
@@ -309,7 +387,6 @@ private:
             return;
         }
 
-        // Stale feeds would draw lying skeletons: hide them instead.
         const double now_s = now().seconds();
         if ((now_s - last_camera_skeleton_time_s_) > kStaleDataTimeoutS ||
             (now_s - last_zone_time_s_) > kStaleDataTimeoutS) {
@@ -317,7 +394,6 @@ private:
         }
 
         for (const auto& person : projected_people_) {
-            // Only draw people currently inside the workspace zone.
             if (active_body_ids_.find(person.first) == active_body_ids_.end()) {
                 continue;
             }
@@ -388,7 +464,7 @@ private:
         y += 35;
 
         cv::putText(img, "People in zone: " + std::to_string(active_body_ids_.size()),
-                    cv::Point(x, y), font, 0.5, cv::Scalar(255, 255, 0), 1);
+                    cv::Point(x, y), font, 0.5, cv::Scalar(255, 255, 255), 1);
         y += 25;
 
         const bool base_fresh = (now().seconds() - last_base_time_s_) < kBaseDataTimeoutS;
@@ -398,7 +474,12 @@ private:
             return;
         }
 
+        // Only show info for people currently in the workspace zone
         for (const auto& person : base_people_) {
+            if (active_body_ids_.find(person.first) == active_body_ids_.end()) {
+                continue;
+            }
+
             const cv::Scalar color = personColor(person.first);
             for (const auto& entry : person.second) {
                 if (entry.first != ID_HAND_LEFT && entry.first != ID_HAND_RIGHT &&
@@ -418,6 +499,7 @@ private:
 
     std::unique_ptr<vision::frame::FrameTransformer> tf_transformer_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
+    rclcpp::Subscription<sensor_msgs::msg::CompressedImage>::SharedPtr compressed_image_sub_;
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
     rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr camera_skeleton_sub_;
     rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr base_skeleton_sub_;
@@ -439,10 +521,13 @@ private:
     double last_base_time_s_ = -1.0;
     double last_zone_time_s_ = -1.0;
     double last_camera_skeleton_time_s_ = -1.0;
+    double last_raw_msg_time_s_ = -1.0;
+    bool using_compressed_ = false;
     std::string safety_status_ = "SAFE";
     double fps_ = 0.0;
     double last_image_time_s_ = 0.0;
     std::map<int, cv::Scalar> joint_colors_;
+    double display_scale_ = 1.0;
 };
 
 int main(int argc, char* argv[]) {
