@@ -78,7 +78,7 @@ public:
     }
 
 private:
-    void skeletonCallback(const visualization_msgs::msg::MarkerArray::SharedPtr msg) {
+       void skeletonCallback(const visualization_msgs::msg::MarkerArray::SharedPtr msg) {
         const double now_s = now().seconds();
         last_skeleton_time_s_ = now_s;
 
@@ -86,14 +86,10 @@ private:
         using SafetyStatus = vision::workspace_robot::SafetyStatus;
 
         visualization_msgs::msg::MarkerArray in_zone_markers;
-        bool any_priority_in_zone = false;
         std::set<int> current_ids;
+        std::set<int> person_ids;
 
         for (const auto& skeleton : skeletons) {
-            if (workspace_robot_->evaluate(skeleton) == SafetyStatus::WARNING) {
-                any_priority_in_zone = true;
-            }
-
             for (size_t idx = 0; idx < skeleton.joints.size(); ++idx) {
                 if (!skeleton.is_tracked[idx]) {
                     continue;
@@ -105,6 +101,7 @@ private:
 
                 const int marker_id = skeleton.body_id * 100 + static_cast<int>(idx);
                 current_ids.insert(marker_id);
+                person_ids.insert(skeleton.body_id);
 
                 visualization_msgs::msg::Marker marker;
                 marker.header.frame_id = skeleton.frame_id;
@@ -125,7 +122,7 @@ private:
                 in_zone_markers.markers.push_back(marker);
             }
         }
-        
+
         for (const int old_id : published_marker_ids_) {
             if (current_ids.count(old_id) == 0) {
                 visualization_msgs::msg::Marker delete_marker;
@@ -142,7 +139,7 @@ private:
         humans_in_zone_pub_->publish(in_zone_markers);
 
         const SafetyStatus worst =
-            any_priority_in_zone ? SafetyStatus::WARNING : SafetyStatus::SAFE;
+            person_ids.empty() ? SafetyStatus::SAFE : SafetyStatus::WARNING;
         if (worst != last_status_) {
             last_status_ = worst;
             RCLCPP_INFO(get_logger(), "Safety status changed to: %s",

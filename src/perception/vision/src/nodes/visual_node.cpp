@@ -4,6 +4,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -50,6 +51,11 @@ constexpr int ID_EAR_RIGHT = 131;
 constexpr double kMinValidDepthM = 0.1;
 constexpr double kBaseDataTimeoutS = 0.5;
 constexpr double kImageTimeoutS = 1.0;
+constexpr double kStaleDataTimeoutS = 0.5;
+
+constexpr double kDefaultDisplayFps = 30.0;
+constexpr double kMinDisplayFps = 1.0;
+constexpr double kMaxDisplayFps = 60.0;
 
 // Bones follow the official Azure Kinect connectivity, with the arm chain
 // rooted at the chest and no lines drawn for eyes and ears.
@@ -122,6 +128,16 @@ public:
     VisualNode() : Node("visual_node") {
         tf_transformer_ = std::make_unique<vision::frame::FrameTransformer>(this);
 
+        double display_fps = declare_parameter("display_target_fps", kDefaultDisplayFps);
+        if (display_fps < kMinDisplayFps || display_fps > kMaxDisplayFps) {
+            RCLCPP_WARN(get_logger(),
+                        "display_target_fps %.1f out of range [%.0f, %.0f], using %.0f",
+                        display_fps, kMinDisplayFps, kMaxDisplayFps, kDefaultDisplayFps);
+            display_fps = kDefaultDisplayFps;
+        }
+        const auto display_period =
+            std::chrono::milliseconds(static_cast<int64_t>(1000.0 / display_fps));
+
         auto latest_only = rclcpp::QoS(rclcpp::KeepLast(1)).best_effort();
 
         image_sub_ = create_subscription<sensor_msgs::msg::Image>(
@@ -140,14 +156,21 @@ public:
             "/vision/skeleton/base_frame", latest_only,
             std::bind(&VisualNode::baseSkeletonCallback, this, std::placeholders::_1));
 
+        zone_skeleton_sub_ = create_subscription<visualization_msgs::msg::MarkerArray>(
+            "/perception/humans_in_zone", latest_only,
+            std::bind(&VisualNode::zoneSkeletonCallback, this, std::placeholders::_1));
+
         status_sub_ = create_subscription<std_msgs::msg::String>(
             "/perception/workspace_status", 10,
             std::bind(&VisualNode::statusCallback, this, std::placeholders::_1));
 
-        timer_ = create_wall_timer(33ms, std::bind(&VisualNode::displayCallback, this));
+        timer_ = create_wall_timer(display_period,
+                                   std::bind(&VisualNode::displayCallback, this));
 
         joint_colors_ = getJointColors();
-        RCLCPP_INFO(get_logger(), "Visual node started (FPV view, multi-person)");
+        RCLCPP_INFO(get_logger(),
+                    "Visual node started (FPV view, multi-person, workspace-filtered, display %.0f fps)",
+                    display_fps);
     }
 
 private:
@@ -192,6 +215,7 @@ private:
 
     void cameraSkeletonCallback(const visualization_msgs::msg::MarkerArray::SharedPtr msg) {
         std::lock_guard<std::mutex> lock(mutex_);
+        last_camera_skeleton_time_s_ = now().seconds();
         camera_people_.clear();
         projected_people_.clear();
         for (const auto& marker : msg->markers) {
@@ -231,6 +255,18 @@ private:
             base_people_[marker.id / 100][marker.id] = marker.pose.position;
         }
         last_base_time_s_ = now().seconds();
+    }
+
+    void zoneSkeletonCallback(const visualization_msgs::msg::MarkerArray::SharedPtr msg) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        active_body_ids_.clear();
+        for (const auto& marker : msg->markers) {
+            if (marker.action != visualization_msgs::msg::Marker::ADD) {
+                continue;  // DELETE markers mean "gone", not "here"
+            }
+            active_body_ids_.insert(marker.id / 100);
+        }
+        last_zone_time_s_ = now().seconds();
     }
 
     void statusCallback(const std_msgs::msg::String::SharedPtr msg) {
@@ -273,7 +309,19 @@ private:
             return;
         }
 
+        // Stale feeds would draw lying skeletons: hide them instead.
+        const double now_s = now().seconds();
+        if ((now_s - last_camera_skeleton_time_s_) > kStaleDataTimeoutS ||
+            (now_s - last_zone_time_s_) > kStaleDataTimeoutS) {
+            return;
+        }
+
         for (const auto& person : projected_people_) {
+            // Only draw people currently inside the workspace zone.
+            if (active_body_ids_.find(person.first) == active_body_ids_.end()) {
+                continue;
+            }
+
             const cv::Scalar color = personColor(person.first);
             const auto& points = person.second;
 
@@ -339,7 +387,7 @@ private:
         cv::putText(img, "Status: " + safety_status_, cv::Point(x, y), font, 0.6, status_color, 2);
         y += 35;
 
-        cv::putText(img, "People detected: " + std::to_string(camera_people_.size()),
+        cv::putText(img, "People in zone: " + std::to_string(active_body_ids_.size()),
                     cv::Point(x, y), font, 0.5, cv::Scalar(255, 255, 0), 1);
         y += 25;
 
@@ -373,6 +421,7 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
     rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr camera_skeleton_sub_;
     rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr base_skeleton_sub_;
+    rclcpp::Subscription<visualization_msgs::msg::MarkerArray>::SharedPtr zone_skeleton_sub_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr status_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
 
@@ -385,8 +434,11 @@ private:
     std::map<int, std::map<int, geometry_msgs::msg::Point>> camera_people_;
     std::map<int, std::map<int, cv::Point>> projected_people_;
     std::map<int, std::map<int, geometry_msgs::msg::Point>> base_people_;
+    std::set<int> active_body_ids_;
     std::string camera_frame_id_;
     double last_base_time_s_ = -1.0;
+    double last_zone_time_s_ = -1.0;
+    double last_camera_skeleton_time_s_ = -1.0;
     std::string safety_status_ = "SAFE";
     double fps_ = 0.0;
     double last_image_time_s_ = 0.0;

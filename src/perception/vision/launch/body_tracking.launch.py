@@ -6,18 +6,18 @@ def generate_launch_description():
     # AZURE KINECT DRIVER CONFIGURATION
     kinect_config = {
         # Body Tracking (Core of the System)
-        'body_tracking_enabled': True,
+        'body_tracking_enabled': True,  # Set True to enable body tracking (CPU heavy)
         'body_tracking_smoothing_factor': 0.3,  # Range: 0.0 (noisy) to 1.0 (laggy). Recommended: 0.3 - 0.5
 
         # Depth Camera (Most Critical for Accuracy)
         'depth_enabled': True,
-        'depth_mode': 'NFOV_2X2BINNED',  # Options: 'NFOV_UNBINNED', 'WFOV_UNBINNED', 'NFOV_2X2BINNED' (lightest for CPU inference)
+        'depth_mode': 'WFOV_2X2BINNED',  # Options: 'NFOV_UNBINNED', 'WFOV_UNBINNED', 'NFOV_2X2BINNED' (lightest for CPU inference)
 
         # Color Camera (RGB)
-        'color_enabled': True,
+        'color_enabled': True,          # Set True to enable the color camera
         'color_resolution': '720P',     # Options: '720P', '1080P', '1440P', '1536P', '2160P', '3072P'
-        'color_format': 'bgra',         # Options: 'bgra' (raw/fast), 'jpeg' (compressed/USB friendly)
-        'fps': 15,                      # Options: 5, 15, 30. (30 starves CPU body tracking; 15 is sustainable)
+        'color_format': 'bgra',         # Options: 'bgra' (raw/fast), 'mjpg' (compressed/USB friendly)
+        'fps': 30,                      # Options: 5, 15, 30. (30 starves CPU body tracking; 15 is sustainable)
 
         # Point Cloud (3D Room Mapping)
         'point_cloud': False,           # Set True if 3D room mapping is needed (very heavy!)
@@ -94,6 +94,6 @@ def generate_launch_description():
              name='skeleton_transform_node', output='screen'),
         Node(package='vision', executable='workspace_monitor_node',
              name='workspace_monitor_node', parameters=[workspace_params], output='screen'),
-        Node(package='vision', executable='visual_node',
-             name='visual_node', output='screen'),
+        Node(package='vision', executable='visual_node', name='visual_node',
+             parameters=[{'display_target_fps': 20.0}], output='screen'),
     ])
