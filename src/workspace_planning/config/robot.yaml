@@ -1,0 +1,22 @@
+robot:
+  name: cognitive_robotic_arm
+
+  model:
+    path: robot_model/cognitive_robotics_arm.xml
+
+  frames:
+    base: base_link
+    end_effector: end_effector
+
+workspace:
+  num_samples: 50000
+  random_seed: 42
+
+gng:
+  max_nodes: 1000
+  epochs: 20
+  epsilon_b: 0.05
+  epsilon_n: 0.006
+  max_edge_age: 50
+  lambda: 100
+  error_decay: 0.995

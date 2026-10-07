@@ -1,0 +1,356 @@
+<mujoco model="cognitive_robotics_arm">
+
+  <compiler angle="radian"/>
+
+  <option
+    gravity="0 0 -9.8"
+    integrator="implicitfast"/>
+
+  <!-- ============================================================
+       ASSETS
+       ============================================================ -->
+  <asset>
+
+    <material
+      name="table_material"
+      rgba="0.9 0.9 0.9 1"/>
+
+    <material
+      name="floor_material"
+      rgba="0.2 0.2 0.2 1"/>
+
+    <mesh
+      name="base_link"
+      content_type="model/stl"
+      file="meshes/base_link.stl"
+      scale="0.001 0.001 0.001"/>
+
+    <mesh
+      name="link1_1"
+      content_type="model/stl"
+      file="meshes/link1_1.stl"
+      scale="0.001 0.001 0.001"/>
+
+    <mesh
+      name="link2_1"
+      content_type="model/stl"
+      file="meshes/link2_1.stl"
+      scale="0.001 0.001 0.001"/>
+
+    <mesh
+      name="link3_1"
+      content_type="model/stl"
+      file="meshes/link3_1.stl"
+      scale="0.001 0.001 0.001"/>
+
+    <mesh
+      name="link4_1"
+      content_type="model/stl"
+      file="meshes/link4_1.stl"
+      scale="0.001 0.001 0.001"/>
+
+    <mesh
+      name="link5_1"
+      content_type="model/stl"
+      file="meshes/link5_1.stl"
+      scale="0.001 0.001 0.001"/>
+
+    <mesh
+      name="target"
+      content_type="model/stl"
+      file="meshes/bdt2.stl"
+      scale="0.002 0.002 0.002"/>
+
+  </asset>
+
+
+  <!-- ============================================================
+       WORLD
+       ============================================================ -->
+  <worldbody>
+
+    <!-- Floor -->
+    <geom
+      name="floor"
+      type="plane"
+      size="5 5 0.1"
+      material="floor_material"/>
+
+
+    <!-- ==========================================================
+         TARGET
+         ========================================================== -->
+    <body
+      name="target"
+      mocap="true"
+      pos="-0.1 0.3 0.85">
+
+      <geom
+        name="target"
+        type="mesh"
+        mesh="target"
+        rgba="1 0 0 1"
+        contype="0"
+        conaffinity="0"/>
+
+    </body>
+
+
+    <!-- ==========================================================
+         LIGHT
+         ========================================================== -->
+    <light
+      name="main_light"
+      pos="0 0 3"
+      dir="0 0 -1"/>
+
+
+    <!-- ==========================================================
+         RGB-D CAMERA
+         ========================================================== -->
+    <camera
+      name="rgbd_camera"
+      pos="0 2.0 2.5"
+      euler="-0.8 0 3.14"
+      fovy="25"/>
+
+
+    <!-- ==========================================================
+         ROBOT
+         ========================================================== -->
+    <body
+      name="base_link"
+      pos="0 0.8 1.1"
+      euler="1.5708 -1.5708 0">
+
+      <!-- Base inertial -->
+      <inertial
+        pos="-7.989183742208192e-17 -0.01692645464379777 -0.0035613414146945166"
+        mass="2.2341247990073567"
+        fullinertia="0.00254 0.002539 0.000986 0.0 0.0 0.0"/>
+
+      <!-- Base visual -->
+      <geom
+        name="base_link_visual"
+        type="mesh"
+        mesh="base_link"
+        pos="0 0 0"
+        contype="0"
+        conaffinity="0"/>
+
+
+      <!-- ========================================================
+           LINK 1
+           ======================================================== -->
+      <body
+        name="link1_1"
+        pos="0 -0.016926 0.052912">
+
+        <inertial
+          pos="0.000507143 1.40583e-07 0.0319368"
+          quat="0.500165 0.499835 0.499835 0.500165"
+          mass="2.32018"
+          diaginertia="0.002639 0.002609 0.001098"/>
+
+        <!-- q1: -40° ~ 170° -->
+        <joint
+          name="joint1"
+          range="-0.698132 2.96706"
+          damping="5"/>
+
+        <geom
+          name="link1_visual"
+          pos="0 0.016926 -0.052912"
+          quat="1 0 0 0"
+          type="mesh"
+          rgba="0.7 0.7 0.7 1"
+          mesh="link1_1"/>
+
+
+        <!-- ======================================================
+             LINK 2
+             ====================================================== -->
+        <body
+          name="link2_1"
+          pos="0.057 0 0.033">
+
+          <inertial
+            pos="-0.0575663 -0.209341 -0.0183203"
+            quat="0.467259 0.531058 -0.539808 0.456347"
+            mass="3.79126"
+            diaginertia="0.0309556 0.0288823 0.00495302"/>
+
+          <!-- q2: -180° ~ 0° -->
+          <joint
+            name="joint2"
+            range="-3.141593 0"
+            axis="1 0 0"
+            actuatorfrcrange="-100 100"
+            damping="5"/>
+
+          <geom
+            name="link2_visual"
+            pos="-0.057 0.016926 -0.085912"
+            quat="1 0 0 0"
+            type="mesh"
+            rgba="0.7 0.7 0.7 1"
+            mesh="link2_1"/>
+
+
+          <!-- ====================================================
+               LINK 3
+               ==================================================== -->
+          <body
+            name="link3_1"
+            pos="0 -0.263998 -0.029998">
+
+            <inertial
+              pos="-0.0564482 -0.135503 0.0299572"
+              quat="0.512593 0.500917 -0.495871 0.490349"
+              mass="2.10525"
+              diaginertia="0.0106718 0.0100459 0.00185725"/>
+
+            <!-- q3: 0° ~ 170° -->
+            <joint
+              name="joint3"
+              range="0 2.967060"
+              axis="1 0 0"
+              actuatorfrcrange="-100 100"
+              damping="5"/>
+
+            <geom
+              name="link3_visual"
+              pos="-0.057 0.280924 -0.055914"
+              quat="1 0 0 0"
+              type="mesh"
+              rgba="0.7 0.7 0.7 1"
+              mesh="link3_1"/>
+
+
+            <!-- ==================================================
+                 LINK 4
+                 ================================================== -->
+            <body
+              name="link4_1"
+              pos="-0.057 -0.237 0.03">
+
+              <inertial
+                pos="0.00431694 -0.0259941 1.21051e-07"
+                quat="0.00349314 0.707098 -0.00349314 0.707098"
+                mass="1.1548"
+                diaginertia="0.000865 0.000852049 0.000345951"/>
+
+              <!-- q4: -90° ~ 90° -->
+              <joint
+                name="joint4"
+                range="-1.570796 1.570796"
+                axis="0 1 0"
+                damping="5"/>
+
+              <geom
+                name="link4_visual"
+                pos="0 0.517924 -0.085914"
+                quat="1 0 0 0"
+                type="mesh"
+                rgba="0.7 0.7 0.7 1"
+                mesh="link4_1"/>
+
+
+              <!-- ================================================
+                   LINK 5
+                   ================================================ -->
+              <body
+                name="link5_1"
+                pos="0.051 -0.027 0">
+
+                <inertial
+                  pos="-0.0421078 -0.029394 1.08362e-07"
+                  quat="0.491357 0.491357 0.508496 0.508496"
+                  mass="0.225159"
+                  diaginertia="0.000307274 0.000291 7.37256e-05"/>
+
+                <!-- q5: -90° ~ 90° -->
+                <joint
+                  name="joint5"
+                  range="-1.570796 1.570796"
+                  axis="-1 0 0"
+                  actuatorfrcrange="-100 100"
+                  damping="5"/>
+
+                <geom
+                  name="link5_visual"
+                  pos="-0.051 0.544924 -0.085914"
+                  quat="1 0 0 0"
+                  type="mesh"
+                  rgba="0.7 0.7 0.7 1"
+                  mesh="link5_1"/>
+
+
+                <!-- ==============================================
+                     END EFFECTOR
+                     ============================================== -->
+                <body
+                  name="end_effector"
+                  pos="-0.05 -0.05 0">
+
+                  <geom
+                    name="end_effector_visual"
+                    type="sphere"
+                    size="0.005"
+                    rgba="1 1 1 1"
+                    contype="0"
+                    conaffinity="0"/>
+
+                </body>
+
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+  </worldbody>
+
+
+  <!-- ============================================================
+       ACTUATORS
+       ============================================================ -->
+  <actuator>
+
+    <position
+      name="motor1"
+      joint="joint1"
+      kp="100"
+      kv="2"
+      inheritrange="1"/>
+
+    <position
+      name="motor2"
+      joint="joint2"
+      kp="100"
+      kv="2"
+      inheritrange="1"/>
+
+    <position
+      name="motor3"
+      joint="joint3"
+      kp="100"
+      kv="2"
+      inheritrange="1"/>
+
+    <position
+      name="motor4"
+      joint="joint4"
+      kp="100"
+      kv="2"/>
+
+    <position
+      name="motor5"
+      joint="joint5"
+      kp="100"
+      kv="2"/>
+
+  </actuator>
+
+</mujoco>
