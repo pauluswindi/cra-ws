@@ -45,4 +45,5 @@ Thumbs.db
 # Secrets and credentials
 .env
 *.pem
-*.key
+*.keycore
+core.*
