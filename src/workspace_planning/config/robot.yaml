@@ -20,3 +20,14 @@ gng:
   max_edge_age: 50
   lambda: 100
   error_decay: 0.995
+
+planning:
+  path_processing:
+    remove_duplicate_points: true
+
+trajectory:
+  enabled: true
+  speed: 0.5
+  distance_step: 0.001
+  curve: linear
+  waypoint_tolerance: 0.06

@@ -95,6 +95,17 @@
 
     </body>
 
+    <body 
+      name="obstacle1" 
+      mocap="true" 
+      pos="0 0 0" 
+      quat="1 0 0 0">
+
+      <geom type="box" 
+      size="0.05 0.1 0.08" 
+      rgba="1 0 0 0.7"/>
+    </body>
+
 
     <!-- ==========================================================
          LIGHT

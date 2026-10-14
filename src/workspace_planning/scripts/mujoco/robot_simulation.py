@@ -11,6 +11,8 @@ import rclpy
 
 from geometry_msgs.msg import Point
 from nav_msgs.msg import Path as PathMessage
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Empty
 from rclpy.node import Node
 
 
@@ -129,7 +131,33 @@ class RobotSimulation(Node):
         self.path_active = False
         self.current_waypoint = None
 
-        self.waypoint_tolerance = 0.015
+        # Parameter path executor (meter).
+        self.waypoint_tolerance = 0.025
+        self.path_lookahead = 0.035
+        self.path_cross_track_tolerance = 0.035
+        self.progress_timeout = 3.0
+        self.progress_epsilon = 0.003
+        self.best_waypoint_distance = float("inf")
+        self.last_progress_time = time.monotonic()
+        self.last_stall_warning = 0.0
+
+        # Optional waypoint bypass when robot stalls against joint limits.
+        # This does NOT prove that bypass is collision-free.
+        self.skip_on_limit_stall = True
+        self.skip_stall_seconds = 3.0
+        self.skip_cross_track_max = 0.065  # diagnostic cap, not a safety proof
+        self.skip_endpoint_max = 0.15      # meters
+        self.joint_limit_margin = 0.005     # radians
+        self.last_dq_command = np.zeros_like(self.q_des)
+        self.skip_request_pending = False
+        self.skip_request_time = 0.0
+        self.skip_candidate = None
+        self.last_replan_request = 0.0
+        self.replan_cooldown = 5.0
+        self.executor_paused = False
+        self.failed_plan_signatures = set()
+        self.path_frame_id = "base_link"
+
 
         self.target_subscriber = (
             self.create_subscription(
@@ -147,6 +175,18 @@ class RobotSimulation(Node):
                 self.path_callback,
                 10,
             )
+        )
+
+        # The planner owns obstacle geometry. Never bypass without its approval.
+        self.skip_validation_publisher = self.create_publisher(
+            PathMessage, "/planning/validate_skip", 10
+        )
+        self.skip_validation_subscriber = self.create_subscription(
+            PathMessage, "/planning/skip_validation_result",
+            self.skip_validation_callback, 10
+        )
+        self.replan_publisher = self.create_publisher(
+            Empty, "/planning/request_replan", 10
         )
 
         self.eof_publisher = (
@@ -229,6 +269,7 @@ class RobotSimulation(Node):
             self.path_index = 0
             self.current_waypoint = None
             self.path_active = False
+            self.best_waypoint_distance = float("inf")
 
             return
 
@@ -248,10 +289,20 @@ class RobotSimulation(Node):
                 position
             )
 
-        self.path = np.asarray(
-            path_positions,
-            dtype=np.float64,
-        )
+        received_path = np.asarray(path_positions, dtype=np.float64)
+        self.path_frame_id = message.header.frame_id or "base_link"
+        # Avoid endless replanning of precisely the same non-executable path.
+        signature = tuple(np.round(received_path.flatten(), 3))
+        if self.executor_paused and signature in self.failed_plan_signatures:
+            self.get_logger().error(
+                "Planner returned a previously blocked path. Execution stays paused. "
+                "A different path or joint-space planning is required."
+            )
+            return
+        self.executor_paused = False
+        self.skip_request_pending = False
+        self.skip_candidate = None
+        self.path = received_path
 
         if len(self.path) <= 1:
             self.path_index = 0
@@ -272,6 +323,9 @@ class RobotSimulation(Node):
         )
 
         self.path_active = True
+        self.best_waypoint_distance = float("inf")
+        self.last_progress_time = time.monotonic()
+        self.last_stall_warning = 0.0
 
         final_target = (
             self.path[-1].copy()
@@ -382,72 +436,189 @@ class RobotSimulation(Node):
 
         return tip_robot
 
+    def outward_limited_joints(self):
+        """Joint ids currently at a limit with a command pointing outward."""
+        q = self.kinematics.get_joint_positions()
+        dq = self.last_dq_command
+        at_lower = (q <= self.q_lower + self.joint_limit_margin) & (dq < -1e-4)
+        at_upper = (q >= self.q_upper - self.joint_limit_margin) & (dq > 1e-4)
+        return np.flatnonzero(at_lower | at_upper).tolist()
+
+    def request_replan(self, reason):
+        now = time.monotonic()
+        if now - self.last_replan_request < self.replan_cooldown:
+            return
+        self.last_replan_request = now
+        self.executor_paused = True
+        if self.path is not None:
+            self.failed_plan_signatures.add(tuple(np.round(self.path.flatten(), 3)))
+        self.get_logger().warning(f"PAUSED; requesting replanning: {reason}")
+        self.replan_publisher.publish(Empty())
+
+    def request_skip_validation(self, current_eof):
+        if self.skip_request_pending or self.path_index >= len(self.path) - 1:
+            return
+        # Candidate shortcut starts at the ACTUAL EoF, not the nominal waypoint.
+        # Do not skip the final goal. Let the planner check target + obstacle.
+        end = self.path[self.path_index + 1]
+        if np.linalg.norm(end - current_eof) > 0.25:
+            self.request_replan("Next waypoint too far for a local bypass")
+            return
+        request = PathMessage()
+        request.header.frame_id = self.path_frame_id
+        for xyz in (current_eof, end):
+            pose = PoseStamped()
+            pose.pose.position.x = float(xyz[0])
+            pose.pose.position.y = float(xyz[1])
+            pose.pose.position.z = float(xyz[2])
+            pose.pose.orientation.w = 1.0
+            request.poses.append(pose)
+        self.skip_candidate = (self.path_index, current_eof.copy(), end.copy())
+        self.skip_request_pending = True
+        self.skip_request_time = time.monotonic()
+        self.executor_paused = True
+        self.skip_validation_publisher.publish(request)
+        self.get_logger().warning(
+            f"STALLED at waypoint {self.path_index}; asking planner to "
+            "validate a shortcut from the actual EoF."
+        )
+
+    def skip_validation_callback(self, message):
+        if not self.skip_request_pending or self.skip_candidate is None:
+            return
+        index, start, end = self.skip_candidate
+        self.skip_request_pending = False
+        self.skip_candidate = None
+        # Result carries the same two poses only when the segment is clear.
+        accepted = len(message.poses) == 2 and message.header.frame_id == self.path_frame_id
+        if accepted:
+            returned = np.array([
+                [p.pose.position.x, p.pose.position.y, p.pose.position.z]
+                for p in message.poses
+            ])
+            accepted = np.allclose(returned, [start, end], atol=1e-4)
+        # EoF may have moved while validating. Never use a stale approval.
+        current = self.get_current_eof_robot()
+        if accepted and np.linalg.norm(current - start) <= 0.01 and self.path_index == index:
+            self.path_index += 1
+            # New segment starts at the actually validated EoF, not the skipped point.
+            self.path[self.path_index - 1] = start.copy()
+            self.current_waypoint = self.path[self.path_index].copy()
+            self.best_waypoint_distance = float('inf')
+            self.last_progress_time = time.monotonic()
+            self.executor_paused = False
+            self.q_des = np.clip(self.kinematics.get_joint_positions().copy(),
+                                 self.q_lower, self.q_upper)
+            self.get_logger().warning(
+                f"BYPASS APPROVED: waypoint {index} skipped after planner "
+                "validated the direct segment to next waypoint."
+            )
+        else:
+            self.request_replan("Shortcut unsafe, stale, or rejected")
+
     def update_waypoint(self, current_eof):
-        if (
-            not self.path_active
-            or self.path is None
-            or self.current_waypoint is None
-        ):
+        """Advance only after reaching/passing the current segment endpoint.
+
+        Works in the same robot base frame as the Path message.
+        No blind skipping on timeout: that could cross an obstacle.
+        """
+        if not self.path_active or self.path is None:
             return
 
-        distance = np.linalg.norm(
-            self.current_waypoint
-            - current_eof
-        )
+        # Skip consecutive near-duplicate points safely.
+        while self.path_active:
+            end = self.path[self.path_index]
+            start = self.path[self.path_index - 1]
+            segment = end - start
+            length_sq = float(np.dot(segment, segment))
+            dist = float(np.linalg.norm(end - current_eof))
 
-        if distance > self.waypoint_tolerance:
-            return
+            if length_sq > 1e-12:
+                projection = float(np.dot(current_eof - start, segment) / length_sq)
+                closest = start + np.clip(projection, 0.0, 1.0) * segment
+                cross_track = float(np.linalg.norm(current_eof - closest))
+            else:
+                projection = 1.0
+                cross_track = dist
 
-        reached_waypoint = np.round(
-            self.current_waypoint,
-            3,
-        ).tolist()
+            # Waypoint is reached either by proximity or by safely passing it
+            # while staying close to the intended line segment.
+            reached = (dist <= self.waypoint_tolerance or
+                       (projection >= 1.0 and
+                        cross_track <= self.path_cross_track_tolerance))
+            if not reached:
+                now = time.monotonic()
+                if dist < self.best_waypoint_distance - self.progress_epsilon:
+                    self.best_waypoint_distance = dist
+                    self.last_progress_time = now
 
-        self.get_logger().info(
-            "Waypoint reached: "
-            f"{reached_waypoint}"
-        )
+                stalled = now - self.last_progress_time >= self.skip_stall_seconds
+                limited = self.outward_limited_joints() if stalled else []
+                has_next = self.path_index < len(self.path) - 1
+                # A limit by itself is not sufficient; demand a real stall.
+                # Also detect severe actuator tracking error when no limit is reported.
+                q_actual = self.kinematics.get_joint_positions()
+                joint_error = float(np.max(np.abs(self.q_des - q_actual)))
+                blocked = bool(limited) or joint_error >= 0.12
+                if (self.skip_on_limit_stall and stalled and blocked
+                        and has_next and not self.executor_paused):
+                    self.request_skip_validation(current_eof)
+                elif stalled and not has_next and not self.executor_paused:
+                    self.request_replan("Final waypoint cannot be reached")
+                if self.skip_request_pending and now - self.skip_request_time > 2.0:
+                    self.skip_request_pending = False
+                    self.skip_candidate = None
+                    self.request_replan("Skip validation timed out")
 
-        self.path_index += 1
-
-        if self.path_index >= len(
-            self.path
-        ):
-            self.current_waypoint = None
-            self.path_active = False
+                if (now - self.last_progress_time >= self.progress_timeout
+                      and now - self.last_stall_warning >= self.progress_timeout):
+                    self.get_logger().warning(
+                        f"Executor not progressing: waypoint "
+                        f"{self.path_index}/{len(self.path)-1}, "
+                        f"distance={dist*1000:.1f} mm, "
+                        f"cross_track={cross_track*1000:.1f} mm. "
+                        "Check reachability, joint saturation, collisions and control error."
+                    )
+                    self.last_stall_warning = now
+                break
 
             self.get_logger().info(
-                "A* path completed."
+                f"Waypoint reached: {self.path_index}/{len(self.path)-1}, "
+                f"error={dist*1000:.1f} mm"
             )
+            self.path_index += 1
+            self.best_waypoint_distance = float("inf")
+            self.last_progress_time = time.monotonic()
 
-            return
+            if self.path_index >= len(self.path):
+                self.path_active = False
+                self.current_waypoint = None
+                self.get_logger().info("A* path completed.")
+                break
+            self.current_waypoint = self.path[self.path_index].copy()
 
-        self.current_waypoint = (
-            self.path[self.path_index].copy()
-        )
+    def get_control_target(self, current_eof=None):
+        """A small lookahead along the current A* segment avoids point-chasing.
 
-        next_waypoint = np.round(
-            self.current_waypoint,
-            3,
-        ).tolist()
+        Does not use a smoothed trajectory because it has not been collision
+        validated; small lookahead limits corner cutting around obstacles.
+        """
+        if not self.path_active or self.path is None:
+            return self.get_target_position_robot()
 
-        self.get_logger().info(
-            "Next waypoint: "
-            f"{next_waypoint}"
-        )
+        end = self.path[self.path_index]
+        if current_eof is None:
+            return end.copy()
+        start = self.path[self.path_index - 1]
+        segment = end - start
+        seg_length = float(np.linalg.norm(segment))
+        if seg_length < 1e-9:
+            return end.copy()
 
-    def get_control_target(self):
-        if (
-            self.path_active
-            and self.current_waypoint is not None
-        ):
-            return (
-                self.current_waypoint.copy()
-            )
-
-        return (
-            self.get_target_position_robot()
-        )
+        direction = segment / seg_length
+        along = float(np.dot(current_eof - start, direction))
+        follow_distance = np.clip(along + self.path_lookahead, 0.0, seg_length)
+        return start + follow_distance * direction
 
     def publish_current_eof(
         self,
@@ -482,7 +653,7 @@ class RobotSimulation(Node):
         self,
         gain=3.0,
         damping=0.05,
-        vmax=0.4,
+        vmax=5.0,
         dqmax=1.5,
     ):
         try:
@@ -531,7 +702,8 @@ class RobotSimulation(Node):
                     )
 
                     control_target = (
-                        self.get_control_target()
+                        tip_robot.copy() if self.executor_paused
+                        else self.get_control_target(tip_robot)
                     )
 
                     target_mujoco_base = (
@@ -597,6 +769,10 @@ class RobotSimulation(Node):
                             / max_dq
                         )
 
+                    if self.executor_paused:
+                        dq[:] = 0.0
+                        self.q_des = self.kinematics.get_joint_positions().copy()
+                    self.last_dq_command = dq.copy()
                     self.q_des += (
                         dq * self.dt
                     )
