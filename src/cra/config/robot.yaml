@@ -1,0 +1,84 @@
+robot:
+  name: cognitive_robotic_arm
+  mode: simulation # simulation atau robot
+
+  model:
+    path: models/robot_model/cognitive_robotics_arm.xml
+
+  frames:
+    base: base_link
+    end_effector: end_effector
+  
+  joints:
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+
+workspace:
+  num_samples: 50000
+  random_seed: 42
+
+gng:
+  max_nodes: 1000
+  epochs: 20
+  epsilon_b: 0.05
+  epsilon_n: 0.006
+  max_edge_age: 50
+  lambda: 100
+  error_decay: 0.995
+
+planning:
+  obstacle_safety_margin: 0.005
+
+  path_processing:
+    remove_duplicate_points: true
+  
+  joint_graph:
+    max_candidates: 4
+    nearest_pool: 64
+    max_joint_delta: 0.8
+
+kinematics:
+  inverse:
+    max_iterations: 5000
+    tolerance: 0.0001
+    damping: 0.01
+    step_size: 0.5
+    max_joint_step: 0.1
+
+  jacobian:
+    damping: 0.01
+
+motion:
+  control_mode: joint_trajectory # joint_trajectory / cartesian
+  target_source: simulation_marker
+
+  tracking:
+    gain: 2.0
+    max_cartesian_velocity: 0.1
+    max_joint_velocity: 0.50
+    target_tolerance: 0.01
+    feedback_timeout: 0.2
+
+  joint_tracking:
+    gain: 2.0
+    goal_tolerance: 0.02
+    start_tolerance: 0.10
+    max_segment_delta: 0.6
+
+trajectory:
+  enabled: true
+  speed: 0.5
+  distance_step: 0.01
+  curve: linear # linear, ease_in, ease_out, smoth_step, smoother_step
+  waypoint_tolerance: 0.005
+  replan_threshold: 0.005
+
+simulation:
+  obstacles:
+    enabled: true
+    mocap_body_prefix: obstacle_
+    pause_on_change: true
+    replan_interval: 0.25

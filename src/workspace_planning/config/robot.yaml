@@ -22,12 +22,21 @@ gng:
   error_decay: 0.995
 
 planning:
+  obstacle_safety_margin: 0.005
+  
   path_processing:
     remove_duplicate_points: true
 
 trajectory:
   enabled: true
-  speed: 0.5
+  speed: 1.5
   distance_step: 0.001
   curve: linear
   waypoint_tolerance: 0.06
+
+simulation:
+  obstacles:
+    enabled: true
+    mocap_body_prefix: obstacle_
+    pause_on_change: true
+    replan_interval: 0.25

@@ -101,6 +101,7 @@ class PlanningNode(Node):
             target_body_name="target",
             base_body_name=self.config.get_base_frame(),
         )
+        
 
         trajectory_config = config_data.get("trajectory", {})
         self.trajectory_enabled = trajectory_config.get("enabled", True)
@@ -159,9 +160,11 @@ class PlanningNode(Node):
         self.workspace_filter = WorkspaceFilter(
             positions=self.gng_positions,
             edges=self.gng_edges,
-            safety_margin=0.01,
+            safety_margin=float(config_data.get("planning", {}).get("obstacle_safety_margin", 0.025)),
         )
         self.target_position = None
+        self.goal_position = None
+        self.goal_clearance = float(config_data.get("planning", {}).get("target_goal_clearance", 0.02))
         self.target_filter_center = (
             self.target_geometry.initial_position
             + self.target_geometry.center_offset
@@ -373,6 +376,63 @@ class PlanningNode(Node):
             f"curve={self.trajectory_generator.curve.curve_type}"
         )
 
+
+    def _load_target_mesh_triangles(self, model_path):
+        # Buat representasi mesh target pada frame base_link dari model MuJoCo
+        import mujoco
+        from workspace.frame_transform import FrameTransform
+
+        model = mujoco.MjModel.from_xml_path(str(model_path))
+        data = mujoco.MjData(model)
+        mujoco.mj_forward(model, data)
+        target_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "target")
+        base_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, self.config.get_base_frame())
+        if target_id < 0 or base_id < 0:
+            raise RuntimeError("Target/base_link missing in MuJoCo model")
+
+        base_position = np.asarray(data.xpos[base_id], dtype=float)
+        base_rotation = np.asarray(data.xmat[base_id], dtype=float).reshape(3, 3)
+        target_position = np.asarray(data.xpos[target_id], dtype=float)
+        target_origin_base = (target_position - base_position) @ base_rotation
+        target_origin_robot = FrameTransform.mujoco_base_to_robot_base(target_origin_base)
+        triangles = []
+
+        for geom_id in np.flatnonzero(model.geom_bodyid == target_id):
+            if int(model.geom_type[geom_id]) != int(mujoco.mjtGeom.mjGEOM_MESH):
+                continue
+            mesh_id = int(model.geom_dataid[geom_id])
+            vs = int(model.mesh_vertadr[mesh_id])
+            vn = int(model.mesh_vertnum[mesh_id])
+            fs = int(model.mesh_faceadr[mesh_id])
+            fn = int(model.mesh_facenum[mesh_id])
+            vertices = np.asarray(model.mesh_vert[vs:vs + vn], dtype=float)
+            faces = np.asarray(model.mesh_face[fs:fs + fn], dtype=np.int64)
+            rotation = np.asarray(data.geom_xmat[geom_id], dtype=float).reshape(3, 3)
+            position = np.asarray(data.geom_xpos[geom_id], dtype=float)
+            points_world = vertices @ rotation.T + position
+            points_base = (points_world - base_position) @ base_rotation
+            points_robot = FrameTransform.transform_positions(points_base)
+            local_points = points_robot - target_origin_robot
+            for face in faces:
+                for index in face:
+                    triangles.append(local_points[int(index)].copy())
+        return np.asarray(triangles, dtype=float).reshape(-1, 3)
+
+    # Menghitung goal di luar permukaan target
+    def _calculate_goal_position(self):
+        center = self.target_filter_center
+        half = 0.5 * self.target_geometry.size
+        margin = self.workspace_filter.safety_margin
+        clearance = max(self.goal_clearance, 0.001)
+        reference = (self.current_eof if self.current_eof is not None
+                     else np.zeros(3, dtype=np.float64))
+        delta = reference - center
+        axis = int(np.argmax(np.abs(delta) / np.maximum(half, 1e-8)))
+        direction = 1.0 if delta[axis] >= 0 else -1.0
+        goal = center.copy()
+        goal[axis] += direction * (half[axis] + margin + clearance)
+        return goal
+
     def target_callback(self, message):
 
         target = np.array(
@@ -405,13 +465,13 @@ class PlanningNode(Node):
                 self.target_geometry.size,
             )
             if bounds_changed:
+                self._invalidate_current_path()
                 self._refresh_workspace_filter()
 
-        self.publish_target(
-
-            self.target_position
-
-        )
+        self.goal_position = self._calculate_goal_position()
+        self.publish_target(self.target_position)
+        if target_changed:
+            self.publish_target_bounds()
 
         self.get_logger().info(
 
@@ -422,23 +482,37 @@ class PlanningNode(Node):
         )
 
     def obstacle_callback(self, message):
+        # Menerima obstacle berdasarkan namespace dan ID
         base_frame = self.config.get_base_frame()
         frame_id = message.header.frame_id or base_frame
+        namespace = message.ns or "obstacles"
+        obstacle_id = int(message.id)
 
-        if message.action in (Marker.DELETE, Marker.DELETEALL):
-            if self.workspace_filter.clear_obstacle():
-                self.get_logger().info("Dummy obstacle removed.")
+        if message.action == Marker.DELETEALL:
+            changed = self.workspace_filter.clear_all_obstacles()
+            if changed:
+                self.get_logger().info("All obstacles removed")
+                self._invalidate_current_path()
                 self._refresh_workspace_filter()
-            return
-
-        if message.action != Marker.ADD:
             return
 
         if frame_id != base_frame:
             self.get_logger().warning(
-                f"Obstacle frame '{frame_id}' does not match '{base_frame}'. "
-                "Obstacle update ignored."
+                f"Obstacle frame '{frame_id}' differs from '{base_frame}'"
             )
+            return
+
+        if message.action == Marker.DELETE:
+            changed = self.workspace_filter.clear_obstacle(
+                obstacle_id=obstacle_id, namespace=namespace
+            )
+            if changed:
+                self.get_logger().info(f"Obstacle removed: {namespace}/{obstacle_id}")
+                self._invalidate_current_path()
+                self._refresh_workspace_filter()
+            return
+
+        if message.action != Marker.ADD:
             return
 
         shape_types = {
@@ -448,13 +522,13 @@ class PlanningNode(Node):
         }
         shape_type = shape_types.get(message.type)
         if shape_type is None:
-            self.get_logger().warning(
-                "Obstacle type is unsupported. Use CUBE, SPHERE, or CYLINDER."
-            )
+            self.get_logger().warning("Obstacle shape not supported")
             return
 
         try:
-            obstacle_changed = self.workspace_filter.set_obstacle(
+            changed = self.workspace_filter.set_obstacle(
+                obstacle_id=obstacle_id,
+                namespace=namespace,
                 shape_type=shape_type,
                 center=[
                     message.pose.position.x,
@@ -469,19 +543,26 @@ class PlanningNode(Node):
                     message.pose.orientation.w,
                 ],
             )
-        except ValueError as error:
-            self.get_logger().warning(f"Obstacle update ignored: {error}")
+        except (ValueError, TypeError) as error:
+            self.get_logger().warning(f"Obstacle rejected: {error}")
             return
 
-        if not obstacle_changed:
+        if not changed:
             return
 
         self.get_logger().info(
-            f"Obstacle updated: type={shape_type}, "
-            f"position={[round(message.pose.position.x, 3), round(message.pose.position.y, 3), round(message.pose.position.z, 3)]}, "
-            f"size={[round(message.scale.x, 3), round(message.scale.y, 3), round(message.scale.z, 3)]}"
+            f"Obstacle updated: {namespace}/{obstacle_id}, {shape_type}, "
+            f"position=({message.pose.position.x:.3f}, "
+            f"{message.pose.position.y:.3f}, {message.pose.position.z:.3f})"
         )
+        self._invalidate_current_path()
         self._refresh_workspace_filter()
+
+    def _invalidate_current_path(self):
+        # Membatalkan path agar executor berhenti
+        self.a_star_path_publisher.publish(
+            self._create_path_message(np.empty((0, 3)), self.get_clock().now().to_msg())
+        )
 
     def _refresh_workspace_filter(self, publish_markers=True):
         self.valid_node_mask, self.valid_edge_mask = self.workspace_filter.update()
@@ -549,9 +630,9 @@ class PlanningNode(Node):
 
     def request_replan_callback(self, _message):
         self.get_logger().warning("Executor requested replanning from actual EoF")
+        self._invalidate_current_path()
         self.graph_filter_dirty = True
-        if self.current_eof is not None and self.target_position is not None:
-            self.plan_path()
+        # Timer menyatukan beberapa permintaan replanning dalam satu siklus
 
     def planning_callback(self):
 
@@ -593,26 +674,42 @@ class PlanningNode(Node):
     def plan_path(self):
         self.graph_filter_dirty = False
         self.last_plan_target = self.target_position.copy()
+        self.goal_position = self._calculate_goal_position()
+
+        # Periksa posisi awal dan target terhadap obstacle
+        if self.workspace_filter.is_point_blocked(
+            self.current_eof, include_target=False
+        ):
+            self.get_logger().warning("Current EoF is inside an obstacle")
+            self._invalidate_current_path()
+            return
+        if self.workspace_filter.is_point_blocked(
+            self.goal_position, include_target=True
+        ):
+            self.get_logger().warning("Goal lies inside an obstacle")
+            self._invalidate_current_path()
+            return
 
         start_connector_valid = np.array(
             [
-                not self.workspace_filter.is_segment_blocked(
-                    self.current_eof,
-                    position,
+                self.valid_node_mask[index]
+                and not self.workspace_filter.is_segment_blocked(
+                    self.current_eof, position
                 )
-                for position in self.gng_positions
+                for index, position in enumerate(self.gng_positions)
             ],
             dtype=bool,
         )
         goal_connector_valid = np.array(
             [
-                not self.workspace_filter.is_segment_blocked(
+                self.valid_node_mask[index]
+                and not self.workspace_filter.is_segment_blocked(
                     position,
-                    self.target_position,
-                    include_target=False,
+                    self.goal_position,
+                    include_target=True,
                     include_obstacle=True,
                 )
-                for position in self.gng_positions
+                for index, position in enumerate(self.gng_positions)
             ],
             dtype=bool,
         )
@@ -620,7 +717,7 @@ class PlanningNode(Node):
         try:
             result = self.planner.plan(
                 self.current_eof,
-                self.target_position,
+                self.goal_position,
                 start_connector_valid=start_connector_valid,
                 goal_connector_valid=goal_connector_valid,
             )
@@ -636,21 +733,32 @@ class PlanningNode(Node):
                     "The direct connection from the current EoF to the graph is blocked."
                 )
 
-            # The final connection may enter the target object intentionally, but it
-            # must not pass through the separately published dummy obstacle.
+            # Segmen terakhir harus bebas dari target dan obstacle
             if self.workspace_filter.is_segment_blocked(
                 goal_node_position,
-                self.target_position,
-                include_target=False,
+                self.goal_position,
+                include_target=True,
                 include_obstacle=True,
             ):
                 raise RuntimeError(
-                    "The final connection to the target intersects the dummy obstacle."
+                    "Final connection to target intersects an obstacle."
                 )
 
         except RuntimeError as error:
             self.get_logger().warning(f"A* failed: {error}")
+            self._invalidate_current_path()
             return
+
+        entire_path = np.vstack([self.current_eof, result["positions"], self.goal_position])
+        for i in range(len(entire_path) - 1):
+            if self.workspace_filter.is_segment_blocked(
+                entire_path[i], entire_path[i + 1],
+                include_target=True,
+                include_obstacle=True,
+            ):
+                self.get_logger().warning(f"Rejected path: segment {i} intersects a blocked region")
+                self._invalidate_current_path()
+                return
 
         self.publish_a_star_path(result)
 
@@ -834,6 +942,7 @@ class PlanningNode(Node):
         self.gng_edges_publisher.publish(marker)
 
     def publish_target_bounds(self):
+        # Menampilkan balok target sesuai dimensi XML MuJoCo
         marker = Marker()
         marker.header.frame_id = self.config.get_base_frame()
         marker.header.stamp = self.get_clock().now().to_msg()
@@ -841,19 +950,18 @@ class PlanningNode(Node):
         marker.id = 0
         marker.type = Marker.CUBE
         marker.action = Marker.ADD
-        marker.pose.position.x = float(self.workspace_filter.target_box_center[0])
-        marker.pose.position.y = float(self.workspace_filter.target_box_center[1])
-        marker.pose.position.z = float(self.workspace_filter.target_box_center[2])
+        center = self.target_filter_center
+        marker.pose.position.x = float(center[0])
+        marker.pose.position.y = float(center[1])
+        marker.pose.position.z = float(center[2])
         marker.pose.orientation.w = 1.0
-        marker.scale.x = float(self.workspace_filter.target_box_size[0])
-        marker.scale.y = float(self.workspace_filter.target_box_size[1])
-        marker.scale.z = float(self.workspace_filter.target_box_size[2])
-        marker.color.r = 0.0
-        marker.color.g = 0.4
-        marker.color.b = 1.0
-        marker.color.a = 0.18
-        marker.lifetime.sec = 0
-        marker.lifetime.nanosec = 0
+        marker.scale.x = float(self.target_geometry.size[0])
+        marker.scale.y = float(self.target_geometry.size[1])
+        marker.scale.z = float(self.target_geometry.size[2])
+        marker.color.r = 0.95
+        marker.color.g = 0.08
+        marker.color.b = 0.08
+        marker.color.a = 1.0
         self.target_bounds_publisher.publish(marker)
 
     def publish_a_star_path(self, result):
@@ -864,7 +972,7 @@ class PlanningNode(Node):
             [
                 self.current_eof,
                 graph_path,
-                self.target_position,
+                self.goal_position,
             ]
         )
         path_positions = self._remove_duplicate_positions(path_positions)
@@ -981,7 +1089,7 @@ class PlanningNode(Node):
 
             marker_id=0,
 
-            scale=0.045,
+            scale=0.018,
 
         )
 

@@ -7,38 +7,63 @@ from launch.actions import ExecuteProcess
 
 
 def generate_launch_description():
+
     # Workspace root
     workspace_dir = Path.home() / "living-lab" / "cra_ws"
 
     # Source package directory
     package_dir = workspace_dir / "src" / "workspace_planning"
 
+    # Planning node
     planning_script = (
         package_dir / "scripts" / "planning" / "planning_node.py"
     )
 
+    # Robot simulation
     simulation_script = (
         package_dir / "scripts" / "mujoco" / "robot_simulation.py"
     )
 
+    # Obstacle controller
+    obstacle_script = (
+        package_dir / "scripts" / "planning" / "obstacle_controller.py"
+    )
+
     # Validate script paths
-    if not planning_script.is_file():
-        raise FileNotFoundError(
-            f"Planning script tidak ditemukan: {planning_script}"
-        )
+    scripts = {
+        "Planning Node": planning_script,
+        "Robot Simulation": simulation_script,
+        "Obstacle Controller": obstacle_script,
+    }
 
-    if not simulation_script.is_file():
-        raise FileNotFoundError(
-            f"Simulation script tidak ditemukan: {simulation_script}"
-        )
+    for name, script_path in scripts.items():
+        if not script_path.is_file():
+            raise FileNotFoundError(
+                f"{name} tidak ditemukan: {script_path}"
+            )
 
+    # Launch all nodes
     return LaunchDescription([
+
+        # Planning node
         ExecuteProcess(
             cmd=["python3", str(planning_script)],
+            name="planning_node",
             output="screen",
         ),
+
+        # Robot simulation
         ExecuteProcess(
             cmd=["python3", str(simulation_script)],
+            name="robot_simulation",
             output="screen",
         ),
+
+        # Obstacle controller
+        ExecuteProcess(
+            cmd=["python3", str(obstacle_script)],
+            name="obstacle_controller",
+            output="screen",
+        ),
+
     ])
