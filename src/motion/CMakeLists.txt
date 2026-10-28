@@ -20,15 +20,15 @@ set(COMMON_HEADERS_PATH
 )
 
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(msgs REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -90,8 +90,16 @@ set_target_properties(robot_kinematics PROPERTIES
 # Motion component
 add_library(motion_component SHARED
   src/motion_component/motion_component.cpp
+
+  src/controllers/cartesian_controller.cpp
+  src/controllers/joint_controller.cpp
+  src/controllers/execution_monitor.cpp
+
   src/modules/data_module.cpp
+  src/modules/joint_feedback.cpp
+  src/modules/motion_guard.cpp
   src/modules/servo_module.cpp
+
   src/logic/robot_initializer.cpp
 )
 
@@ -110,9 +118,9 @@ ament_target_dependencies(motion_component
   std_srvs
   geometry_msgs
   sensor_msgs
-  msgs
   trajectory_msgs
   visualization_msgs
+  msgs
   ament_index_cpp
 )
 

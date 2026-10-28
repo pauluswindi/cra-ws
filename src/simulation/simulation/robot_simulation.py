@@ -213,6 +213,8 @@ class RobotSimulation(Node):
         self.q_des = self.joint_positions()
         self.command = np.zeros(5)
         self.last_command = None
+        self.last_debug_time = 0.0
+        self.holding_position = True
 
         self.pending_target = None
         self.pending_obstacles = {}
@@ -337,22 +339,15 @@ class RobotSimulation(Node):
         )
 
     def velocity_callback(self, message):
-        velocity = np.asarray(
-            message.data,
-            dtype=float,
-        )
+        velocity = np.asarray(message.data, dtype=float)
 
-        if (
-            velocity.shape != (5,)
-            or not np.isfinite(velocity).all()
-        ):
-            self.get_logger().error(
-                "Invalid joint velocity command"
-            )
-
+        if velocity.shape != (5,) or not np.isfinite(velocity).all():
+            self.get_logger().error("Invalid joint velocity command")
             self.command.fill(0.0)
             self.last_command = None
-            self.q_des = self.joint_positions()
+            if not self.holding_position:
+                self.q_des = self.joint_positions()
+            self.holding_position = True
             return
 
         self.command = np.clip(
@@ -361,6 +356,12 @@ class RobotSimulation(Node):
             self.max_velocity,
         )
 
+        moving = bool(np.any(self.command))
+        if not moving and not self.holding_position:
+            # Capture the hold position once, not on every zero command.
+            self.q_des = self.joint_positions()
+
+        self.holding_position = not moving
         self.last_command = time.monotonic()
 
     def target_callback(self, message):
@@ -415,24 +416,24 @@ class RobotSimulation(Node):
         self.pending_obstacles.clear()
 
         if self.last_command is not None:
-            if (
-                time.monotonic() - self.last_command
-                <= self.command_timeout
-            ):
-                self.q_des += self.command * self.dt
-
+            if time.monotonic() - self.last_command <= self.command_timeout:
+                if not self.holding_position:
+                    self.q_des += self.command * self.dt
             else:
                 self.command.fill(0.0)
                 self.last_command = None
-                self.q_des = self.joint_positions()
+                if not self.holding_position:
+                    self.q_des = self.joint_positions()
+                self.holding_position = True
 
         current = self.joint_positions()
 
-        self.q_des = np.clip(
-            self.q_des,
-            current - 0.12,
-            current + 0.12,
-        )
+        if not self.holding_position:
+            self.q_des = np.clip(
+                self.q_des,
+                current - 0.12,
+                current + 0.12,
+            )
 
         self.q_des = np.clip(
             self.q_des,
@@ -441,6 +442,26 @@ class RobotSimulation(Node):
         )
 
         self.data.ctrl[self.actuator_ids] = self.q_des
+
+        now = time.monotonic()
+        if (
+            self.last_command is not None
+            and now - self.last_command <= self.command_timeout
+            and now - self.last_debug_time >= 1.0
+        ):
+            self.last_debug_time = now
+            actual_velocity = self.data.qvel[self.qvel_ids]
+            actuator_force = self.data.actuator_force[self.actuator_ids[0]]
+
+            self.get_logger().info(
+                "Joint1: "
+                f"cmd={self.command[0]:.3f}, "
+                f"actual_vel={actual_velocity[0]:.3f}, "
+                f"q_des={self.q_des[0]:.3f}, "
+                f"q_actual={current[0]:.3f}, "
+                f"force={actuator_force:.3f}, "
+                f"contacts={self.data.ncon}"
+            )
 
     @staticmethod
     def rotation_to_quaternion(rotation):

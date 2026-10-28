@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import time
 from pathlib import Path
 
 import mujoco
@@ -17,6 +16,7 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from visualization_msgs.msg import Marker
 
 from planning.path_planner import PathPlanner
+from planning.planning_manager import PlanningManager
 from planning.visualization.planning_visualizer import PlanningVisualizer
 from simulation.frame_transform import FrameTransform
 
@@ -30,14 +30,11 @@ class PlanningNode(Node):
             "workspace_path": "",
             "model_path": "",
             "config_path": "",
-            "goal_index": 100,
-            "joint_path_speed": 0.25,
             "feedback_timeout": 1.0,
             "obstacle_timeout": 1.0,
-            "publish_filtered_joint_graph": False,
             "goal_tolerance": 0.12,
             "target_clearance": 0.04,
-            "execution_segment_delta": 0.5,
+            "publish_filtered_joint_graph": False,
             "execute_path": True,
         }
 
@@ -62,18 +59,33 @@ class PlanningNode(Node):
                 raise FileNotFoundError(str(path))
 
         with paths["config_path"].open(encoding="utf-8") as file:
-            robot = yaml.safe_load(file)["robot"]
+            config = yaml.safe_load(file)
+
+        robot = config["robot"]
 
         self.joint_names = list(robot["joints"])
         self.base_frame = robot["frames"]["base"]
 
         if len(self.joint_names) != 5:
-            raise ValueError("Expected five joints")
+            raise ValueError("Expected five robot joints")
+
+        self.show_joint_graph = bool(
+            get("publish_filtered_joint_graph")
+        )
 
         self.planner = PathPlanner(
             paths["graph_path"],
             paths["model_path"],
             paths["config_path"],
+        )
+
+        self.manager = PlanningManager(
+            path_planner=self.planner,
+            goal_tolerance=get("goal_tolerance"),
+            target_clearance=get("target_clearance"),
+            feedback_timeout=get("feedback_timeout"),
+            obstacle_timeout=get("obstacle_timeout"),
+            execute_path=bool(get("execute_path")),
         )
 
         self.visualizer = PlanningVisualizer(
@@ -87,112 +99,11 @@ class PlanningNode(Node):
             frame_id=self.base_frame,
         )
 
-        with np.load(
-            paths["graph_path"],
-            allow_pickle=False,
-        ) as graph:
-            self.joint_eof = np.asarray(
-                graph["joint_eof"],
-                dtype=float,
-            ).copy()
-
-        if self.joint_eof.shape != (
-            len(self.planner.joint_q),
-            3,
-        ):
-            raise ValueError(
-                "joint_eof and joint_q must have matching rows"
-            )
-
-        if not np.isfinite(self.joint_eof).all():
-            raise ValueError("Invalid joint_eof")
-
-        self.path_speed = float(get("joint_path_speed"))
-        self.feedback_timeout = float(get("feedback_timeout"))
-        self.obstacle_timeout = float(get("obstacle_timeout"))
-        self.goal_tolerance = float(get("goal_tolerance"))
-        self.target_clearance = float(get("target_clearance"))
-        self.segment_delta = float(get("execution_segment_delta"))
-
-        self.execute_path = bool(get("execute_path"))
-        self.show_joint_graph = bool(
-            get("publish_filtered_joint_graph")
-        )
-
-        if any(
-            not np.isfinite(value) or value <= 0
-            for value in (
-                self.path_speed,
-                self.feedback_timeout,
-                self.obstacle_timeout,
-                self.goal_tolerance,
-                self.segment_delta,
-            )
-        ):
-            raise ValueError("Invalid planning parameters")
-
-        if not 0 <= self.target_clearance < self.goal_tolerance:
-            raise ValueError("Invalid target clearance")
-
-        if (
-            self.segment_delta > 0.6
-            or self.path_speed > 0.5 / 1.5
-        ):
-            raise ValueError(
-                "Trajectory parameters exceed MotionComponent limits"
-            )
-
-        checker = self.planner.collision_filter
-
-        self.obstacle_names = sorted(
-            checker.model.body(i).name
-            for i in range(checker.model.nbody)
-            if checker.model.body(i).name.startswith("obstacle_")
-        )
-
-        if mujoco.mj_name2id(
-            checker.model,
-            mujoco.mjtObj.mjOBJ_BODY,
-            "target",
-        ) < 0:
-            raise ValueError("Target body missing in MuJoCo")
-
-        mujoco.mj_forward(checker.model, checker.data)
-
-        base_id = checker.model.body(self.base_frame).id
-
-        self.base_position_world = (
-            checker.data.xpos[base_id].copy()
-        )
-
-        self.base_rotation_world = (
-            checker.data.xmat[base_id]
-            .reshape(3, 3)
-            .copy()
-        )
-
-        self.current_q = None
-        self.goal_q = None
-        self.current_path = None
-
-        self.target_base = None
-        self.last_target_world = None
-        self.last_obstacle_poses = None
-
-        self.feedback_time = None
-        self.obstacle_time = None
-
-        self.obstacles_ready = False
-        self.target_ready = False
-
-        self.planning_required = True
-        self.graph_update_required = self.show_joint_graph
+        self.initialize_environment()
 
         self.status = None
-        self.motion_status = None
-
-        self.motion_command_pending = False
-        self.execution_started = False
+        self.displayed_path = None
+        self.graph_update_required = self.show_joint_graph
 
         durable = QoSProfile(
             depth=1,
@@ -212,7 +123,6 @@ class PlanningNode(Node):
             durable,
         )
 
-        # Motion commands must not replay after reconnection.
         self.motion_pub = self.create_publisher(
             JointTrajectory,
             "/motion/joint_path",
@@ -225,35 +135,42 @@ class PlanningNode(Node):
             10,
         )
 
-        self.create_subscription(
+        self.joint_sub = self.create_subscription(
             JointState,
             "/joint_states",
             self.joint_callback,
             10,
         )
 
-        self.create_subscription(
+        self.obstacle_sub = self.create_subscription(
             PoseArray,
             "/simulation/obstacle_poses",
             self.obstacle_callback,
             10,
         )
 
-        self.create_subscription(
+        self.target_sub = self.create_subscription(
             Marker,
             "/simulation/target_marker",
             self.target_callback,
             10,
         )
 
-        self.create_subscription(
+        self.failure_reason_sub = self.create_subscription(
+            String,
+            "/motion/failure_reason",
+            self.failure_reason_callback,
+            durable,
+        )
+
+        self.motion_status_sub = self.create_subscription(
             String,
             "/motion/execution_status",
             self.motion_status_callback,
             durable,
         )
 
-        self.create_timer(
+        self.timer = self.create_timer(
             0.2,
             self.planning_cycle,
         )
@@ -261,9 +178,40 @@ class PlanningNode(Node):
         self.set_status("WAITING_FOR_FEEDBACK")
 
         self.get_logger().info(
-            "PlanningNode ready; "
-            "goal_source=joint_eof, "
-            f"execute_path={self.execute_path}"
+            "PlanningNode initialized; "
+            f"execute_path={self.manager.execute_path}"
+        )
+
+    def initialize_environment(self):
+        checker = self.planner.collision_filter
+
+        self.obstacle_names = sorted(
+            checker.model.body(i).name
+            for i in range(checker.model.nbody)
+            if checker.model.body(i).name.startswith("obstacle_")
+        )
+
+        target_id = mujoco.mj_name2id(
+            checker.model,
+            mujoco.mjtObj.mjOBJ_BODY,
+            "target",
+        )
+
+        if target_id < 0:
+            raise ValueError("Target body missing in MuJoCo")
+
+        mujoco.mj_forward(checker.model, checker.data)
+
+        base_id = checker.model.body(self.base_frame).id
+
+        self.base_position_world = (
+            checker.data.xpos[base_id].copy()
+        )
+
+        self.base_rotation_world = (
+            checker.data.xmat[base_id]
+            .reshape(3, 3)
+            .copy()
         )
 
     def set_status(self, status):
@@ -295,34 +243,72 @@ class PlanningNode(Node):
             return
 
         joints = np.asarray(
+            [positions[name] for name in self.joint_names],
+            dtype=float,
+        )
+
+        self.manager.update_joint_state(joints)
+
+    def motion_status_callback(self, message):
+        self.manager.update_motion_status(message.data)
+
+    def failure_reason_callback(self, message):
+        self.manager.update_failure_reason(message.data)
+
+    def target_callback(self, message):
+        if (
+            message.action != Marker.ADD
+            or message.header.frame_id != self.base_frame
+        ):
+            return
+
+        target = np.array(
             [
-                positions[name]
-                for name in self.joint_names
+                message.pose.position.x,
+                message.pose.position.y,
+                message.pose.position.z,
             ],
             dtype=float,
         )
 
-        if not np.isfinite(joints).all():
+        if not np.isfinite(target).all():
+            self.manager.target_base = None
+            self.manager.invalidate_path()
+            self.set_status("TARGET_ERROR")
             return
 
-        self.current_q = joints
-        self.feedback_time = time.monotonic()
+        try:
+            mujoco_base = np.asarray(
+                FrameTransform.robot_base_to_mujoco_base(
+                    target
+                ),
+                dtype=float,
+            )
 
-    def motion_status_callback(self, message):
-        self.motion_status = message.data
+            world = (
+                self.base_position_world
+                + self.base_rotation_world @ mujoco_base
+            )
 
-        if self.motion_status == "EXECUTING":
-            self.execution_started = True
+            if not np.isfinite(world).all():
+                raise ValueError("Invalid target world position")
 
-        if self.motion_status in (
-            "FEEDBACK_TIMEOUT",
-            "CONTROL_ERROR",
-            "STOPPED",
-        ):
-            self.motion_command_pending = False
+            changed = self.manager.update_target(
+                target,
+                world,
+            )
 
-        if self.motion_status == "COMPLETED":
-            self.motion_command_pending = False
+            if changed:
+                self.clear_visualization()
+                self.graph_update_required = (
+                    self.show_joint_graph
+                )
+
+        except Exception as error:
+            self.manager.target_base = None
+            self.manager.invalidate_path()
+            self.set_status("TARGET_ERROR")
+            self.get_logger().error(str(error))
 
     @staticmethod
     def pose_arrays(pose):
@@ -356,22 +342,83 @@ class PlanningNode(Node):
 
         return position, quaternion / norm
 
-    def cancel_execution(self):
-        if self.execute_path:
-            self.stop_pub.publish(Bool(data=True))
+    def obstacle_callback(self, message):
+        if (
+            message.header.frame_id != "mujoco_world"
+            or len(message.poses) != len(self.obstacle_names)
+        ):
+            self.manager.obstacles_ready = False
+            self.manager.invalidate_path()
+            self.set_status("OBSTACLE_ERROR")
+            return
 
-        self.motion_command_pending = False
-        self.execution_started = False
+        try:
+            obstacles = []
 
-    def invalidate_path(self, status, error=None):
-        self.cancel_execution()
+            for name, pose in zip(
+                self.obstacle_names,
+                message.poses,
+            ):
+                position, quaternion = self.pose_arrays(pose)
 
-        self.current_path = None
-        self.goal_q = None
+                removed = np.allclose(
+                    position,
+                    [100.0, 100.0, 100.0],
+                    atol=1e-5,
+                    rtol=0.0,
+                )
 
-        self.planning_required = False
-        self.graph_update_required = False
+                obstacles.append(
+                    (name, position, quaternion, removed)
+                )
 
+            changed = self.manager.update_obstacles(
+                obstacles
+            )
+
+            if changed:
+                self.clear_visualization()
+                self.graph_update_required = (
+                    self.show_joint_graph
+                )
+
+        except Exception as error:
+            self.manager.obstacles_ready = False
+            self.manager.invalidate_path()
+            self.set_status("OBSTACLE_ERROR")
+            self.get_logger().error(str(error))
+
+    def build_trajectory(self, path):
+        message = JointTrajectory()
+        message.header.stamp = self.get_clock().now().to_msg()
+        message.joint_names = list(self.joint_names)
+
+        if path is None:
+            return message
+
+        path = np.asarray(path, dtype=float)
+        if (
+            path.ndim != 2
+            or path.shape[1] != len(self.joint_names)
+            or len(path) < 2
+            or not np.isfinite(path).all()
+        ):
+            raise ValueError("Invalid joint trajectory path")
+
+        for joints in path:
+            point = JointTrajectoryPoint()
+            point.positions = joints.tolist()
+            message.points.append(point)
+
+        return message
+
+    def publish_preview(self, path):
+        self.preview_pub.publish(
+            self.build_trajectory(path)
+        )
+
+    def clear_visualization(self):
+        self.displayed_path = None
         self.publish_preview(None)
 
         for kind in (
@@ -381,512 +428,86 @@ class PlanningNode(Node):
         ):
             self.visualizer.clear_path(kind)
 
-        self.set_status(status)
+    def update_visualization(self):
+        path = self.manager.current_path
 
-        if error is not None:
-            self.get_logger().error(str(error))
-
-    def target_callback(self, message):
-        if message.action != Marker.ADD:
-            return
-
-        if message.header.frame_id != self.base_frame:
-            return
-
-        target = np.array(
-            [
-                message.pose.position.x,
-                message.pose.position.y,
-                message.pose.position.z,
-            ],
-            dtype=float,
-        )
-
-        if not np.isfinite(target).all():
-            self.target_ready = False
-            self.invalidate_path("TARGET_ERROR")
-            return
-
-        mujoco_base = np.asarray(
-            FrameTransform.robot_base_to_mujoco_base(
-                target
-            ),
-            dtype=float,
-        )
-
-        world = (
-            self.base_position_world
-            + self.base_rotation_world @ mujoco_base
-        )
-
-        if not np.isfinite(world).all():
-            self.target_ready = False
-            self.invalidate_path("TARGET_ERROR")
-            return
-
-        if (
-            self.last_target_world is not None
-            and np.allclose(
-                world,
-                self.last_target_world,
-                atol=1e-6,
-                rtol=0,
-            )
-        ):
-            self.target_ready = True
-            return
-
-        self.cancel_execution()
-
-        self.current_path = None
-        self.goal_q = None
-
-        self.publish_preview(None)
-
-        try:
-            self.planner.update_obstacle(
-                "target",
-                world,
-            )
-        except Exception as error:
-            self.target_ready = False
-            self.invalidate_path(
-                "TARGET_ERROR",
-                error,
-            )
-            return
-
-        self.target_base = target.copy()
-        self.last_target_world = world.copy()
-
-        self.target_ready = True
-        self.planning_required = True
-
-        self.graph_update_required = (
-            self.show_joint_graph
-        )
-
-    def obstacle_callback(self, message):
-        if (
-            message.header.frame_id != "mujoco_world"
-            or len(message.poses) != len(self.obstacle_names)
-        ):
-            self.obstacles_ready = False
-
-            self.invalidate_path(
-                "OBSTACLE_ERROR",
-                ValueError("Invalid obstacle array"),
-            )
-            return
-
-        try:
-            poses = [
-                self.pose_arrays(pose)
-                for pose in message.poses
-            ]
-        except ValueError as error:
-            self.obstacles_ready = False
-            self.invalidate_path(
-                "OBSTACLE_ERROR",
-                error,
-            )
-            return
-
-        self.obstacle_time = time.monotonic()
-
-        if self.last_obstacle_poses is not None:
-            unchanged = all(
-                np.allclose(
-                    position,
-                    old_position,
-                    atol=1e-6,
-                    rtol=0,
-                )
-                and abs(
-                    float(
-                        np.dot(
-                            quaternion,
-                            old_quaternion,
-                        )
-                    )
-                ) > 1.0 - 1e-8
-                for (
-                    position,
-                    quaternion,
-                ), (
-                    old_position,
-                    old_quaternion,
-                ) in zip(
-                    poses,
-                    self.last_obstacle_poses,
-                )
-            )
-
-            if unchanged:
-                self.obstacles_ready = True
-                return
-
-        self.cancel_execution()
-        self.current_path = None
-        self.publish_preview(None)
-
-        try:
-            for name, (
-                position,
-                quaternion,
-            ) in zip(
-                self.obstacle_names,
-                poses,
-            ):
-                if np.allclose(
-                    position,
-                    [100, 100, 100],
-                    atol=1e-5,
-                    rtol=0,
-                ):
-                    self.planner.remove_obstacle(name)
-                else:
-                    self.planner.update_obstacle(
-                        name,
-                        position,
-                        quaternion,
-                    )
-        except Exception as error:
-            self.obstacles_ready = False
-            self.invalidate_path(
-                "OBSTACLE_ERROR",
-                error,
-            )
-            return
-
-        self.last_obstacle_poses = [
-            (
-                position.copy(),
-                quaternion.copy(),
-            )
-            for position, quaternion in poses
-        ]
-
-        self.obstacles_ready = True
-        self.planning_required = True
-
-        self.graph_update_required = (
-            self.show_joint_graph
-        )
-
-    def feedback_ready(self):
-        return (
-            self.current_q is not None
-            and self.feedback_time is not None
-            and time.monotonic() - self.feedback_time
-            <= self.feedback_timeout
-        )
-
-    def obstacle_data_ready(self):
-        return (
-            self.obstacles_ready
-            and self.obstacle_time is not None
-            and time.monotonic() - self.obstacle_time
-            <= self.obstacle_timeout
-        )
-
-    def select_goal(self):
-        # Select a collision-free sampled goal near the target.
-        distances = np.linalg.norm(
-            self.joint_eof - self.target_base,
-            axis=1,
-        )
-
-        candidates = np.argsort(distances)
-
-        checker = self.planner.collision_filter
-
-        for index in candidates:
-            distance = float(distances[index])
-
-            if distance > self.goal_tolerance:
-                break
-
-            if distance < self.target_clearance:
-                continue
-
-            joints = self.planner.joint_q[index]
-
-            if checker.is_state_valid(joints):
-                self.get_logger().info(
-                    f"Selected goal node={index}, "
-                    f"EOF error={distance:.3f} m"
-                )
-
-                return joints.copy()
-
-        return None
-
-    def prepare_trajectory(self, path):
-        # Subdivide long A* edges without changing their geometry.
-        result = [
-            np.asarray(
-                path[0],
-                dtype=float,
-            ).copy()
-        ]
-
-        for start, goal in zip(
-            path[:-1],
-            path[1:],
-        ):
-            delta = goal - start
-
-            steps = max(
-                1,
-                int(
-                    np.ceil(
-                        np.max(np.abs(delta))
-                        / self.segment_delta
-                    )
-                ),
-            )
-
-            for step in range(1, steps + 1):
-                result.append(
-                    start + delta * step / steps
-                )
-
-        result = np.asarray(result)
-
-        if not self.planner.is_path_valid(result):
-            raise ValueError(
-                "Execution path failed collision validation"
-            )
-
-        return self.build_trajectory(result)
-
-    def build_trajectory(self, path):
-        message = JointTrajectory()
-
-        message.header.stamp = (
-            self.get_clock().now().to_msg()
-        )
-
-        message.joint_names = list(self.joint_names)
-
-        elapsed = 0.0
-
-        for index, joints in enumerate(path):
-            if index:
-                delta = float(
-                    np.max(
-                        np.abs(
-                            joints - path[index - 1]
-                        )
-                    )
-                )
-
-                elapsed += max(
-                    delta / self.path_speed,
-                    0.01,
-                )
-
-            point = JointTrajectoryPoint()
-
-            point.positions = joints.tolist()
-
-            nanoseconds = round(elapsed * 1e9)
-
-            point.time_from_start.sec = (
-                nanoseconds // 1_000_000_000
-            )
-
-            point.time_from_start.nanosec = (
-                nanoseconds % 1_000_000_000
-            )
-
-            message.points.append(point)
-
-        return message
-
-    def publish_preview(self, path):
         if path is None:
-            message = JointTrajectory()
+            if self.displayed_path is not None:
+                self.clear_visualization()
+            return
 
-            message.header.stamp = (
-                self.get_clock().now().to_msg()
+        if (
+            self.displayed_path is not None
+            and np.array_equal(path, self.displayed_path)
+        ):
+            return
+
+        self.displayed_path = path.copy()
+
+        self.publish_preview(path)
+
+        self.visualizer.publish_path(
+            path,
+            "initial",
+        )
+
+        self.visualizer.clear_path("invalid")
+        self.visualizer.clear_path("replanned")
+
+    def update_graph_visualization(self):
+        if not self.graph_update_required:
+            return
+
+        self.graph_update_required = False
+
+        if not self.show_joint_graph:
+            return
+
+        try:
+            graph = self.planner.get_filtered_graph()
+
+            self.visualizer.publish_filtered_graph(graph)
+
+        except Exception as error:
+            self.get_logger().error(
+                f"Graph visualization failed: {error}"
             )
-
-            message.joint_names = list(self.joint_names)
-        else:
-            message = self.build_trajectory(path)
-
-        self.preview_pub.publish(message)
 
     def planning_cycle(self):
-        if not self.feedback_ready():
-            if (
-                self.execute_path
-                and self.motion_command_pending
-            ):
-                self.cancel_execution()
+        decision = self.manager.step()
 
-            self.set_status("WAITING_FOR_FEEDBACK")
-            return
+        self.set_status(decision.status)
 
-        if not self.obstacle_data_ready():
-            if (
-                self.execute_path
-                and self.motion_command_pending
-            ):
-                self.cancel_execution()
+        self.update_visualization()
+        self.update_graph_visualization()
 
-            self.set_status("WAITING_FOR_OBSTACLES")
-            return
-
-        if not self.target_ready:
-            self.set_status("WAITING_FOR_TARGET")
-            return
-
-        if self.planning_required:
-            # Require a stopped controller before replanning.
-            if (
-                self.execute_path
-                and self.motion_status != "STOPPED"
-            ):
-                self.cancel_execution()
-                self.set_status("WAITING_FOR_STOP")
-                return
-
-            self.planning_required = False
-            started = time.monotonic()
-
-            try:
-                goal = self.select_goal()
-
-                if goal is None:
-                    self.invalidate_path(
-                        "GOAL_UNREACHABLE"
-                    )
-                else:
-                    self.goal_q = goal
-
-                    self.set_status("PLANNING")
-
-                    if not self.planner.plan(
-                        self.current_q.copy(),
-                        goal,
-                    ):
-                        self.invalidate_path("NO_PATH")
-                    else:
-                        self.current_path = (
-                            self.planner.current_path.copy()
-                        )
-
-                        self.visualizer.publish_path(
-                            self.current_path,
-                            "initial",
-                        )
-
-                        self.visualizer.clear_path("invalid")
-                        self.visualizer.clear_path("replanned")
-
-                        self.publish_preview(
-                            self.current_path
-                        )
-
-                        self.set_status("PATH_READY")
-
-            except Exception as error:
-                self.invalidate_path(
-                    "PLANNING_ERROR",
-                    error,
-                )
-
-            self.get_logger().info(
-                "Path planning took "
-                f"{time.monotonic() - started:.2f} s"
+        if decision.action == "STOP":
+            self.stop_pub.publish(
+                Bool(data=True)
             )
 
-        if self.graph_update_required:
-            self.graph_update_required = False
-
-            if self.show_joint_graph:
-                try:
-                    self.visualizer.publish_filtered_graph(
-                        self.planner.get_filtered_graph()
-                    )
-                except Exception as error:
-                    self.get_logger().error(
-                        "Graph visualization failed: "
-                        f"{error}"
-                    )
-
-        if (
-            self.execute_path
-            and self.current_path is not None
-            and not self.execution_started
-        ):
-            self.try_execute()
-
-    def try_execute(self):
-        if self.motion_command_pending:
-            if self.motion_status == "IDLE":
-                self.motion_command_pending = False
-            else:
-                return
-
-        if self.motion_status == "STOPPED":
+        elif decision.action == "RELEASE":
             self.stop_pub.publish(
                 Bool(data=False)
             )
 
-            self.motion_command_pending = True
-            self.set_status("WAITING_FOR_RELEASE")
-            return
+        elif decision.action == "EXECUTE":
+            if decision.path is None:
+                self.get_logger().error("Execution decision has no path")
+                self.stop_pub.publish(Bool(data=True))
+                return
 
-        if self.motion_status != "IDLE":
-            return
+            try:
+                trajectory = self.build_trajectory(decision.path)
+            except ValueError as error:
+                self.get_logger().error(f"Trajectory rejected: {error}")
+                self.stop_pub.publish(Bool(data=True))
+                return
 
-        if (
-            not self.feedback_ready()
-            or not self.obstacle_data_ready()
-        ):
-            return
-
-        start_error = float(
-            np.max(
-                np.abs(
-                    self.current_q
-                    - self.current_path[0]
-                )
+            self.motion_pub.publish(trajectory)
+            self.get_logger().info(
+                f"{decision.status}: {len(trajectory.points)} waypoints sent"
             )
-        )
-
-        if start_error > 0.05:
-            self.current_path = None
-            self.planning_required = True
-
-            self.stop_pub.publish(
-                Bool(data=True)
-            )
-            return
-
-        path = self.current_path.copy()
-        path[0] = self.current_q.copy()
-
-        try:
-            trajectory = self.prepare_trajectory(path)
-        except Exception as error:
-            self.invalidate_path(
-                "TRAJECTORY_ERROR",
-                error,
-            )
-            return
-
-        if not self.feedback_ready():
-            return
-
-        self.motion_pub.publish(trajectory)
-
-        self.execution_started = True
-        self.set_status("TRAJECTORY_SENT")
 
 
 def main():

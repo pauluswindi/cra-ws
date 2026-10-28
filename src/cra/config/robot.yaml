@@ -1,6 +1,6 @@
 robot:
   name: cognitive_robotic_arm
-  mode: simulation # simulation atau robot
+  mode: simulation # simulation / robot
 
   model:
     path: models/robot_model/cognitive_robotics_arm.xml
@@ -8,7 +8,7 @@ robot:
   frames:
     base: base_link
     end_effector: end_effector
-  
+
   joints:
     - joint1
     - joint2
@@ -34,7 +34,7 @@ planning:
 
   path_processing:
     remove_duplicate_points: true
-  
+
   joint_graph:
     max_candidates: 4
     nearest_pool: 64
@@ -52,28 +52,32 @@ kinematics:
     damping: 0.01
 
 motion:
-  control_mode: joint_trajectory # joint_trajectory / cartesian
+  control_mode: joint_trajectory # cartesian / joint_trajectory
   target_source: simulation_marker
+  feedback_timeout: 0.2
 
-  tracking:
+  cartesian:
+    speed: 0.1
     gain: 2.0
-    max_cartesian_velocity: 0.1
-    max_joint_velocity: 0.50
-    target_tolerance: 0.01
-    feedback_timeout: 0.2
+    tolerance: 0.01
 
-  joint_tracking:
+  joint:
+    speed: 0.5
     gain: 2.0
-    goal_tolerance: 0.02
+    tolerance: 0.02
     start_tolerance: 0.10
     max_segment_delta: 0.6
+  
+  monitoring:
+    goal_timeout: 10.0
+    stall_timeout: 2.0
+    tracking_error_limit: 0.2
+    tracking_error_timeout: 0.5
 
 trajectory:
   enabled: true
-  speed: 0.5
   distance_step: 0.01
-  curve: linear # linear, ease_in, ease_out, smoth_step, smoother_step
-  waypoint_tolerance: 0.005
+  curve: linear # linear / ease_in / ease_out / smooth_step / smoother_step
   replan_threshold: 0.005
 
 simulation:

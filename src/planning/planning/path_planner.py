@@ -31,6 +31,9 @@ class PathPlanner:
             self.joint_costs = np.asarray(
                 graph["joint_costs"], dtype=float
             )
+            self.joint_eof = np.asarray(
+                graph["joint_eof"], dtype=float
+            ).copy()
 
         if len(self.joint_names) != 5:
             raise ValueError("Expected five robot joints")
@@ -41,6 +44,12 @@ class PathPlanner:
             or not np.isfinite(self.joint_q).all()
         ):
             raise ValueError("Invalid joint graph configurations")
+
+        if (
+            self.joint_eof.shape != (len(self.joint_q), 3)
+            or not np.isfinite(self.joint_eof).all()
+        ):
+            raise ValueError("Invalid joint end-effector positions")
 
         if len(self.joint_edges) and (
             self.joint_edges.min() < 0
@@ -57,6 +66,15 @@ class PathPlanner:
 
         planning_config = config["planning"]
         joint_config = planning_config["joint_graph"]
+        self.max_joint_delta = float(joint_config["max_joint_delta"])
+        self.max_segment_delta = float(
+            config["motion"]["joint"]["max_segment_delta"]
+        )
+        if (
+            not np.isfinite(self.max_segment_delta)
+            or self.max_segment_delta <= 0.0
+        ):
+            raise ValueError("Invalid maximum joint segment delta")
 
         self.collision_filter = CollisionFilter(
             model_path=self.model_path,
@@ -71,18 +89,78 @@ class PathPlanner:
             joint_edges=self.joint_edges,
             joint_costs=self.joint_costs,
             collision_filter=self.collision_filter,
-            max_joint_delta=float(
-                joint_config["max_joint_delta"]
-            ),
+            max_joint_delta=self.max_joint_delta,
         )
 
         self.current_path = None
         self.goal_q = None
         self.path_revision = None
+        self.last_plan_failure = "NONE"
+        self.safe_recovery_path = None
 
         self.valid_node_mask = None
         self.valid_edge_mask = None
         self.graph_filter_revision = None
+
+    def select_goal(self, target, goal_tolerance, target_clearance):
+        target = np.asarray(target, dtype=float)
+        if target.shape != (3,) or not np.isfinite(target).all():
+            raise ValueError("Invalid Cartesian target")
+        if (
+            not np.isfinite(goal_tolerance)
+            or goal_tolerance <= 0.0
+            or not np.isfinite(target_clearance)
+            or not 0.0 <= target_clearance < goal_tolerance
+        ):
+            raise ValueError("Invalid goal selection tolerances")
+
+        distances = np.linalg.norm(self.joint_eof - target, axis=1)
+        for index in np.argsort(distances):
+            distance = float(distances[index])
+            if distance > goal_tolerance:
+                break
+            if distance < target_clearance:
+                continue
+
+            joints = self.joint_q[index]
+            if self.collision_filter.is_state_valid(joints):
+                return joints.copy()
+
+        return None
+
+    def prepare_execution_path(self, path):
+        path = np.asarray(path, dtype=float)
+        if (
+            path.ndim != 2
+            or path.shape[1] != 5
+            or len(path) < 2
+            or not np.isfinite(path).all()
+        ):
+            raise ValueError("Invalid execution path")
+
+        result = [path[0].copy()]
+        for goal in path[1:]:
+            start = result[-1]
+            delta = goal - start
+            max_delta = float(np.max(np.abs(delta)))
+            if max_delta <= 1e-9:
+                continue
+
+            steps = max(1, int(np.ceil(max_delta / self.max_segment_delta)))
+            if len(result) + steps > 10000:
+                raise ValueError("Execution path exceeds waypoint limit")
+
+            for step in range(1, steps + 1):
+                result.append(start + delta * (step / steps))
+
+        if len(result) < 2:
+            raise ValueError("Execution path has no movement")
+
+        result = np.asarray(result)
+        if not self.is_path_valid(result):
+            raise ValueError("Execution path failed collision validation")
+
+        return result
 
     def invalidate_graph_filter(self):
         self.valid_node_mask = None
@@ -182,6 +260,130 @@ class PathPlanner:
 
         return checker.environment_revision == revision
 
+    def find_nearest_safe_configuration(self, current_q):
+        current = np.asarray(current_q, dtype=float)
+        checker = self.collision_filter
+
+        if (
+            current.shape != (5,)
+            or not np.isfinite(current).all()
+            or not checker.is_state_valid(current)
+        ):
+            return None
+
+        distances = np.linalg.norm(self.joint_q - current, axis=1)
+        for index in np.argsort(distances):
+            candidate = self.joint_q[index]
+            if np.max(np.abs(candidate - current)) > self.max_joint_delta:
+                continue
+            if (
+                checker.is_state_valid(candidate)
+                and checker.is_edge_valid(current, candidate)
+            ):
+                return candidate.copy()
+
+        return None
+
+    def find_safe_recovery_path(self, current_q, max_steps=12):
+        """Find a small monotonic contact retreat, including initial contact.
+
+        Candidate only; execution requires manager validation and monitoring.
+        """
+        self.safe_recovery_path = None
+        checker = self.collision_filter
+        current = np.asarray(current_q, dtype=float)
+        if current.shape != (5,) or not np.isfinite(current).all():
+            return None
+
+        revision = checker.environment_revision
+        initial = checker.recovery_contact_state(current)
+        if initial is None or initial["status"] == "CLEAR":
+            return None
+
+        step_size = min(checker.max_joint_step, self.max_segment_delta, 0.01)
+        path = [current.copy()]
+        current_state = initial
+        for _ in range(max_steps):
+            best = None
+            best_state = None
+            best_improvement = 1e-5
+            for joint in range(5):
+                for sign in (-1.0, 1.0):
+                    candidate = path[-1].copy()
+                    candidate[joint] += sign * step_size
+                    if checker.limited[joint] and not (
+                        checker.lower[joint] <= candidate[joint] <= checker.upper[joint]
+                    ):
+                        continue
+                    if not checker.is_recovery_transition_valid(
+                        path[-1], candidate, current_state
+                    ):
+                        continue
+                    state = checker.recovery_contact_state(candidate)
+                    if state is None:
+                        continue
+                    # Compare total clearance deficits to favor reducing all contacts.
+                    old_deficit = sum(
+                        checker.safety_margin - distance
+                        for distance in current_state["pairs"].values()
+                    )
+                    new_deficit = sum(
+                        checker.safety_margin - distance
+                        for distance in state["pairs"].values()
+                    )
+                    improvement = old_deficit - new_deficit
+                    if improvement > best_improvement:
+                        best = candidate
+                        best_state = state
+                        best_improvement = improvement
+
+            if checker.environment_revision != revision or best is None:
+                return None
+            path.append(best)
+            current_state = best_state
+            if current_state["status"] == "CLEAR":
+                result = np.asarray(path, dtype=float)
+                if checker.environment_revision != revision or not checker.is_state_valid(best):
+                    return None
+                self.safe_recovery_path = result.copy()
+                return result
+
+        return None
+
+    def find_alternative_path(self, start, goal, revision):
+        checker = self.collision_filter
+        distances = np.linalg.norm(self.joint_q - start, axis=1)
+        attempts = 0
+
+        for index in np.argsort(distances):
+            intermediate = self.joint_q[index]
+            if np.max(np.abs(intermediate - start)) > self.max_joint_delta:
+                continue
+            if not checker.is_state_valid(intermediate):
+                continue
+            if not checker.is_edge_valid(start, intermediate):
+                continue
+
+            attempts += 1
+            remainder = self.planner.plan(intermediate, goal)
+            if remainder is not None:
+                path = np.vstack((start, np.asarray(remainder)))
+                if (
+                    checker.environment_revision == revision
+                    and self.is_path_valid(path)
+                ):
+                    return path
+
+            if checker.environment_revision != revision or attempts >= 8:
+                break
+
+        return None
+
+    def _plan_failed(self, reason, message):
+        self.last_plan_failure = reason
+        print(f"[PathPlanner] NO_PATH: {message}", flush=True)
+        return False
+
     def plan(self, start_q, goal_q):
         start = np.asarray(start_q, dtype=float)
         goal = np.asarray(goal_q, dtype=float)
@@ -197,58 +399,49 @@ class PathPlanner:
         self.current_path = None
         self.path_revision = None
         self.goal_q = goal.copy()
+        self.last_plan_failure = "NONE"
 
         checker = self.collision_filter
         revision = checker.environment_revision
 
         if not checker.is_state_valid(start):
-            print(
-                "[PathPlanner] NO_PATH: "
-                "start configuration is invalid",
-                flush=True,
+            return self._plan_failed(
+                "START_INVALID", "start configuration is invalid"
             )
-            return False
 
         if not checker.is_state_valid(goal):
-            print(
-                "[PathPlanner] NO_PATH: "
-                "goal configuration is invalid",
-                flush=True,
+            return self._plan_failed(
+                "GOAL_INVALID", "goal configuration is invalid"
             )
-            return False
 
         if checker.environment_revision != revision:
-            print(
-                "[PathPlanner] NO_PATH: environment changed",
-                flush=True,
+            return self._plan_failed(
+                "ENVIRONMENT_CHANGED", "environment changed"
             )
-            return False
 
         path = self.planner.plan(start, goal)
 
         if path is None:
-            print(
-                "[PathPlanner] NO_PATH: "
-                "A* could not connect start to goal",
-                flush=True,
+            path = self.find_alternative_path(start, goal, revision)
+
+        if path is None:
+            if checker.environment_revision != revision:
+                return self._plan_failed(
+                    "ENVIRONMENT_CHANGED", "environment changed"
+                )
+            return self._plan_failed(
+                "NO_GRAPH_PATH", "A* could not connect start to goal"
             )
-            return False
 
         if (
             checker.environment_revision != revision
             or not self.is_path_valid(path)
         ):
-            print(
-                "[PathPlanner] NO_PATH: "
-                "final path validation failed",
-                flush=True,
+            return self._plan_failed(
+                "PATH_INVALID", "final path validation failed"
             )
-            return False
 
-        self.current_path = np.asarray(
-            path, dtype=float
-        ).copy()
-
+        self.current_path = np.asarray(path, dtype=float).copy()
         self.path_revision = revision
 
         print(
@@ -256,7 +449,6 @@ class PathPlanner:
             f"{len(self.current_path)} waypoints",
             flush=True,
         )
-
         return True
 
     def update_obstacle(
