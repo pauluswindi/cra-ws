@@ -1,0 +1,29 @@
+reconstruction_node:
+  ros__parameters:
+    depth_topic: "/depth/image_raw"
+    camera_info_topic: "/depth/camera_info"
+    body_index_topic: "/body_index_map/image_raw"
+
+    roi_margin: 0.15
+    voxel_size: 0.02
+
+    min_depth: 0.3
+    max_depth: 3.0
+
+    max_sync_delay: 0.15
+    data_timeout: 0.5
+
+    capsule:
+      torso_radius: 0.13
+      head_radius: 0.09
+      upper_arm_radius: 0.055
+      forearm_radius: 0.045
+
+      torso_max_radius: 0.22
+      head_max_radius: 0.14
+      upper_arm_max_radius: 0.10
+      forearm_max_radius: 0.085
+
+      safety_margin: 0.015
+      radius_percentile: 0.85
+      min_voxels: 10

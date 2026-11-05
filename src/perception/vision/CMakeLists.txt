@@ -26,41 +26,105 @@ find_package(OpenCV REQUIRED)
 include_directories(include ${OpenCV_INCLUDE_DIRS})
 
 # Libraries
-add_library(body_tracker_lib src/body_tracking/body_tracker.cpp)
+add_library(body_tracker_lib
+  src/body_tracking/body_tracker.cpp)
 ament_target_dependencies(body_tracker_lib
   rclcpp builtin_interfaces geometry_msgs visualization_msgs)
 
-add_library(frame_transformer_lib src/frame/frame_transformer.cpp)
+add_library(frame_transformer_lib
+  src/frame/frame_transformer.cpp)
 ament_target_dependencies(frame_transformer_lib
   rclcpp geometry_msgs visualization_msgs tf2 tf2_ros tf2_geometry_msgs)
-target_link_libraries(frame_transformer_lib body_tracker_lib)
+target_link_libraries(frame_transformer_lib
+  body_tracker_lib)
 
-add_library(workspace_robot_lib src/workspace_robot/workspace_robot.cpp)
-ament_target_dependencies(workspace_robot_lib rclcpp geometry_msgs)
-target_link_libraries(workspace_robot_lib body_tracker_lib)
+add_library(workspace_robot_lib
+  src/workspace_robot/workspace_robot.cpp)
+ament_target_dependencies(workspace_robot_lib
+  rclcpp geometry_msgs)
+target_link_libraries(workspace_robot_lib
+  body_tracker_lib)
+
+# Reconstruction Libraries
+add_library(roi_generator_lib
+  src/reconstruction/roi_generator.cpp)
+ament_target_dependencies(roi_generator_lib
+  geometry_msgs)
+
+add_library(depth_processor_lib
+  src/reconstruction/depth_processor.cpp)
+ament_target_dependencies(depth_processor_lib
+  sensor_msgs geometry_msgs tf2)
+target_link_libraries(depth_processor_lib
+  ${OpenCV_LIBS})
+
+add_library(voxel_reconstruction_lib
+  src/reconstruction/voxel_reconstruction.cpp)
+ament_target_dependencies(voxel_reconstruction_lib
+  geometry_msgs)
+
+# Human Segmentation
+add_library(human_segmenter_lib
+  src/segmentation/human_segmenter.cpp
+)
+ament_target_dependencies(human_segmenter_lib
+  sensor_msgs
+)
+
+# Human Capsule
+add_library(human_capsule_lib
+  src/human/human_capsule.cpp
+)
+ament_target_dependencies(human_capsule_lib
+  geometry_msgs
+)
 
 # Executables
-add_executable(skeleton_transform_node src/nodes/skeleton_transform_node.cpp)
+add_executable(skeleton_transform_node
+  src/nodes/skeleton_transform_node.cpp)
 ament_target_dependencies(skeleton_transform_node
   rclcpp geometry_msgs visualization_msgs tf2 tf2_ros tf2_geometry_msgs)
-target_link_libraries(skeleton_transform_node body_tracker_lib frame_transformer_lib)
+target_link_libraries(skeleton_transform_node
+  body_tracker_lib frame_transformer_lib)
 
-add_executable(workspace_monitor_node src/nodes/workspace_monitor_node.cpp)
+add_executable(workspace_monitor_node
+  src/nodes/workspace_monitor_node.cpp)
 ament_target_dependencies(workspace_monitor_node
   rclcpp geometry_msgs std_msgs visualization_msgs)
-target_link_libraries(workspace_monitor_node body_tracker_lib workspace_robot_lib)
+target_link_libraries(workspace_monitor_node
+  body_tracker_lib workspace_robot_lib)
 
-add_executable(visual_node src/nodes/visual_node.cpp)
+add_executable(visual_node
+  src/nodes/visual_node.cpp)
 ament_target_dependencies(visual_node
   rclcpp sensor_msgs std_msgs geometry_msgs visualization_msgs cv_bridge
   tf2 tf2_ros tf2_geometry_msgs)
-target_link_libraries(visual_node frame_transformer_lib ${OpenCV_LIBS})
+target_link_libraries(visual_node
+  frame_transformer_lib ${OpenCV_LIBS})
 
+# Reconstruction Node
+add_executable(reconstruction_node
+  src/nodes/reconstruction_node.cpp)
+ament_target_dependencies(reconstruction_node
+  rclcpp sensor_msgs geometry_msgs visualization_msgs
+  tf2 tf2_ros)
+target_link_libraries(reconstruction_node
+  roi_generator_lib
+  depth_processor_lib
+  voxel_reconstruction_lib
+  human_segmenter_lib
+  human_capsule_lib)
+  
 # Install libraries
 install(TARGETS
   body_tracker_lib
   frame_transformer_lib
   workspace_robot_lib
+  roi_generator_lib
+  depth_processor_lib
+  voxel_reconstruction_lib
+  human_segmenter_lib
+  human_capsule_lib
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
 )
@@ -70,11 +134,16 @@ install(TARGETS
   skeleton_transform_node
   workspace_monitor_node
   visual_node
+  reconstruction_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY launch/ DESTINATION share/${PROJECT_NAME}/launch)
+# Install resources
+install(DIRECTORY include/
+  DESTINATION include)
+
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -82,9 +151,28 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_include_directories(include)
-ament_export_libraries(body_tracker_lib frame_transformer_lib workspace_robot_lib)
+
+ament_export_libraries(
+  body_tracker_lib
+  frame_transformer_lib
+  workspace_robot_lib
+  roi_generator_lib
+  depth_processor_lib
+  voxel_reconstruction_lib
+  human_segmenter_lib
+)
+
 ament_export_dependencies(
-  rclcpp builtin_interfaces sensor_msgs std_msgs geometry_msgs visualization_msgs
-  tf2 tf2_ros tf2_geometry_msgs cv_bridge)
+  rclcpp
+  builtin_interfaces
+  sensor_msgs
+  std_msgs
+  geometry_msgs
+  visualization_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  cv_bridge
+)
 
 ament_package()
