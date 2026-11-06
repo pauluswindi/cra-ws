@@ -13,17 +13,23 @@ reconstruction_node:
     max_sync_delay: 0.15
     data_timeout: 0.5
 
+    publish_voxels: true
+
     capsule:
       torso_radius: 0.13
       head_radius: 0.09
       upper_arm_radius: 0.055
       forearm_radius: 0.045
+      hand_radius: 0.05
 
       torso_max_radius: 0.22
       head_max_radius: 0.14
       upper_arm_max_radius: 0.10
       forearm_max_radius: 0.085
+      hand_max_radius: 0.09
 
       safety_margin: 0.015
       radius_percentile: 0.85
       min_voxels: 10
+
+      radius_smoothing_alpha: 0.2

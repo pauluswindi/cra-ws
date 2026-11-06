@@ -81,31 +81,29 @@ double distanceToSegment(
 
     const double t = std::clamp(projection, 0.0, 1.0);
 
-    const double closest_x = start.x + t * dx;
-    const double closest_y = start.y + t * dy;
-    const double closest_z = start.z + t * dz;
-
-    const double px = point.x - closest_x;
-    const double py = point.y - closest_y;
-    const double pz = point.z - closest_z;
+    const double px = point.x - (start.x + t * dx);
+    const double py = point.y - (start.y + t * dy);
+    const double pz = point.z - (start.z + t * dz);
 
     return std::sqrt(px * px + py * py + pz * pz);
 }
 
 void validateConfig(const CapsuleConfig& config)
 {
-    const std::array<double, 4> default_radii = {{
+    const std::array<double, 5> default_radii = {{
         config.torso_radius,
         config.head_radius,
         config.upper_arm_radius,
-        config.forearm_radius
+        config.forearm_radius,
+        config.hand_radius
     }};
 
-    const std::array<double, 4> max_radii = {{
+    const std::array<double, 5> max_radii = {{
         config.torso_max_radius,
         config.head_max_radius,
         config.upper_arm_max_radius,
-        config.forearm_max_radius
+        config.forearm_max_radius,
+        config.hand_max_radius
     }};
 
     if (!std::isfinite(config.safety_margin) ||
@@ -122,8 +120,8 @@ void validateConfig(const CapsuleConfig& config)
         if (!std::isfinite(default_radii[i]) ||
             !std::isfinite(max_radii[i]) ||
             default_radii[i] <= 0.0 ||
-            max_radii[i] < default_radii[i] +
-                config.safety_margin) {
+            max_radii[i] <
+                default_radii[i] + config.safety_margin) {
             throw std::invalid_argument(
                 "Invalid human capsule radius limits");
         }
@@ -132,11 +130,10 @@ void validateConfig(const CapsuleConfig& config)
 
 double estimateRadius(
     std::vector<double>& distances,
-    double default_radius,
-    double max_radius,
+    const SegmentDefinition& segment,
     const CapsuleConfig& config)
 {
-    double estimated_radius = default_radius;
+    double radius = segment.default_radius;
 
     if (distances.size() >= config.min_voxels) {
         const std::size_t index = static_cast<std::size_t>(
@@ -148,14 +145,12 @@ double estimateRadius(
             distances.begin() + index,
             distances.end());
 
-        estimated_radius = std::max(
-            default_radius,
-            distances[index]);
+        radius = std::max(radius, distances[index]);
     }
 
     return std::min(
-        max_radius,
-        estimated_radius + config.safety_margin);
+        segment.max_radius,
+        radius + config.safety_margin);
 }
 
 }  // namespace
@@ -168,7 +163,7 @@ std::vector<Capsule> HumanCapsule::generate(
 {
     validateConfig(config);
 
-    const std::array<SegmentDefinition, 6> segments = {{
+    const std::array<SegmentDefinition, 8> segments = {{
         {0, 0, 2,
             config.torso_radius,
             config.torso_max_radius},
@@ -191,16 +186,24 @@ std::vector<Capsule> HumanCapsule::generate(
 
         {5, 13, 14,
             config.forearm_radius,
-            config.forearm_max_radius}
+            config.forearm_max_radius},
+
+        {6, 7, 9,
+            config.hand_radius,
+            config.hand_max_radius},
+
+        {7, 14, 16,
+            config.hand_radius,
+            config.hand_max_radius}
     }};
 
     std::vector<Capsule> capsules;
+    std::vector<SegmentDefinition> active_segments;
+
     capsules.reserve(segments.size());
+    active_segments.reserve(segments.size());
 
-    std::vector<double> max_radii;
-    max_radii.reserve(segments.size());
-
-    // Generate the initial skeleton-based capsules.
+    // Generate capsules from valid skeleton joints.
     for (const auto& segment : segments) {
         const auto* start = findJoint(
             joints,
@@ -223,23 +226,26 @@ std::vector<Capsule> HumanCapsule::generate(
 
         capsule.start = *start;
         capsule.end = *end;
-        capsule.radius = segment.default_radius;
+
+        capsule.radius =
+            segment.default_radius + config.safety_margin;
+
         capsule.body_id = body_id;
         capsule.segment_id = segment.id;
+        capsule.radius_valid = false;
 
         capsules.push_back(capsule);
-        max_radii.push_back(segment.max_radius);
+        active_segments.push_back(segment);
     }
 
     if (capsules.empty()) {
         return capsules;
     }
 
-    // Store voxel distances separately for each capsule.
     std::vector<std::vector<double>> segment_distances(
         capsules.size());
 
-    // Assign each voxel to at most one nearby body segment.
+    // Assign each voxel to its nearest eligible segment.
     for (const auto& voxel : voxels) {
         const auto& point = voxel.center;
 
@@ -254,6 +260,7 @@ std::vector<Capsule> HumanCapsule::generate(
 
         for (std::size_t i = 0; i < capsules.size(); ++i) {
             const auto& capsule = capsules[i];
+            const auto& segment = active_segments[i];
 
             double projection = 0.0;
 
@@ -264,18 +271,25 @@ std::vector<Capsule> HumanCapsule::generate(
                 projection);
 
             if (!std::isfinite(distance) ||
-                distance > max_radii[i]) {
+                distance > segment.max_radius) {
                 continue;
             }
 
             const bool is_sphere =
-                squaredDistance(
-                    capsule.start,
-                    capsule.end) < 1e-12;
+                segment.start_joint == segment.end_joint;
 
-            // Use the central segment to avoid joint overlap.
-            if (!is_sphere &&
+            const bool is_hand =
+                segment.id == 6 || segment.id == 7;
+
+            // Use the central portion for arm and torso fitting.
+            if (!is_sphere && !is_hand &&
                 (projection < 0.15 || projection > 0.85)) {
+                continue;
+            }
+
+            // Hand fitting uses the entire wrist-to-fingertip axis.
+            if (is_hand &&
+                (projection < 0.0 || projection > 1.0)) {
                 continue;
             }
 
@@ -291,31 +305,70 @@ std::vector<Capsule> HumanCapsule::generate(
         }
     }
 
-    // Refine each capsule radius using its assigned voxels.
+    // Estimate radius from assigned voxel distances.
     for (std::size_t i = 0; i < capsules.size(); ++i) {
-        const auto& segment = segments;
+        auto& distances = segment_distances[i];
 
-        (void)segment;
-
-        const auto definition = std::find_if(
-            segments.begin(),
-            segments.end(),
-            [&capsules, i](const SegmentDefinition& candidate) {
-                return candidate.id == capsules[i].segment_id;
-            });
-
-        if (definition == segments.end()) {
-            continue;
-        }
+        capsules[i].radius_valid =
+            distances.size() >= config.min_voxels;
 
         capsules[i].radius = estimateRadius(
-            segment_distances[i],
-            definition->default_radius,
-            definition->max_radius,
+            distances,
+            active_segments[i],
             config);
     }
 
     return capsules;
+}
+
+CoverageResult HumanCapsule::evaluateCoverage(
+    const std::vector<Capsule>& capsules,
+    const std::vector<reconstruction::Voxel>& voxels,
+    double voxel_size) const
+{
+    if (!std::isfinite(voxel_size) || voxel_size <= 0.0) {
+        throw std::invalid_argument(
+            "Invalid voxel size for coverage evaluation");
+    }
+
+    CoverageResult result;
+
+    // Account for the distance from voxel center to its corners.
+    const double voxel_tolerance =
+        0.5 * std::sqrt(3.0) * voxel_size;
+
+    for (const auto& voxel : voxels) {
+        if (!isFinite(voxel.center)) {
+            continue;
+        }
+
+        ++result.total_voxels;
+
+        for (const auto& capsule : capsules) {
+            if (!isFinite(capsule.start) ||
+                !isFinite(capsule.end) ||
+                !std::isfinite(capsule.radius) ||
+                capsule.radius <= 0.0) {
+                continue;
+            }
+
+            double projection = 0.0;
+
+            const double distance = distanceToSegment(
+                voxel.center,
+                capsule.start,
+                capsule.end,
+                projection);
+
+            if (distance <=
+                capsule.radius + voxel_tolerance) {
+                ++result.covered_voxels;
+                break;
+            }
+        }
+    }
+
+    return result;
 }
 
 }  // namespace vision::human

@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -20,14 +19,14 @@
 #include "visualization_msgs/msg/marker_array.hpp"
 
 #include "tf2/exceptions.h"
-#include "tf2/LinearMath/Quaternion.h"
-#include "tf2/LinearMath/Vector3.h"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
+#include "vision/human/capsule_marker.hpp"
 #include "vision/human/human_capsule.hpp"
 #include "vision/reconstruction/depth_processor.hpp"
 #include "vision/reconstruction/roi_generator.hpp"
+#include "vision/reconstruction/voxel_marker.hpp"
 #include "vision/reconstruction/voxel_reconstruction.hpp"
 #include "vision/segmentation/human_segmenter.hpp"
 
@@ -37,23 +36,34 @@ namespace
 constexpr char kBaseFrame[] = "base_link";
 constexpr char kZoneNamespace[] = "humans_in_zone";
 constexpr char kVoxelNamespace[] = "human_voxels";
-constexpr char kCapsuleNamespace[] = "human_capsule_";
 
-constexpr int kQueueSize = 10;
-
-using Marker = visualization_msgs::msg::Marker;
-using MarkerArray = visualization_msgs::msg::MarkerArray;
-using Point = geometry_msgs::msg::Point;
 using Image = sensor_msgs::msg::Image;
 using CameraInfo = sensor_msgs::msg::CameraInfo;
+using Point = geometry_msgs::msg::Point;
+using Marker = visualization_msgs::msg::Marker;
+using MarkerArray = visualization_msgs::msg::MarkerArray;
 
-bool isUpperBodyJoint(int joint_id)
+using Capsule = vision::human::Capsule;
+using BodyJoint = vision::human::BodyJoint;
+using MarkerIds = vision::human::MarkerIds;
+
+using RadiusKey = std::pair<std::uint32_t, int>;
+using RadiusMap = std::map<RadiusKey, double>;
+
+struct SkeletonData
 {
-    return (joint_id >= 0 && joint_id <= 17) ||
-           (joint_id >= 26 && joint_id <= 31);
+    std::vector<Point> points;
+    std::vector<BodyJoint> joints;
+    builtin_interfaces::msg::Time stamp;
+};
+
+bool isUpperBodyJoint(int id)
+{
+    return (id >= 0 && id <= 17) ||
+           (id >= 26 && id <= 31);
 }
 
-bool isValidPoint(const Point& point)
+bool isFinite(const Point& point)
 {
     return std::isfinite(point.x) &&
            std::isfinite(point.y) &&
@@ -61,11 +71,33 @@ bool isValidPoint(const Point& point)
 }
 
 double stampDifference(
-    const builtin_interfaces::msg::Time& first,
-    const builtin_interfaces::msg::Time& second)
+    const builtin_interfaces::msg::Time& a,
+    const builtin_interfaces::msg::Time& b)
 {
     return std::abs(
-        (rclcpp::Time(first) - rclcpp::Time(second)).seconds());
+        (rclcpp::Time(a) - rclcpp::Time(b)).seconds());
+}
+
+void appendDeleteMarkers(
+    const MarkerIds& previous,
+    const MarkerIds& current,
+    const builtin_interfaces::msg::Time& stamp,
+    MarkerArray& output)
+{
+    for (const auto& id : previous) {
+        if (current.count(id) != 0) {
+            continue;
+        }
+
+        Marker marker;
+        marker.header.frame_id = kBaseFrame;
+        marker.header.stamp = stamp;
+        marker.ns = id.first;
+        marker.id = id.second;
+        marker.action = Marker::DELETE;
+
+        output.markers.push_back(marker);
+    }
 }
 
 }  // namespace
@@ -78,13 +110,82 @@ public:
           tf_buffer_(get_clock()),
           tf_listener_(tf_buffer_)
     {
-        const auto depth_topic = declare_parameter<std::string>(
+        loadParameters();
+
+        const auto sensor_qos = rclcpp::SensorDataQoS();
+
+        depth_sub_ = create_subscription<Image>(
+            depth_topic_,
+            sensor_qos,
+            [this](Image::ConstSharedPtr msg) {
+                depth_image_ = std::move(msg);
+                last_depth_received_ = now();
+                processFrame();
+            });
+
+        body_index_sub_ = create_subscription<Image>(
+            body_index_topic_,
+            sensor_qos,
+            [this](Image::ConstSharedPtr msg) {
+                body_index_map_ = std::move(msg);
+                last_body_index_received_ = now();
+                processFrame();
+            });
+
+        camera_info_sub_ = create_subscription<CameraInfo>(
+            camera_info_topic_,
+            sensor_qos,
+            [this](CameraInfo::ConstSharedPtr msg) {
+                camera_info_ = std::move(msg);
+            });
+
+        skeleton_sub_ = create_subscription<MarkerArray>(
+            "/vision/skeleton/base_frame",
+            10,
+            [this](MarkerArray::ConstSharedPtr msg) {
+                skeletonCallback(*msg);
+            });
+
+        zone_sub_ = create_subscription<MarkerArray>(
+            "/perception/humans_in_zone",
+            10,
+            [this](MarkerArray::ConstSharedPtr msg) {
+                zoneCallback(*msg);
+            });
+
+        capsule_pub_ = create_publisher<MarkerArray>(
+            "/vision/human/capsules",
+            10);
+
+        if (publish_voxels_) {
+            voxel_pub_ = create_publisher<MarkerArray>(
+                "/vision/reconstruction/voxels",
+                10);
+        }
+
+        watchdog_timer_ = create_wall_timer(
+            std::chrono::milliseconds(100),
+            [this]() {
+                watchdogCallback();
+            });
+
+        RCLCPP_INFO(
+            get_logger(),
+            "Human capsule reconstruction started "
+            "(voxel debugging: %s)",
+            publish_voxels_ ? "enabled" : "disabled");
+    }
+
+private:
+    void loadParameters()
+    {
+        depth_topic_ = declare_parameter<std::string>(
             "depth_topic", "/depth/image_raw");
 
-        const auto camera_info_topic = declare_parameter<std::string>(
+        camera_info_topic_ = declare_parameter<std::string>(
             "camera_info_topic", "/depth/camera_info");
 
-        const auto body_index_topic = declare_parameter<std::string>(
+        body_index_topic_ = declare_parameter<std::string>(
             "body_index_topic", "/body_index_map/image_raw");
 
         roi_margin_ = declare_parameter<double>(
@@ -105,187 +206,127 @@ public:
         data_timeout_ = declare_parameter<double>(
             "data_timeout", 0.5);
 
-        capsule_config_.torso_radius = declare_parameter<double>(
-            "capsule.torso_radius", 0.13);
+        publish_voxels_ = declare_parameter<bool>(
+            "publish_voxels", false);
 
-        capsule_config_.head_radius = declare_parameter<double>(
-            "capsule.head_radius", 0.09);
+        capsule_config_.torso_radius =
+            declare_parameter<double>(
+                "capsule.torso_radius", 0.13);
 
-        capsule_config_.upper_arm_radius = declare_parameter<double>(
-            "capsule.upper_arm_radius", 0.055);
+        capsule_config_.head_radius =
+            declare_parameter<double>(
+                "capsule.head_radius", 0.09);
 
-        capsule_config_.forearm_radius = declare_parameter<double>(
-            "capsule.forearm_radius", 0.045);
+        capsule_config_.upper_arm_radius =
+            declare_parameter<double>(
+                "capsule.upper_arm_radius", 0.055);
 
-        capsule_config_.torso_max_radius = declare_parameter<double>(
-            "capsule.torso_max_radius", 0.22);
+        capsule_config_.forearm_radius =
+            declare_parameter<double>(
+                "capsule.forearm_radius", 0.045);
 
-        capsule_config_.head_max_radius = declare_parameter<double>(
-            "capsule.head_max_radius", 0.14);
+        capsule_config_.hand_radius =
+            declare_parameter<double>(
+                "capsule.hand_radius", 0.05);
 
-        capsule_config_.upper_arm_max_radius = declare_parameter<double>(
-            "capsule.upper_arm_max_radius", 0.10);
+        capsule_config_.torso_max_radius =
+            declare_parameter<double>(
+                "capsule.torso_max_radius", 0.22);
 
-        capsule_config_.forearm_max_radius = declare_parameter<double>(
-            "capsule.forearm_max_radius", 0.085);
+        capsule_config_.head_max_radius =
+            declare_parameter<double>(
+                "capsule.head_max_radius", 0.14);
 
-        capsule_config_.safety_margin = declare_parameter<double>(
-            "capsule.safety_margin", 0.015);
+        capsule_config_.upper_arm_max_radius =
+            declare_parameter<double>(
+                "capsule.upper_arm_max_radius", 0.10);
 
-        capsule_config_.radius_percentile = declare_parameter<double>(
-            "capsule.radius_percentile", 0.85);
+        capsule_config_.forearm_max_radius =
+            declare_parameter<double>(
+                "capsule.forearm_max_radius", 0.085);
+
+        capsule_config_.hand_max_radius =
+            declare_parameter<double>(
+                "capsule.hand_max_radius", 0.09);
+
+        capsule_config_.safety_margin =
+            declare_parameter<double>(
+                "capsule.safety_margin", 0.015);
+
+        capsule_config_.radius_percentile =
+            declare_parameter<double>(
+                "capsule.radius_percentile", 0.85);
 
         const int min_voxels = declare_parameter<int>(
             "capsule.min_voxels", 10);
 
-        if (min_voxels < 1) {
-            throw std::invalid_argument(
-                "capsule.min_voxels must be positive");
-        }
+        radius_alpha_ = declare_parameter<double>(
+            "capsule.radius_smoothing_alpha", 0.2);
 
-        capsule_config_.min_voxels =
-            static_cast<std::size_t>(min_voxels);
-
-        if (!std::isfinite(roi_margin_) ||
-            !std::isfinite(voxel_size_) ||
-            !std::isfinite(min_depth_) ||
-            !std::isfinite(max_depth_) ||
-            !std::isfinite(max_sync_delay_) ||
-            !std::isfinite(data_timeout_) ||
+        if (min_voxels < 1 ||
+            !std::isfinite(radius_alpha_) ||
+            radius_alpha_ <= 0.0 ||
+            radius_alpha_ > 1.0 ||
+            !std::isfinite(roi_margin_) ||
             roi_margin_ < 0.0 ||
+            !std::isfinite(voxel_size_) ||
             voxel_size_ <= 0.0 ||
+            !std::isfinite(min_depth_) ||
             min_depth_ <= 0.0 ||
+            !std::isfinite(max_depth_) ||
             max_depth_ <= min_depth_ ||
+            !std::isfinite(max_sync_delay_) ||
             max_sync_delay_ < 0.0 ||
+            !std::isfinite(data_timeout_) ||
             data_timeout_ <= 0.0) {
             throw std::invalid_argument(
                 "Invalid reconstruction configuration");
         }
 
-        const auto sensor_qos = rclcpp::SensorDataQoS();
-
-        depth_sub_ = create_subscription<Image>(
-            depth_topic,
-            sensor_qos,
-            [this](Image::ConstSharedPtr msg) {
-                depthCallback(msg);
-            });
-
-        camera_info_sub_ = create_subscription<CameraInfo>(
-            camera_info_topic,
-            sensor_qos,
-            [this](CameraInfo::ConstSharedPtr msg) {
-                cameraInfoCallback(msg);
-            });
-
-        body_index_sub_ = create_subscription<Image>(
-            body_index_topic,
-            sensor_qos,
-            [this](Image::ConstSharedPtr msg) {
-                bodyIndexCallback(msg);
-            });
-
-        skeleton_sub_ = create_subscription<MarkerArray>(
-            "/vision/skeleton/base_frame",
-            kQueueSize,
-            [this](MarkerArray::ConstSharedPtr msg) {
-                skeletonCallback(msg);
-            });
-
-        zone_sub_ = create_subscription<MarkerArray>(
-            "/perception/humans_in_zone",
-            kQueueSize,
-            [this](MarkerArray::ConstSharedPtr msg) {
-                zoneCallback(msg);
-            });
-
-        voxel_pub_ = create_publisher<MarkerArray>(
-            "/vision/reconstruction/voxels",
-            kQueueSize);
-
-        capsule_pub_ = create_publisher<MarkerArray>(
-            "/vision/human/capsules",
-            kQueueSize);
-
-        watchdog_timer_ = create_wall_timer(
-            std::chrono::milliseconds(200),
-            [this]() {
-                watchdogCallback();
-            });
-
-        RCLCPP_INFO(
-            get_logger(),
-            "Hybrid reconstruction started: voxel=%.3f m, ROI=%.3f m",
-            voxel_size_,
-            roi_margin_);
+        capsule_config_.min_voxels =
+            static_cast<std::size_t>(min_voxels);
     }
 
-private:
-    void depthCallback(Image::ConstSharedPtr msg)
+    void skeletonCallback(const MarkerArray& msg)
     {
-        depth_image_ = std::move(msg);
-        last_depth_received_ = now();
+        skeletons_.clear();
 
-        processFrame();
-    }
-
-    void cameraInfoCallback(CameraInfo::ConstSharedPtr msg)
-    {
-        camera_info_ = std::move(msg);
-    }
-
-    void bodyIndexCallback(Image::ConstSharedPtr msg)
-    {
-        body_index_map_ = std::move(msg);
-        last_body_index_received_ = now();
-
-        processFrame();
-    }
-
-    void skeletonCallback(MarkerArray::ConstSharedPtr msg)
-    {
-        skeleton_points_.clear();
-        skeleton_joints_.clear();
-        skeleton_stamps_.clear();
-
-        for (const auto& marker : msg->markers) {
+        for (const auto& marker : msg.markers) {
             if (marker.action != Marker::ADD ||
                 marker.id < 0 ||
-                marker.header.frame_id != kBaseFrame) {
+                marker.header.frame_id != kBaseFrame ||
+                !isFinite(marker.pose.position)) {
                 continue;
             }
 
             const int body_id = marker.id / 100;
             const int joint_id = marker.id % 100;
 
-            if (!isUpperBodyJoint(joint_id) ||
-                !isValidPoint(marker.pose.position)) {
+            if (!isUpperBodyJoint(joint_id)) {
                 continue;
             }
 
-            skeleton_points_[body_id].push_back(
-                marker.pose.position);
+            auto& skeleton = skeletons_[body_id];
 
-            vision::human::BodyJoint joint;
+            skeleton.points.push_back(marker.pose.position);
+
+            BodyJoint joint;
             joint.id = joint_id;
             joint.position = marker.pose.position;
 
-            skeleton_joints_[body_id].push_back(joint);
-
-            skeleton_stamps_[body_id] = marker.header.stamp;
+            skeleton.joints.push_back(joint);
+            skeleton.stamp = marker.header.stamp;
         }
 
         last_skeleton_received_ = now();
-
         processFrame();
     }
 
-    void zoneCallback(MarkerArray::ConstSharedPtr msg)
+    void zoneCallback(const MarkerArray& msg)
     {
-        active_body_ids_.clear();
-        zone_stamps_.clear();
+        std::set<int> current_ids;
 
-        for (const auto& marker : msg->markers) {
+        for (const auto& marker : msg.markers) {
             if (marker.ns != kZoneNamespace ||
                 marker.action != Marker::ADD ||
                 marker.id < 0 ||
@@ -293,12 +334,10 @@ private:
                 continue;
             }
 
-            const int body_id = marker.id / 100;
-
-            active_body_ids_.insert(body_id);
-            zone_stamps_[body_id] = marker.header.stamp;
+            current_ids.insert(marker.id / 100);
         }
 
+        active_body_ids_ = std::move(current_ids);
         last_zone_received_ = now();
 
         if (active_body_ids_.empty()) {
@@ -309,233 +348,134 @@ private:
         processFrame();
     }
 
-    bool isRecent(const rclcpp::Time& received) const
+    bool isRecent(const rclcpp::Time& timestamp) const
     {
-        if (received.nanoseconds() == 0) {
+        if (timestamp.nanoseconds() == 0) {
             return false;
         }
 
-        const double age = (now() - received).seconds();
+        const double age = (now() - timestamp).seconds();
 
         return age >= 0.0 && age <= data_timeout_;
     }
 
     bool inputsReady() const
     {
-        if (!depth_image_ ||
-            !camera_info_ ||
-            !body_index_map_ ||
-            active_body_ids_.empty()) {
-            return false;
-        }
-
-        return isRecent(last_depth_received_) &&
+        return depth_image_ &&
+               body_index_map_ &&
+               camera_info_ &&
+               !active_body_ids_.empty() &&
+               isRecent(last_depth_received_) &&
                isRecent(last_body_index_received_) &&
                isRecent(last_skeleton_received_) &&
                isRecent(last_zone_received_);
     }
 
-    void appendCapsuleMarkers(
-        const std::vector<vision::human::Capsule>& capsules,
-        const builtin_interfaces::msg::Time& stamp,
-        MarkerArray& output,
-        std::set<std::pair<std::string, int>>& current_ids) const
+    bool frameValid()
     {
-        for (const auto& capsule : capsules) {
-            const auto& a = capsule.start;
-            const auto& b = capsule.end;
-
-            if (!isValidPoint(a) ||
-                !isValidPoint(b) ||
-                !std::isfinite(capsule.radius) ||
-                capsule.radius <= 0.0) {
-                continue;
-            }
-
-            const tf2::Vector3 start(a.x, a.y, a.z);
-            const tf2::Vector3 end(b.x, b.y, b.z);
-            const tf2::Vector3 direction = end - start;
-
-            const double length = direction.length();
-
-            if (!std::isfinite(length)) {
-                continue;
-            }
-
-            const double diameter = capsule.radius * 2.0;
-
-            Marker marker;
-            marker.header.frame_id = kBaseFrame;
-            marker.header.stamp = stamp;
-
-            marker.ns =
-                std::string(kCapsuleNamespace) +
-                std::to_string(capsule.body_id);
-
-            marker.action = Marker::ADD;
-
-            marker.color.r = 1.0f;
-            marker.color.g = 0.55f;
-            marker.color.b = 0.1f;
-            marker.color.a = 0.25f;
-
-            marker.lifetime.sec = 0;
-            marker.lifetime.nanosec = 500000000;
-
-            marker.scale.x = diameter;
-            marker.scale.y = diameter;
-
-            if (length < 1e-6) {
-                marker.id = capsule.segment_id * 3;
-                marker.type = Marker::SPHERE;
-
-                marker.pose.position = a;
-                marker.pose.orientation.w = 1.0;
-                marker.scale.z = diameter;
-
-                current_ids.emplace(marker.ns, marker.id);
-                output.markers.push_back(marker);
-                continue;
-            }
-
-            const tf2::Vector3 normalized = direction / length;
-            const tf2::Vector3 z_axis(0.0, 0.0, 1.0);
-
-            const double cosine = std::clamp(
-                normalized.z(), -1.0, 1.0);
-
-            const tf2::Vector3 rotation_axis =
-                z_axis.cross(normalized);
-
-            tf2::Quaternion rotation;
-
-            if (rotation_axis.length2() > 1e-12) {
-                rotation.setRotation(
-                    rotation_axis.normalized(),
-                    std::acos(cosine));
-            } else if (cosine < 0.0) {
-                rotation.setRotation(
-                    tf2::Vector3(1.0, 0.0, 0.0),
-                    std::acos(-1.0));
-            } else {
-                rotation.setValue(0.0, 0.0, 0.0, 1.0);
-            }
-
-            rotation.normalize();
-
-            marker.id = capsule.segment_id * 3;
-            marker.type = Marker::CYLINDER;
-
-            marker.pose.position.x = (a.x + b.x) * 0.5;
-            marker.pose.position.y = (a.y + b.y) * 0.5;
-            marker.pose.position.z = (a.z + b.z) * 0.5;
-
-            marker.pose.orientation.x = rotation.x();
-            marker.pose.orientation.y = rotation.y();
-            marker.pose.orientation.z = rotation.z();
-            marker.pose.orientation.w = rotation.w();
-
-            marker.scale.z = length;
-
-            current_ids.emplace(marker.ns, marker.id);
-            output.markers.push_back(marker);
-
-            marker.type = Marker::SPHERE;
-
-            marker.pose.orientation.x = 0.0;
-            marker.pose.orientation.y = 0.0;
-            marker.pose.orientation.z = 0.0;
-            marker.pose.orientation.w = 1.0;
-
-            marker.scale.z = diameter;
-
-            marker.id = capsule.segment_id * 3 + 1;
-            marker.pose.position = a;
-
-            current_ids.emplace(marker.ns, marker.id);
-            output.markers.push_back(marker);
-
-            marker.id = capsule.segment_id * 3 + 2;
-            marker.pose.position = b;
-
-            current_ids.emplace(marker.ns, marker.id);
-            output.markers.push_back(marker);
-        }
-    }
-
-    void processFrame()
-    {
-        if (!inputsReady()) {
-            return;
-        }
-
         const auto& depth = *depth_image_;
         const auto& body_map = *body_index_map_;
-        const auto& camera_info = *camera_info_;
+        const auto& info = *camera_info_;
 
         if (stampDifference(
                 depth.header.stamp,
                 body_map.header.stamp) > max_sync_delay_) {
-            clearOutputs();
-            return;
+            return false;
         }
 
         if (depth.width != body_map.width ||
             depth.height != body_map.height ||
+            depth.width != info.width ||
+            depth.height != info.height ||
             depth.header.frame_id != body_map.header.frame_id ||
-            depth.header.frame_id != camera_info.header.frame_id) {
+            depth.header.frame_id != info.header.frame_id) {
             RCLCPP_WARN_THROTTLE(
                 get_logger(),
                 *get_clock(),
                 2000,
-                "Depth and Body Index Map geometry/frame mismatch");
+                "Depth, body index, or camera info mismatch");
 
-            clearOutputs();
-            return;
+            return false;
         }
 
-        const auto frame_stamp = rclcpp::Time(depth.header.stamp);
-
-        if (frame_stamp == last_processed_stamp_) {
-            return;
-        }
-
-        std::set<std::uint8_t> used_indices;
+        std::set<std::uint8_t> body_indices;
 
         for (const int body_id : active_body_ids_) {
             const auto index =
                 static_cast<std::uint8_t>(body_id % 255);
 
-            if (!used_indices.insert(index).second) {
+            if (!body_indices.insert(index).second) {
                 RCLCPP_WARN_THROTTLE(
                     get_logger(),
                     *get_clock(),
                     2000,
-                    "Ambiguous human body index detected");
+                    "Ambiguous body index detected");
 
-                clearOutputs();
-                return;
+                return false;
+            }
+
+            const auto it = skeletons_.find(body_id);
+
+            if (it == skeletons_.end() ||
+                it->second.joints.empty() ||
+                stampDifference(
+                    depth.header.stamp,
+                    it->second.stamp) > max_sync_delay_) {
+                return false;
             }
         }
 
-        for (const int body_id : active_body_ids_) {
-            const auto skeleton_stamp =
-                skeleton_stamps_.find(body_id);
+        return true;
+    }
 
-            const auto zone_stamp =
-                zone_stamps_.find(body_id);
+    void filterRadii(
+        std::vector<Capsule>& capsules,
+        RadiusMap& radii)
+    {
+        for (auto& capsule : capsules) {
+            const auto key = std::make_pair(
+                capsule.body_id,
+                capsule.segment_id);
 
-            if (skeleton_stamp == skeleton_stamps_.end() ||
-                zone_stamp == zone_stamps_.end() ||
-                stampDifference(
-                    depth.header.stamp,
-                    skeleton_stamp->second) > max_sync_delay_ ||
-                stampDifference(
-                    depth.header.stamp,
-                    zone_stamp->second) > max_sync_delay_) {
-                clearOutputs();
-                return;
+            auto it = radii.find(key);
+
+            if (it == radii.end()) {
+                radii[key] = capsule.radius;
+                continue;
             }
+
+            double& previous = it->second;
+
+            if (!capsule.radius_valid) {
+                capsule.radius = previous;
+                continue;
+            }
+
+            if (capsule.radius >= previous) {
+                previous = capsule.radius;
+            } else {
+                previous =
+                    radius_alpha_ * capsule.radius +
+                    (1.0 - radius_alpha_) * previous;
+            }
+
+            capsule.radius = previous;
+        }
+    }
+
+    void processFrame()
+    {
+        if (!inputsReady() || !frameValid()) {
+            return;
+        }
+
+        const auto& depth = *depth_image_;
+        const auto& body_map = *body_index_map_;
+
+        const rclcpp::Time frame_stamp(depth.header.stamp);
+
+        if (frame_stamp == last_processed_stamp_) {
+            return;
         }
 
         geometry_msgs::msg::TransformStamped transform;
@@ -551,41 +491,32 @@ private:
                 get_logger(),
                 *get_clock(),
                 2000,
-                "Depth TF unavailable: %s",
+                "Depth transform unavailable: %s",
                 error.what());
 
-            clearOutputs();
             return;
         }
 
-        MarkerArray voxel_output;
         MarkerArray capsule_output;
+        MarkerIds current_capsule_ids;
 
-        std::set<int> current_voxel_ids;
-        std::set<std::pair<std::string, int>> current_capsule_ids;
+        MarkerArray voxel_output;
+        MarkerIds current_voxel_ids;
+
+        RadiusMap next_radii = filtered_radii_;
 
         try {
             for (const int body_id : active_body_ids_) {
-                const auto skeleton_it =
-                    skeleton_points_.find(body_id);
-
-                const auto joints_it =
-                    skeleton_joints_.find(body_id);
-
-                if (skeleton_it == skeleton_points_.end() ||
-                    skeleton_it->second.empty() ||
-                    joints_it == skeleton_joints_.end()) {
-                    continue;
-                }
+                const auto& skeleton = skeletons_.at(body_id);
 
                 const auto roi = roi_generator_.generate(
-                    skeleton_it->second,
+                    skeleton.points,
                     roi_margin_,
                     static_cast<std::uint32_t>(body_id),
                     "human");
 
                 if (!roi.valid) {
-                    continue;
+                    return;
                 }
 
                 const auto human_mask =
@@ -596,194 +527,183 @@ private:
                 const auto points =
                     depth_processor_.extractPoints(
                         depth,
-                        camera_info,
+                        *camera_info_,
                         transform,
                         roi,
                         min_depth_,
                         max_depth_,
                         &human_mask);
 
+                // Voxels remain internal to capsule fitting.
                 const auto voxels =
                     voxel_reconstruction_.reconstruct(
                         points,
                         voxel_size_);
 
-                const auto capsules = human_capsule_.generate(
-                    joints_it->second,
+                auto capsules = human_capsule_.generate(
+                    skeleton.joints,
                     voxels,
                     static_cast<std::uint32_t>(body_id),
                     capsule_config_);
 
-                appendCapsuleMarkers(
+                if (capsules.empty()) {
+                    return;
+                }
+
+                filterRadii(capsules, next_radii);
+
+                const auto coverage =
+                    human_capsule_.evaluateCoverage(
+                        capsules,
+                        voxels,
+                        voxel_size_);
+
+                RCLCPP_DEBUG_THROTTLE(
+                    get_logger(),
+                    *get_clock(),
+                    2000,
+                    "Body %d: voxel coverage %.1f%% (%zu/%zu)",
+                    body_id,
+                    100.0 * coverage.ratio(),
+                    coverage.covered_voxels,
+                    coverage.total_voxels);
+
+                vision::human::appendCapsuleMarkers(
                     capsules,
                     depth.header.stamp,
                     capsule_output,
                     current_capsule_ids);
 
-                if (voxels.empty()) {
-                    continue;
+                if (publish_voxels_) {
+                    vision::reconstruction::appendVoxelMarker(
+                        voxels,
+                        static_cast<std::uint32_t>(body_id),
+                        voxel_size_,
+                        depth.header.stamp,
+                        voxel_output);
+
+                    if (!voxels.empty()) {
+                        current_voxel_ids.emplace(
+                            kVoxelNamespace,
+                            body_id);
+                    }
                 }
-
-                Marker marker;
-                marker.header.frame_id = kBaseFrame;
-                marker.header.stamp = depth.header.stamp;
-
-                marker.ns = kVoxelNamespace;
-                marker.id = body_id;
-                marker.type = Marker::CUBE_LIST;
-                marker.action = Marker::ADD;
-
-                marker.pose.orientation.w = 1.0;
-
-                marker.scale.x = voxel_size_;
-                marker.scale.y = voxel_size_;
-                marker.scale.z = voxel_size_;
-
-                marker.color.r = 0.1f;
-                marker.color.g = 0.8f;
-                marker.color.b = 1.0f;
-                marker.color.a = 0.9f;
-
-                marker.points.reserve(voxels.size());
-
-                for (const auto& voxel : voxels) {
-                    marker.points.push_back(voxel.center);
-                }
-
-                voxel_output.markers.push_back(std::move(marker));
-                current_voxel_ids.insert(body_id);
             }
         } catch (const std::exception& error) {
             RCLCPP_WARN_THROTTLE(
                 get_logger(),
                 *get_clock(),
                 2000,
-                "Hybrid reconstruction failed: %s",
+                "Capsule reconstruction failed: %s",
                 error.what());
 
-            clearOutputs();
             return;
         }
 
-        // Delete voxel markers that are no longer valid.
-        for (const int old_id : published_voxel_ids_) {
-            if (current_voxel_ids.count(old_id) != 0) {
-                continue;
-            }
+        appendDeleteMarkers(
+            published_capsule_ids_,
+            current_capsule_ids,
+            depth.header.stamp,
+            capsule_output);
 
-            Marker marker;
-            marker.header.frame_id = kBaseFrame;
-            marker.header.stamp = depth.header.stamp;
-            marker.ns = kVoxelNamespace;
-            marker.id = old_id;
-            marker.action = Marker::DELETE;
-
-            voxel_output.markers.push_back(marker);
+        if (publish_voxels_) {
+            appendDeleteMarkers(
+                published_voxel_ids_,
+                current_voxel_ids,
+                depth.header.stamp,
+                voxel_output);
         }
 
-        // Delete capsule markers that are no longer valid.
-        for (const auto& old_id : published_capsule_ids_) {
-            if (current_capsule_ids.count(old_id) != 0) {
-                continue;
-            }
-
-            Marker marker;
-            marker.header.frame_id = kBaseFrame;
-            marker.header.stamp = depth.header.stamp;
-            marker.ns = old_id.first;
-            marker.id = old_id.second;
-            marker.action = Marker::DELETE;
-
-            capsule_output.markers.push_back(marker);
-        }
-
-        published_voxel_ids_ = std::move(current_voxel_ids);
         published_capsule_ids_ = std::move(current_capsule_ids);
 
-        last_processed_stamp_ = frame_stamp;
-
-        if (!voxel_output.markers.empty()) {
-            voxel_pub_->publish(voxel_output);
+        if (publish_voxels_) {
+            published_voxel_ids_ = std::move(current_voxel_ids);
         }
+
+        filtered_radii_ = std::move(next_radii);
+
+        for (auto it = filtered_radii_.begin();
+             it != filtered_radii_.end();) {
+            if (active_body_ids_.count(
+                    static_cast<int>(it->first.first)) == 0) {
+                it = filtered_radii_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        last_processed_stamp_ = frame_stamp;
+        last_successful_update_ = now();
 
         if (!capsule_output.markers.empty()) {
             capsule_pub_->publish(capsule_output);
         }
-    }
 
-    void clearVoxels()
-    {
-        if (published_voxel_ids_.empty()) {
-            return;
+        if (publish_voxels_ &&
+            !voxel_output.markers.empty()) {
+            voxel_pub_->publish(voxel_output);
         }
-
-        MarkerArray output;
-
-        for (const int body_id : published_voxel_ids_) {
-            Marker marker;
-            marker.header.frame_id = kBaseFrame;
-            marker.header.stamp = now();
-            marker.ns = kVoxelNamespace;
-            marker.id = body_id;
-            marker.action = Marker::DELETE;
-
-            output.markers.push_back(marker);
-        }
-
-        voxel_pub_->publish(output);
-        published_voxel_ids_.clear();
-    }
-
-    void clearCapsules()
-    {
-        if (published_capsule_ids_.empty()) {
-            return;
-        }
-
-        MarkerArray output;
-
-        for (const auto& id : published_capsule_ids_) {
-            Marker marker;
-            marker.header.frame_id = kBaseFrame;
-            marker.header.stamp = now();
-            marker.ns = id.first;
-            marker.id = id.second;
-            marker.action = Marker::DELETE;
-
-            output.markers.push_back(marker);
-        }
-
-        capsule_pub_->publish(output);
-        published_capsule_ids_.clear();
     }
 
     void clearOutputs()
     {
-        clearVoxels();
-        clearCapsules();
+        const builtin_interfaces::msg::Time stamp = now();
+
+        if (!published_capsule_ids_.empty()) {
+            MarkerArray output;
+
+            appendDeleteMarkers(
+                published_capsule_ids_,
+                MarkerIds{},
+                stamp,
+                output);
+
+            capsule_pub_->publish(output);
+            published_capsule_ids_.clear();
+        }
+
+        if (publish_voxels_ &&
+            !published_voxel_ids_.empty()) {
+            MarkerArray output;
+
+            appendDeleteMarkers(
+                published_voxel_ids_,
+                MarkerIds{},
+                stamp,
+                output);
+
+            voxel_pub_->publish(output);
+            published_voxel_ids_.clear();
+        }
+
+        filtered_radii_.clear();
     }
 
     void watchdogCallback()
     {
-        if (!isRecent(last_depth_received_) ||
-            !isRecent(last_body_index_received_) ||
-            !isRecent(last_skeleton_received_) ||
-            !isRecent(last_zone_received_)) {
+        if (!inputsReady() ||
+            !isRecent(last_successful_update_)) {
             clearOutputs();
         }
     }
 
-    double roi_margin_;
-    double voxel_size_;
-    double min_depth_;
-    double max_depth_;
-    double max_sync_delay_;
-    double data_timeout_;
+    std::string depth_topic_;
+    std::string camera_info_topic_;
+    std::string body_index_topic_;
+
+    double roi_margin_ = 0.15;
+    double voxel_size_ = 0.02;
+    double min_depth_ = 0.3;
+    double max_depth_ = 3.0;
+    double max_sync_delay_ = 0.15;
+    double data_timeout_ = 0.5;
+    double radius_alpha_ = 0.2;
+
+    bool publish_voxels_ = false;
 
     vision::reconstruction::ROIGenerator roi_generator_;
     vision::reconstruction::DepthProcessor depth_processor_;
     vision::reconstruction::VoxelReconstruction voxel_reconstruction_;
-
     vision::segmentation::HumanSegmenter human_segmenter_;
 
     vision::human::HumanCapsule human_capsule_;
@@ -799,8 +719,8 @@ private:
     rclcpp::Subscription<MarkerArray>::SharedPtr skeleton_sub_;
     rclcpp::Subscription<MarkerArray>::SharedPtr zone_sub_;
 
-    rclcpp::Publisher<MarkerArray>::SharedPtr voxel_pub_;
     rclcpp::Publisher<MarkerArray>::SharedPtr capsule_pub_;
+    rclcpp::Publisher<MarkerArray>::SharedPtr voxel_pub_;
 
     rclcpp::TimerBase::SharedPtr watchdog_timer_;
 
@@ -808,24 +728,21 @@ private:
     Image::ConstSharedPtr body_index_map_;
     CameraInfo::ConstSharedPtr camera_info_;
 
-    std::map<int, std::vector<Point>> skeleton_points_;
-
-    std::map<int, std::vector<vision::human::BodyJoint>>
-        skeleton_joints_;
-
-    std::map<int, builtin_interfaces::msg::Time> skeleton_stamps_;
-    std::map<int, builtin_interfaces::msg::Time> zone_stamps_;
-
+    std::map<int, SkeletonData> skeletons_;
     std::set<int> active_body_ids_;
-    std::set<int> published_voxel_ids_;
 
-    std::set<std::pair<std::string, int>> published_capsule_ids_;
+    RadiusMap filtered_radii_;
+
+    MarkerIds published_capsule_ids_;
+    MarkerIds published_voxel_ids_;
 
     rclcpp::Time last_depth_received_{0, 0, RCL_ROS_TIME};
     rclcpp::Time last_body_index_received_{0, 0, RCL_ROS_TIME};
     rclcpp::Time last_skeleton_received_{0, 0, RCL_ROS_TIME};
     rclcpp::Time last_zone_received_{0, 0, RCL_ROS_TIME};
+
     rclcpp::Time last_processed_stamp_{0, 0, RCL_ROS_TIME};
+    rclcpp::Time last_successful_update_{0, 0, RCL_ROS_TIME};
 };
 
 int main(int argc, char* argv[])
