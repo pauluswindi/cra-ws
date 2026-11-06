@@ -13,14 +13,16 @@ from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
     cra_share = Path(get_package_share_directory("cra"))
-
     launch_dir = cra_share / "launch"
 
-    planning_data_dir = Path.home() / "living-lab/cra_ws/src/planning/data"
+    planning_data_dir = (
+        Path.home() / "living-lab/cra_ws/src/planning/data"
+    )
 
     workspace_path = LaunchConfiguration("workspace_path")
     graph_path = LaunchConfiguration("graph_path")
     goal_index = LaunchConfiguration("goal_index")
+    use_sim_time = LaunchConfiguration("use_sim_time")
 
     simulation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -45,6 +47,15 @@ def generate_launch_description():
         }.items(),
     )
 
+    vision_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            str(launch_dir / "vision.launch.py")
+        ),
+        launch_arguments={
+            "use_sim_time": use_sim_time,
+        }.items(),
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             "workspace_path",
@@ -53,6 +64,7 @@ def generate_launch_description():
             ),
             description="Path to workspace samples",
         ),
+
         DeclareLaunchArgument(
             "graph_path",
             default_value=str(
@@ -60,12 +72,21 @@ def generate_launch_description():
             ),
             description="Path to GNG joint graph",
         ),
+
         DeclareLaunchArgument(
             "goal_index",
             default_value="100",
             description="Temporary goal configuration index",
         ),
+
+        DeclareLaunchArgument(
+            "use_sim_time",
+            default_value="false",
+            description="Use ROS simulation time for Vision",
+        ),
+
         simulation_launch,
         motion_launch,
         planning_launch,
+        vision_launch,
     ])

@@ -8,6 +8,7 @@ import rclpy
 import yaml
 
 from geometry_msgs.msg import PoseArray
+from msgs.msg import HumanCapsuleArray
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import JointState
@@ -15,6 +16,7 @@ from std_msgs.msg import Bool, String
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from visualization_msgs.msg import Marker
 
+from planning.human_capsule_monitor import HumanCapsuleMonitor
 from planning.path_planner import PathPlanner
 from planning.planning_manager import PlanningManager
 from planning.visualization.planning_visualizer import PlanningVisualizer
@@ -36,6 +38,7 @@ class PlanningNode(Node):
             "target_clearance": 0.04,
             "publish_filtered_joint_graph": False,
             "execute_path": True,
+            "simulation_only_ignore_unknown": True,
         }
 
         for name, value in defaults.items():
@@ -73,11 +76,45 @@ class PlanningNode(Node):
             get("publish_filtered_joint_graph")
         )
 
+        human_config = config.get("planning", {}).get(
+            "human_avoidance", {}
+        )
+
+        self.human_enabled = bool(
+            human_config.get("enabled", False)
+        )
+
+        human_timeout = float(
+            human_config.get("data_timeout", 0.5)
+        )
+
+        human_future_tolerance = float(
+            human_config.get("future_tolerance", 0.1)
+        )
+
+        human_safety_margin = float(
+            human_config.get("safety_margin", 0.10)
+        )
+
+        if (
+            not np.isfinite(human_timeout)
+            or human_timeout <= 0
+            or not np.isfinite(human_future_tolerance)
+            or human_future_tolerance < 0
+            or not np.isfinite(human_safety_margin)
+            or human_safety_margin < 0
+        ):
+            raise ValueError("Invalid human avoidance configuration")
+
         self.planner = PathPlanner(
             paths["graph_path"],
             paths["model_path"],
             paths["config_path"],
         )
+
+        checker = self.planner.collision_filter
+        checker.human_data_timeout = human_timeout
+        checker.human_safety_margin = human_safety_margin
 
         self.manager = PlanningManager(
             path_planner=self.planner,
@@ -86,7 +123,17 @@ class PlanningNode(Node):
             feedback_timeout=get("feedback_timeout"),
             obstacle_timeout=get("obstacle_timeout"),
             execute_path=bool(get("execute_path")),
+            human_avoidance_enabled=self.human_enabled,
+            simulation_only_ignore_unknown=bool(get("simulation_only_ignore_unknown")),
         )
+
+        self.human_monitor = HumanCapsuleMonitor(
+            frame_id=self.base_frame,
+            data_timeout=human_timeout,
+            future_tolerance=human_future_tolerance,
+        )
+
+        self.last_human_report = None
 
         self.visualizer = PlanningVisualizer(
             node=self,
@@ -170,6 +217,17 @@ class PlanningNode(Node):
             durable,
         )
 
+        self.human_sub = self.create_subscription(
+            HumanCapsuleArray,
+            "/vision/human/geometry",
+            self.human_callback,
+            QoSProfile(
+                depth=1,
+                reliability=ReliabilityPolicy.RELIABLE,
+                durability=DurabilityPolicy.VOLATILE,
+            ),
+        )
+
         self.timer = self.create_timer(
             0.2,
             self.planning_cycle,
@@ -179,7 +237,10 @@ class PlanningNode(Node):
 
         self.get_logger().info(
             "PlanningNode initialized; "
-            f"execute_path={self.manager.execute_path}"
+            f"execute_path={self.manager.execute_path}, "
+            f"human_avoidance={self.human_enabled}, "
+            f"simulation_only_ignore_unknown="
+            f"{self.manager.simulation_only_ignore_unknown}"
         )
 
     def initialize_environment(self):
@@ -248,6 +309,55 @@ class PlanningNode(Node):
         )
 
         self.manager.update_joint_state(joints)
+
+    def human_callback(self, message):
+        now_ros_ns = self.get_clock().now().nanoseconds
+
+        stamp_ns = (
+            int(message.header.stamp.sec) * 1_000_000_000
+            + int(message.header.stamp.nanosec)
+        )
+
+        age_ms = (now_ros_ns - stamp_ns) / 1e6
+
+        accepted = self.human_monitor.update(
+            message,
+            now_ros_ns,
+        )
+
+        if not accepted:
+            self.get_logger().warning(
+                f"Human geometry rejected: "
+                f"reason={self.human_monitor.reason}, "
+                f"age={age_ms:.1f} ms, "
+                f"valid={message.valid}"
+            )
+
+    def monitor_humans(self):
+        snapshot = self.human_monitor.snapshot(
+            self.get_clock().now().nanoseconds
+        )
+
+        self.manager.update_human_snapshot(snapshot)
+
+        report = (
+            snapshot.status,
+            snapshot.reason,
+            snapshot.human_count,
+            len(snapshot.capsules),
+        )
+
+        if report == self.last_human_report:
+            return
+
+        self.last_human_report = report
+
+        self.get_logger().info(
+            f"Human Vision: {snapshot.status} "
+            f"({snapshot.reason}), "
+            f"humans={snapshot.human_count}, "
+            f"capsules={len(snapshot.capsules)}"
+        )
 
     def motion_status_callback(self, message):
         self.manager.update_motion_status(message.data)
@@ -397,6 +507,7 @@ class PlanningNode(Node):
             return message
 
         path = np.asarray(path, dtype=float)
+
         if (
             path.ndim != 2
             or path.shape[1] != len(self.joint_names)
@@ -474,6 +585,8 @@ class PlanningNode(Node):
             )
 
     def planning_cycle(self):
+        self.monitor_humans()
+
         decision = self.manager.step()
 
         self.set_status(decision.status)
@@ -493,20 +606,29 @@ class PlanningNode(Node):
 
         elif decision.action == "EXECUTE":
             if decision.path is None:
-                self.get_logger().error("Execution decision has no path")
+                self.get_logger().error(
+                    "Execution decision has no path"
+                )
                 self.stop_pub.publish(Bool(data=True))
                 return
 
             try:
-                trajectory = self.build_trajectory(decision.path)
+                trajectory = self.build_trajectory(
+                    decision.path
+                )
+
             except ValueError as error:
-                self.get_logger().error(f"Trajectory rejected: {error}")
+                self.get_logger().error(
+                    f"Trajectory rejected: {error}"
+                )
                 self.stop_pub.publish(Bool(data=True))
                 return
 
             self.motion_pub.publish(trajectory)
+
             self.get_logger().info(
-                f"{decision.status}: {len(trajectory.points)} waypoints sent"
+                f"{decision.status}: "
+                f"{len(trajectory.points)} waypoints sent"
             )
 
 

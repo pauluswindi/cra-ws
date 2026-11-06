@@ -4,16 +4,17 @@
   <version>0.0.1</version>
   <description>Package for eilero25 robot</description>
 
-  <maintainer email="jimlyadam18@gmail.com">Jimly Adam Ahmad</maintainer>
   <maintainer email="pwindikurniawan@gmail.com">Paulus Windi Kurniawan CE 23</maintainer>
   <license>Proprietary</license>
 
-  <!-- <build_depend>launch</build_depend>
-  <build_depend>launch_ros</build_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <exec_depend>ament_cmake</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>
-  <exec_depend>launch_ros</exec_depend> -->
-  <build_depend>ament_cmake</build_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <exec_depend>vision</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

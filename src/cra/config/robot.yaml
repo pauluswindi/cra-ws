@@ -32,6 +32,12 @@ gng:
 planning:
   obstacle_safety_margin: 0.005
 
+  human_avoidance:
+    enabled: true
+    data_timeout: 0.5
+    future_tolerance: 0.1
+    safety_margin: 0.10
+
   path_processing:
     remove_duplicate_points: true
 
