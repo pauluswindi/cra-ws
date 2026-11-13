@@ -1,0 +1,877 @@
+{
+  "metadata": {
+    "document_name": "CRA_PROJECT_CONTEXT.json",
+    "version": "1.1",
+    "created_date": "2026-11-12",
+    "last_updated": "2026-11-13",
+    "project_name": "Cognitive Robotic Arm",
+    "purpose": "Maintain shared project context for ChatGPT and Codex development.",
+    "source_of_truth": "Actual repository source code, configuration, and reproducible test results.",
+    "status_note": "This document records project architecture, development decisions, and known issues. Implementation and testing claims must be verified against the active repository."
+  },
+
+  "project": {
+    "name": "Cognitive Robotic Arm",
+    "abbreviation": "CRA",
+    "primary_research_focus": "Robot arm motion planning and dynamic obstacle avoidance.",
+    "supporting_capability": "Visual perception provides human geometry for motion planning and collision checking.",
+    "research_title_recommended": "Perencanaan Gerak Lengan Robot dengan Penghindaran Rintangan Dinamis Berbasis Persepsi Visual Menggunakan GNG dan A*",
+    "workspace_path": "~/living-lab/cra_ws",
+    "language_preference": {
+      "discussion": "Indonesian",
+      "technical_documentation": "English",
+      "code_comments": "English"
+    }
+  },
+
+  "development_environment": {
+    "operating_system": "Ubuntu Linux",
+    "ros_distribution": "ROS 2 Humble",
+    "simulation": "MuJoCo",
+    "programming_languages": [
+      "Python",
+      "C++"
+    ],
+    "vision_sensor": "Azure Kinect",
+    "robot_dof": 5,
+    "workspace": "~/living-lab/cra_ws"
+  },
+
+  "repository": {
+    "root": "~/living-lab/cra_ws",
+
+    "active_packages": {
+      "vision": "src/perception/vision/",
+      "planning": "src/planning/",
+      "motion": "src/motion/",
+      "simulation": "src/simulation/",
+      "messages": "src/msgs/",
+      "configuration": "src/cra/"
+    },
+
+    "legacy_packages": {
+      "workspace_planning": {
+        "path": "src/workspace_planning/",
+        "status": "LEGACY",
+        "actively_used": false,
+        "description": "Previous planning implementation. Some functionality has already been migrated into src/planning/.",
+        "development_policy": "Do not modify, reuse, or migrate legacy code unless explicitly requested."
+      }
+    },
+
+    "planning_source_of_truth": "src/planning/",
+
+    "documentation": {
+      "context": "CRA_PROJECT_CONTEXT.json",
+      "status": "CRA_PROJECT_STATUS.md",
+      "agent_instructions": "AGENTS.md"
+    }
+  },
+
+  "development_principles": [
+    "Prioritize correctness and safety.",
+    "Keep source code simple, readable, and maintainable.",
+    "Preserve the existing GNG and A* planning architecture.",
+    "Inspect actual source code before modifying it.",
+    "Preserve existing functionality and public interfaces.",
+    "Avoid rewriting unrelated modules.",
+    "Avoid unnecessary dependencies, classes, and files.",
+    "Follow existing project conventions.",
+    "Verify ROS 2 interfaces and coordinate transformations.",
+    "Distinguish implemented, tested, in-progress, planned, and unverified features.",
+    "Never claim tests passed unless they were actually executed.",
+    "Do not assume previously discussed changes have been applied to the repository.",
+    "Document significant changes and verification results."
+  ],
+
+  "research_context": {
+    "main_problem": "Robot arm motion planning in environments containing dynamic obstacles represented through visual perception.",
+
+    "research_focus": [
+      "Motion planning",
+      "Growing Neural Gas",
+      "A* path search",
+      "Collision checking",
+      "Dynamic obstacle avoidance",
+      "Path validation",
+      "Path revalidation and replanning"
+    ],
+
+    "supporting_components": [
+      "Human detection",
+      "Human geometry reconstruction",
+      "ROS 2 communication",
+      "MuJoCo simulation",
+      "Trajectory execution"
+    ],
+
+    "scope_caution": "Dynamic obstacle avoidance must not be considered experimentally validated until the complete Vision, Planning, Motion, and Simulation pipeline has been tested."
+  },
+
+  "architecture": {
+    "overview": [
+      "Vision detects humans and reconstructs human geometry.",
+      "Human geometry is published through ROS 2.",
+      "Planning receives and validates human obstacle information.",
+      "GNG provides the workspace-based graph representation.",
+      "A* performs path search in joint space.",
+      "Collision checking validates robot configurations and paths.",
+      "PlanningManager handles environment updates and planning decisions.",
+      "Motion executes trajectories.",
+      "MuJoCo provides the simulation environment."
+    ],
+
+    "vision": {
+      "package": "src/perception/vision/",
+
+      "role": "Detect humans and generate geometric representations for Planning.",
+
+      "components": [
+        "Body tracking",
+        "Skeleton transformation",
+        "Human segmentation",
+        "Depth processing",
+        "Voxel reconstruction",
+        "Human capsule generation",
+        "Radius filtering"
+      ],
+
+      "important_files": [
+        "src/perception/vision/src/human/human_capsule.cpp",
+        "src/perception/vision/src/reconstruction/reconstruction_pipeline.cpp"
+      ],
+
+      "output": {
+        "topic": "/vision/human/geometry",
+        "message_type": "msgs/msg/HumanCapsuleArray",
+        "expected_frame_id": "base_link",
+        "previously_observed_rate_hz": 20
+      },
+
+      "human_representation": {
+        "type": "Capsules",
+        "segment_ids": "0-7",
+        "fields": [
+          "body_id",
+          "segment_id",
+          "start",
+          "end",
+          "radius"
+        ]
+      },
+
+      "known_limitations": [
+        "Capsule radius may be excessively large.",
+        "Radius estimates may fluctuate between frames.",
+        "Skeleton position noise may affect capsule endpoints.",
+        "Depth noise and voxel assignment may affect radius estimation.",
+        "Radius measurement quality is not directly exposed through HumanCapsule.msg."
+      ]
+    },
+
+    "planning": {
+      "package": "src/planning/",
+      "status": "ACTIVE",
+
+      "role": "Generate and validate robot-arm paths using GNG and A*.",
+
+      "pipeline": [
+        "Workspace sampling",
+        "GNG graph construction",
+        "Joint graph construction",
+        "A* path search",
+        "Collision validation",
+        "Path validation",
+        "Motion execution interface"
+      ],
+
+      "components": {
+        "gng": {
+          "role": "Learn a graph representation from sampled robot workspace data.",
+          "status": "Implemented in the repository snapshot."
+        },
+
+        "joint_graph": {
+          "role": "Represent robot joint configurations and graph connectivity.",
+          "status": "Implemented in the repository snapshot."
+        },
+
+        "a_star": {
+          "role": "Search for a path through joint-space graph configurations.",
+          "status": "Implemented in the repository snapshot."
+        },
+
+        "collision_filter": {
+          "role": "Validate robot configurations, motion edges, and paths against obstacles.",
+          "status": "Implemented; recent modifications require repository verification."
+        },
+
+        "path_planner": {
+          "role": "Coordinate path search and path validation.",
+          "status": "Implemented in the repository snapshot."
+        },
+
+        "planning_manager": {
+          "role": "Manage planning decisions, environment changes, path validity, and execution coordination.",
+          "status": "Implemented in the repository snapshot."
+        },
+
+        "planning_node": {
+          "role": "Provide ROS 2 interfaces for Planning.",
+          "status": "Implemented in the repository snapshot."
+        },
+
+        "human_capsule_monitor": {
+          "role": "Validate incoming human geometry and monitor data freshness.",
+          "status": "Implemented in the repository snapshot."
+        }
+      },
+
+      "important_files": [
+        "src/planning/planning/planning_node.py",
+        "src/planning/planning/planning_manager.py",
+        "src/planning/planning/path_planner.py",
+        "src/planning/planning/algorithms/collision_filter.py",
+        "src/planning/planning/algorithms/human_collision.py",
+        "src/planning/planning/algorithms/a_star.py",
+        "src/planning/planning/human_capsule_monitor.py"
+      ],
+
+      "architecture_policy": [
+        "Preserve GNG and A*.",
+        "Do not replace the planning architecture without technical justification.",
+        "Maintain existing CollisionFilter interfaces.",
+        "Validate relevant robot links, not only the end-effector.",
+        "Revalidate paths when relevant obstacle geometry changes."
+      ]
+    },
+
+    "motion": {
+      "package": "src/motion/",
+
+      "role": "Generate and execute robot trajectories.",
+
+      "components": [
+        "MotionComponent",
+        "JointController",
+        "CartesianController",
+        "TrajectoryGenerator",
+        "ExecutionMonitor",
+        "MotionGuard",
+        "JointFeedback",
+        "RobotKinematics"
+      ],
+
+      "verification_needed": [
+        "Trajectory tracking accuracy",
+        "Joint ordering consistency",
+        "Joint limit handling",
+        "Motion stop behavior",
+        "Execution status reporting",
+        "Recovery behavior"
+      ]
+    },
+
+    "simulation": {
+      "package": "src/simulation/",
+      "engine": "MuJoCo",
+
+      "role": "Simulate the robotic arm, obstacles, and trajectory execution.",
+
+      "verification_needed": [
+        "Robot geometry consistency",
+        "Coordinate frame consistency",
+        "Collision geometry accuracy",
+        "Joint feedback consistency",
+        "Trajectory execution behavior",
+        "Dynamic obstacle response"
+      ]
+    }
+  },
+
+  "ros_interfaces": {
+    "human_geometry": {
+      "topic": "/vision/human/geometry",
+      "message": "msgs/msg/HumanCapsuleArray",
+      "publisher": "Vision",
+      "subscriber": "Planning"
+    },
+
+    "joint_states": {
+      "topic": "/joint_states",
+      "message": "sensor_msgs/msg/JointState"
+    },
+
+    "planning_status": {
+      "topic": "/planning/status",
+      "message": "std_msgs/msg/String"
+    },
+
+    "planning_preview": {
+      "topic": "/planning/joint_path_preview",
+      "message": "trajectory_msgs/msg/JointTrajectory"
+    },
+
+    "motion_path": {
+      "topic": "/motion/joint_path",
+      "message": "trajectory_msgs/msg/JointTrajectory"
+    },
+
+    "motion_stop": {
+      "topic": "/motion/stop_requested",
+      "message": "std_msgs/msg/Bool"
+    },
+
+    "motion_execution_status": {
+      "topic": "/motion/execution_status",
+      "message": "std_msgs/msg/String"
+    },
+
+    "motion_failure_reason": {
+      "topic": "/motion/failure_reason",
+      "message": "std_msgs/msg/String"
+    },
+
+    "motion_velocity_command": {
+      "topic": "/motion/joint_velocity_command",
+      "message": "std_msgs/msg/Float64MultiArray"
+    },
+
+    "verification_note": "Topic names and message types are based on the previously inspected repository snapshot. Confirm them against the active source code and runtime ROS 2 graph."
+  },
+
+  "coordinate_frames": {
+    "expected_human_frame": "base_link",
+
+    "known_frames": [
+      "base_link",
+      "mujoco_base",
+      "mujoco_world"
+    ],
+
+    "known_issue": "Human geometry and MuJoCo robot geometry may require an additional coordinate transformation before collision checking.",
+
+    "verification_required": [
+      "Confirm Vision capsule coordinates.",
+      "Confirm robot geometry coordinates.",
+      "Inspect FrameTransform implementation.",
+      "Verify rotation and translation between frames.",
+      "Verify units and axis conventions.",
+      "Compare known reference points.",
+      "Test collision calculations with controlled geometry."
+    ],
+
+    "status": "NOT_FULLY_VERIFIED"
+  },
+
+  "human_obstacle_data": {
+    "representation": "Human capsules",
+
+    "message_type": "msgs/msg/HumanCapsuleArray",
+
+    "array_fields": [
+      "header",
+      "valid",
+      "capsules"
+    ],
+
+    "capsule_fields": [
+      "body_id",
+      "segment_id",
+      "start",
+      "end",
+      "radius"
+    ],
+
+    "monitor_status_model": [
+      "OBSERVED",
+      "EMPTY",
+      "UNKNOWN"
+    ],
+
+    "validation_requirements": [
+      "Finite coordinates",
+      "Positive finite radius",
+      "Valid body and segment identifiers",
+      "Valid coordinate frame",
+      "Valid timestamp",
+      "Fresh data",
+      "No malformed capsule geometry"
+    ],
+
+    "important_note": "An empty detection result must not automatically be interpreted as a safe workspace without verified sensor coverage."
+  },
+
+  "collision_checking": {
+    "active_file": "src/planning/planning/algorithms/collision_filter.py",
+
+    "proposed_helper_file": "src/planning/planning/algorithms/human_collision.py",
+
+    "responsibilities": [
+      "Joint limit validation",
+      "Robot geometry collision checking",
+      "Static obstacle collision checking",
+      "Human capsule collision checking",
+      "State validation",
+      "Edge validation",
+      "Path validation",
+      "Recovery transition validation",
+      "Graph collision filtering"
+    ],
+
+    "existing_human_collision_approach": {
+      "robot_representation": "MuJoCo collision geometries approximated using bounding spheres.",
+      "human_representation": "Capsules",
+      "distance_method": "Point-to-segment distance adjusted by robot and human radii.",
+      "limitation": "Bounding sphere approximations may overestimate occupied space, especially for elongated robot links."
+    },
+
+    "current_debugging_focus": [
+      "Verify coordinate transformations.",
+      "Improve human collision diagnostics.",
+      "Evaluate robot bounding sphere approximations.",
+      "Determine causes of invalid robot configurations.",
+      "Determine causes of failed paths.",
+      "Evaluate environment revision update frequency."
+    ],
+
+    "development_policy": [
+      "Preserve the existing CollisionFilter public interface.",
+      "Do not remove whole-arm collision checking.",
+      "Do not reduce collision margins without geometric justification.",
+      "Validate collision changes with controlled test cases."
+    ]
+  },
+
+  "vision_reconstruction": {
+    "configuration_file": "src/cra/config/reconstruction.yaml",
+
+    "current_experimental_parameters": {
+      "roi_margin": 0.15,
+      "voxel_size": 0.02,
+      "min_depth": 0.3,
+      "max_depth": 3.0,
+      "max_sync_delay": 0.15,
+      "data_timeout": 0.5,
+      "publish_voxels": true,
+
+      "capsule": {
+        "torso_radius": 0.13,
+        "head_radius": 0.09,
+        "upper_arm_radius": 0.055,
+        "forearm_radius": 0.045,
+        "hand_radius": 0.05,
+
+        "torso_max_radius": 0.22,
+        "head_max_radius": 0.14,
+        "upper_arm_max_radius": 0.10,
+        "forearm_max_radius": 0.085,
+        "hand_max_radius": 0.09,
+
+        "safety_margin": 0.015,
+        "radius_percentile": 0.80,
+        "min_voxels": 15,
+        "radius_smoothing_alpha": 0.20
+      }
+    },
+
+    "parameter_status": "Proposed experimental configuration. Confirm that the active local YAML uses these values.",
+
+    "radius_estimation": {
+      "method": "Voxel distance percentile",
+      "default_radius": "Minimum radius estimate for each body segment.",
+      "maximum_radius": "Upper bound for each segment radius.",
+      "safety_margin": "Additional radius margin applied during Vision reconstruction."
+    },
+
+    "radius_filtering": {
+      "previous_behavior": "Radius increases immediately and decreases gradually.",
+      "proposed_behavior": "Asymmetric smoothing for radius increases and decreases.",
+      "alpha_down": 0.20,
+      "alpha_up": 0.40,
+      "verification_status": "Implementation prepared; runtime behavior not yet verified."
+    },
+
+    "known_limitations": [
+      "Radius defaults may dominate the voxel-based estimate.",
+      "Depth noise can influence voxel distribution.",
+      "Skeleton noise may affect capsule placement.",
+      "Temporal filtering may introduce measurement lag.",
+      "Coverage evaluation is required before reducing capsule dimensions."
+    ]
+  },
+
+  "simulation_preferences": {
+    "execute_path": true,
+    "simulation_only_ignore_unknown": true,
+
+    "configuration_source": "User-selected experimental preference.",
+
+    "preserve_settings": true,
+
+    "change_policy": "Do not modify these values unless explicitly requested.",
+
+    "scope": "Controlled MuJoCo simulation experiments.",
+
+    "limitations": [
+      "Unknown human data may be ignored according to the Planning implementation.",
+      "This behavior is not evidence that the human workspace is clear.",
+      "Human avoidance must be evaluated with valid human geometry.",
+      "These settings are not certified for physical human-robot interaction."
+    ]
+  },
+
+  "current_development_focus": {
+    "topic": "Debugging Vision and Planning integration for human obstacle avoidance.",
+
+    "reported_problems": [
+      "Path planning frequently fails when human obstacles are active.",
+      "Human capsule radius appears excessively large.",
+      "Human capsule dimensions fluctuate between frames.",
+      "Collision checking may classify too many configurations as invalid.",
+      "Small geometry changes may trigger repeated environment updates."
+    ],
+
+    "suspected_causes": [
+      "Conservative robot bounding sphere approximation.",
+      "Large human capsule radius estimates.",
+      "Unstable voxel-based radius measurements.",
+      "Asymmetric radius smoothing behavior.",
+      "Possible coordinate frame mismatch.",
+      "Frequent environment revision changes."
+    ],
+
+    "objective": "Improve geometric accuracy and stability while preserving the existing GNG and A* architecture."
+  },
+
+  "recent_development": {
+    "date": "2026-11-13",
+
+    "topic": "Human obstacle avoidance debugging",
+
+    "changes_prepared_in_chatgpt": [
+      {
+        "file": "src/planning/planning/algorithms/collision_filter.py",
+        "changes": [
+          "Improve human collision calculations.",
+          "Improve collision diagnostics.",
+          "Review coordinate transformations.",
+          "Preserve existing collision validation interfaces."
+        ],
+        "repository_status": "UNVERIFIED"
+      },
+
+      {
+        "file": "src/planning/planning/algorithms/human_collision.py",
+        "changes": [
+          "Separate human-specific geometry calculations.",
+          "Simplify CollisionFilter responsibilities."
+        ],
+        "repository_status": "UNVERIFIED"
+      },
+
+      {
+        "file": "src/perception/vision/src/human/human_capsule.cpp",
+        "changes": [
+          "Improve radius percentile estimation.",
+          "Use interpolation for voxel distance percentiles.",
+          "Preserve configured radius limits."
+        ],
+        "repository_status": "UNVERIFIED"
+      },
+
+      {
+        "file": "src/perception/vision/src/reconstruction/reconstruction_pipeline.cpp",
+        "changes": [
+          "Adjust temporal radius smoothing.",
+          "Reduce immediate radius expansion from noisy measurements.",
+          "Preserve previous radius when measurements are insufficient."
+        ],
+        "repository_status": "UNVERIFIED"
+      },
+
+      {
+        "file": "src/cra/config/reconstruction.yaml",
+        "changes": [
+          "Propose radius_percentile of 0.80.",
+          "Propose min_voxels of 15.",
+          "Preserve radius_smoothing_alpha of 0.20.",
+          "Preserve capsule safety_margin of 0.015."
+        ],
+        "repository_status": "UNVERIFIED"
+      }
+    ],
+
+    "important_note": "Changes were discussed and prepared through ChatGPT. Their installation in the active local repository has not been independently verified."
+  },
+
+  "development_status": {
+    "implemented_in_repository_snapshot": [
+      "Workspace generation",
+      "GNG graph construction",
+      "Joint graph construction",
+      "A* path search",
+      "MuJoCo collision checking",
+      "Human capsule reconstruction",
+      "Human geometry monitoring",
+      "ROS 2 Vision-to-Planning interfaces",
+      "PlanningManager orchestration",
+      "Motion execution interfaces",
+      "MuJoCo simulation components"
+    ],
+
+    "prepared_but_repository_unverified": [
+      "Updated collision_filter.py",
+      "New human_collision.py",
+      "Updated human_capsule.cpp",
+      "Updated reconstruction_pipeline.cpp",
+      "Adjusted reconstruction.yaml"
+    ],
+
+    "previously_reported_checks": [
+      "Python syntax checks",
+      "Isolated human geometry logic checks",
+      "Isolated C++ geometry compilation checks"
+    ],
+
+    "tested_end_to_end_after_recent_changes": false,
+
+    "in_progress": [
+      "Human capsule stability improvement",
+      "Human collision checking verification",
+      "Vision-to-Planning integration debugging",
+      "Coordinate frame validation",
+      "Dynamic path revalidation and replanning verification"
+    ],
+
+    "not_yet_verified": [
+      "Complete ROS 2 build after recent changes",
+      "Vision communication using updated code",
+      "Coordinate frame accuracy",
+      "Human collision accuracy",
+      "Path planning success rate with human obstacles",
+      "Motion response to moving humans",
+      "End-to-end dynamic obstacle avoidance"
+    ]
+  },
+
+  "known_risks_and_unresolved_issues": [
+    {
+      "issue": "Coordinate frame mismatch",
+      "priority": "CRITICAL",
+      "status": "UNVERIFIED",
+      "description": "Vision and MuJoCo geometry may use inconsistent coordinate transformations.",
+      "next_action": "Verify transforms with controlled reference points."
+    },
+
+    {
+      "issue": "Path planning failure with human obstacles",
+      "priority": "HIGH",
+      "status": "IN_PROGRESS",
+      "description": "Planning frequently fails when human obstacles are detected.",
+      "next_action": "Inspect failure statuses and collision diagnostics."
+    },
+
+    {
+      "issue": "Human capsule radius instability",
+      "priority": "HIGH",
+      "status": "IN_PROGRESS",
+      "description": "Human capsule radii may fluctuate due to skeleton, depth, and voxel measurement noise.",
+      "next_action": "Evaluate updated radius filtering in RViz."
+    },
+
+    {
+      "issue": "Excessively conservative collision geometry",
+      "priority": "HIGH",
+      "status": "UNVERIFIED",
+      "description": "Robot bounding sphere approximations may overestimate collision regions.",
+      "next_action": "Compare calculated collision distances with MuJoCo geometry."
+    },
+
+    {
+      "issue": "Frequent environment revision updates",
+      "priority": "MEDIUM",
+      "status": "UNVERIFIED",
+      "description": "Small human geometry changes may repeatedly invalidate cached collision results.",
+      "next_action": "Measure update frequency and evaluate replanning behavior."
+    },
+
+    {
+      "issue": "Dynamic obstacle avoidance validation",
+      "priority": "HIGH",
+      "status": "NOT_TESTED_END_TO_END",
+      "description": "The complete behavior of path invalidation, stopping, replanning, and motion resumption has not been verified after recent changes.",
+      "next_action": "Perform controlled MuJoCo experiments."
+    },
+
+    {
+      "issue": "Motion tracking consistency",
+      "priority": "MEDIUM",
+      "status": "REQUIRES_VERIFICATION",
+      "description": "Previous development notes reported inconsistent trajectory tracking.",
+      "next_action": "Evaluate tracking errors after planning integration is validated."
+    }
+  ],
+
+  "development_priorities": [
+    {
+      "order": 1,
+      "task": "Synchronize active repository with the documented development state.",
+      "objective": "Identify which prepared changes have actually been applied."
+    },
+
+    {
+      "order": 2,
+      "task": "Verify Vision and Planning builds.",
+      "objective": "Confirm compatibility after recent source changes."
+    },
+
+    {
+      "order": 3,
+      "task": "Verify coordinate transformations.",
+      "objective": "Ensure human and robot geometry use compatible frames."
+    },
+
+    {
+      "order": 4,
+      "task": "Evaluate human capsule geometry.",
+      "objective": "Measure capsule size, stability, and voxel coverage."
+    },
+
+    {
+      "order": 5,
+      "task": "Evaluate collision checking.",
+      "objective": "Identify why robot configurations and paths are rejected."
+    },
+
+    {
+      "order": 6,
+      "task": "Evaluate GNG and A* planning.",
+      "objective": "Measure path success rate and planning behavior with human obstacles."
+    },
+
+    {
+      "order": 7,
+      "task": "Evaluate dynamic obstacle avoidance.",
+      "objective": "Verify stopping, path revalidation, replanning, and execution behavior."
+    }
+  ],
+
+  "testing_strategy": {
+    "verification_order": [
+      "Syntax and static checks",
+      "Reproducible logic checks",
+      "ROS 2 build and communication checks",
+      "Collision and path validation",
+      "MuJoCo simulation experiments",
+      "End-to-end integration experiments"
+    ],
+
+    "current_test_environment": "MuJoCo simulation",
+
+    "required_scenarios": [
+      "Human not detected",
+      "Human detected and stationary",
+      "Human moving near the robot",
+      "Human crossing the planned path",
+      "Human blocking the goal",
+      "Invalid or stale human data",
+      "Capsule radius fluctuations",
+      "Planning failure and recovery"
+    ],
+
+    "important_note": "Simulation safety margins are experimental parameters, not certified human-safety guarantees."
+  },
+
+  "chatgpt_codex_workflow": {
+    "objective": "Maintain consistent development between ChatGPT and Codex.",
+
+    "chatgpt_responsibilities": [
+      "Architecture discussion",
+      "Algorithm explanations",
+      "Debugging analysis",
+      "Technical trade-off evaluation",
+      "Development planning",
+      "Research progress reporting"
+    ],
+
+    "codex_responsibilities": [
+      "Inspect the actual repository",
+      "Trace source code dependencies",
+      "Implement targeted changes",
+      "Run available checks",
+      "Review modifications",
+      "Update development documentation"
+    ],
+
+    "shared_documents": [
+      "AGENTS.md",
+      "CRA_PROJECT_CONTEXT.json",
+      "CRA_PROJECT_STATUS.md"
+    ],
+
+    "development_rules": [
+      "The active repository is the source of truth.",
+      "Do not assume ChatGPT and Codex share all conversation history.",
+      "Verify previous changes before continuing development.",
+      "Avoid simultaneous conflicting edits to the same files.",
+      "Use Git to track source code changes.",
+      "Update CRA_PROJECT_STATUS.md after significant changes.",
+      "Update CRA_PROJECT_CONTEXT.json when architecture or major design decisions change.",
+      "Preserve existing interfaces unless modifications are justified."
+    ]
+  },
+
+  "codex_initial_task": {
+    "objective": "Audit the current CRA repository before continuing development.",
+
+    "instructions": [
+      "Read AGENTS.md.",
+      "Read CRA_PROJECT_CONTEXT.json.",
+      "Read CRA_PROJECT_STATUS.md.",
+      "Inspect the actual repository structure.",
+      "Use src/planning/ as the active Planning implementation.",
+      "Treat src/workspace_planning/ as legacy.",
+      "Inspect recent Vision and collision checking changes.",
+      "Verify which proposed changes are actually installed.",
+      "Check compatibility between modified files and their callers.",
+      "Identify potential regressions.",
+      "Report findings before modifying source code."
+    ],
+
+    "priority_files": [
+      "src/planning/planning/algorithms/collision_filter.py",
+      "src/planning/planning/algorithms/human_collision.py",
+      "src/planning/planning/planning_manager.py",
+      "src/planning/planning/path_planner.py",
+      "src/perception/vision/src/human/human_capsule.cpp",
+      "src/perception/vision/src/reconstruction/reconstruction_pipeline.cpp",
+      "src/cra/config/reconstruction.yaml"
+    ],
+
+    "modify_source_code": false,
+
+    "expected_output": [
+      "Current repository implementation",
+      "Installed and missing changes",
+      "Interface compatibility findings",
+      "Potential technical problems",
+      "Available verification results",
+      "Recommended next development steps"
+    ]
+  },
+
+  "instructions_for_receiving_ai": [
+    "Read this document as shared project context.",
+    "Verify all implementation claims against the actual repository.",
+    "Preserve the existing GNG and A* architecture.",
+    "Use src/planning/ as the active Planning package.",
+    "Do not use workspace_planning as the active implementation.",
+    "Respect the current experimental simulation preferences.",
+    "Prioritize coordinate frame and collision checking correctness.",
+    "Avoid unnecessary refactoring and additional files.",
+    "Distinguish implementation from experimental validation.",
+    "Do not assume previously prepared code has been installed.",
+    "Update development documentation after significant verified changes."
+  ]
+}

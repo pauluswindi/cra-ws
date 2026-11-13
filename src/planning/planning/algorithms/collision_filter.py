@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
-import argparse
 import time
-from pathlib import Path
 
 import mujoco
 import numpy as np
-import yaml
+
+from planning.algorithms.human_collision import (
+    nearest_human_collision,
+    parse_human_snapshot,
+    point_segment_distance,
+)
 
 
 class CollisionFilter:
@@ -194,80 +197,7 @@ class CollisionFilter:
     def set_human_capsules(self, snapshot):
         """Store a validated HumanSnapshot, not a raw ROS message."""
 
-        status = getattr(snapshot, "status", "UNKNOWN")
-        capsules = ()
-
-        if status == "OBSERVED":
-            try:
-                parsed = []
-                identifiers = set()
-
-                for item in snapshot.capsules:
-                    key = (
-                        int(item.body_id),
-                        int(item.segment_id),
-                    )
-
-                    if (
-                        key in identifiers
-                        or key[0] < 0
-                        or not 0 <= key[1] <= 7
-                    ):
-                        raise ValueError(
-                            "Invalid human capsule identifier"
-                        )
-
-                    identifiers.add(key)
-
-                    start = np.asarray(
-                        item.start,
-                        dtype=float,
-                    )
-
-                    end = np.asarray(
-                        item.end,
-                        dtype=float,
-                    )
-
-                    radius = float(item.radius)
-
-                    if (
-                        start.shape != (3,)
-                        or end.shape != (3,)
-                        or not np.isfinite(start).all()
-                        or not np.isfinite(end).all()
-                        or not np.isfinite(radius)
-                        or radius <= 0
-                    ):
-                        raise ValueError(
-                            "Invalid human capsule geometry"
-                        )
-
-                    parsed.append(
-                        (
-                            key,
-                            tuple(start),
-                            tuple(end),
-                            radius,
-                        )
-                    )
-
-                if not parsed:
-                    raise ValueError("No human capsules")
-
-                capsules = tuple(sorted(parsed))
-
-            except (
-                AttributeError,
-                TypeError,
-                ValueError,
-                OverflowError,
-            ):
-                status = "UNKNOWN"
-
-        else:
-            # EMPTY is not considered clear until zone coverage is verified.
-            status = "UNKNOWN"
+        status, capsules = parse_human_snapshot(snapshot)
 
         changed = (
             status != self.human_status
@@ -298,99 +228,31 @@ class CollisionFilter:
 
     @staticmethod
     def _point_segment_distance(point, start, end):
-        axis = end - start
-        length_sq = float(axis @ axis)
-
-        if length_sq <= 1e-12:
-            return float(
-                np.linalg.norm(point - start)
-            )
-
-        alpha = np.clip(
-            float((point - start) @ axis) / length_sq,
-            0.0,
-            1.0,
-        )
-
-        return float(
-            np.linalg.norm(
-                point - (start + alpha * axis)
-            )
-        )
+        # Retained for compatibility with existing tooling.
+        return point_segment_distance(point, start, end)
 
     def _human_collision_after_forward(self):
         base_position = self.data.xpos[self.base_id]
-        base_rotation = self.data.xmat[
-            self.base_id
-        ].reshape(3, 3)
+        base_rotation = self.data.xmat[self.base_id].reshape(3, 3)
 
-        nearest = None
-
-        for geom_id in self.robot_geoms:
-            robot_radius = float(
-                self.model.geom_rbound[geom_id]
+        # MuJoCo positions are converted to the local MuJoCo base frame here.
+        # human_collision.py then converts them to the CRA robot base_link frame.
+        geoms = (
+            (
+                mujoco.mj_id2name(
+                    self.model, mujoco.mjtObj.mjOBJ_GEOM, geom_id
+                ),
+                base_rotation.T @ (
+                    self.data.geom_xpos[geom_id] - base_position
+                ),
+                self.model.geom_rbound[geom_id],
             )
-
-            if (
-                not np.isfinite(robot_radius)
-                or robot_radius < 0
-            ):
-                return {
-                    "status": "UNKNOWN",
-                    "clearance": None,
-                }
-
-            center = base_rotation.T @ (
-                self.data.geom_xpos[geom_id]
-                - base_position
-            )
-
-            for (
-                key,
-                start,
-                end,
-                human_radius,
-            ) in self.human_capsules:
-
-                clearance = (
-                    self._point_segment_distance(
-                        center,
-                        np.asarray(start),
-                        np.asarray(end),
-                    )
-                    - robot_radius
-                    - human_radius
-                )
-
-                if (
-                    nearest is None
-                    or clearance < nearest["clearance"]
-                ):
-                    nearest = {
-                        "clearance": float(clearance),
-                        "robot_geom": mujoco.mj_id2name(
-                            self.model,
-                            mujoco.mjtObj.mjOBJ_GEOM,
-                            geom_id,
-                        ),
-                        "body_id": key[0],
-                        "segment_id": key[1],
-                    }
-
-        if nearest is None:
-            return {
-                "status": "UNKNOWN",
-                "clearance": None,
-            }
-
-        nearest["status"] = (
-            "NEAR"
-            if nearest["clearance"]
-            <= self.human_safety_margin
-            else "FAR"
+            for geom_id in sorted(self.robot_geoms)
         )
 
-        return nearest
+        return nearest_human_collision(
+            geoms, self.human_capsules, self.human_safety_margin
+        )
 
     def human_collision_report(self, joints):
         if not self.human_data_ready():
@@ -406,6 +268,40 @@ class CollisionFilter:
             }
 
         return self._human_collision_after_forward()
+
+    def diagnose_state(self, joints):
+        """Explain why a state is rejected; intended for on-demand debugging.
+
+        This does not replace the fast boolean validity check used by A*.
+        """
+        if self.human_obstacles_enabled and not self.human_data_ready():
+            return {"valid": False, "reason": "HUMAN_DATA_UNKNOWN"}
+
+        if not self._set_joint_configuration(joints):
+            return {"valid": False, "reason": "INVALID_JOINTS"}
+
+        contacts = self.contact_report(joints)["contacts"]
+        if contacts:
+            closest = min(contacts, key=lambda item: item["distance"])
+            return {
+                "valid": False,
+                "reason": "MUJOCO_CONTACT",
+                "geom1": closest["geom1"],
+                "geom2": closest["geom2"],
+                "distance": closest["distance"],
+            }
+
+        if self.human_obstacles_enabled:
+            human = self._human_collision_after_forward()
+            if human["status"] != "FAR":
+                return {
+                    "valid": False,
+                    "reason": "HUMAN_COLLISION" if human["status"] == "NEAR"
+                    else "HUMAN_GEOMETRY_UNKNOWN",
+                    "human": human,
+                }
+
+        return {"valid": True, "reason": "VALID"}
 
     def _set_joint_configuration(self, joints):
         joints = np.asarray(
@@ -946,64 +842,10 @@ class CollisionFilter:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Validate CRA joint graph using MuJoCo"
-    )
+    # Preserve the existing `collision_filter` console entry point.
+    from planning.algorithms.validate_joint_graph import main as cli_main
 
-    parser.add_argument(
-        "--graph",
-        type=Path,
-        required=True,
-    )
-
-    parser.add_argument(
-        "--model",
-        type=Path,
-        required=True,
-    )
-
-    parser.add_argument(
-        "--config",
-        type=Path,
-        required=True,
-    )
-
-    args = parser.parse_args()
-
-    with args.config.open(encoding="utf-8") as file:
-        config = yaml.safe_load(file)
-
-    with np.load(
-        args.graph,
-        allow_pickle=False,
-    ) as graph:
-        joints = graph["joint_q"].copy()
-        edges = graph["joint_edges"].copy()
-        joint_names = graph["joint_names"].tolist()
-
-    checker = CollisionFilter(
-        model_path=args.model,
-        joint_names=joint_names,
-        safety_margin=float(
-            config["planning"]["obstacle_safety_margin"]
-        ),
-    )
-
-    valid_states, valid_edges = checker.filter_graph(
-        joints,
-        edges,
-    )
-
-    print("CRA Whole-Arm Collision Filtering")
-    print(
-        f"Valid states: "
-        f"{np.count_nonzero(valid_states)}/{len(joints)}"
-    )
-
-    print(
-        f"Valid edges: "
-        f"{np.count_nonzero(valid_edges)}/{len(edges)}"
-    )
+    cli_main()
 
 
 if __name__ == "__main__":

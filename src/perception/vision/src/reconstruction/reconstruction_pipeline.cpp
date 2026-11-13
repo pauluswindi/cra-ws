@@ -1,5 +1,6 @@
 #include "vision/reconstruction/reconstruction_pipeline.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 #include <utility>
@@ -51,6 +52,9 @@ void ReconstructionPipeline::filterRadii(
     std::vector<human::Capsule>& capsules,
     RadiusMap& radii) const
 {
+    const double alpha_down = config_.radius_smoothing_alpha;
+    const double alpha_up = std::min(1.0, 2.0 * alpha_down);
+
     for (auto& capsule : capsules) {
         const RadiusKey key{
             capsule.body_id,
@@ -60,6 +64,7 @@ void ReconstructionPipeline::filterRadii(
         auto it = radii.find(key);
 
         if (it == radii.end()) {
+            // Start from the generated radius, including its fallback value.
             radii.emplace(key, capsule.radius);
             continue;
         }
@@ -67,18 +72,17 @@ void ReconstructionPipeline::filterRadii(
         double& previous = it->second;
 
         if (!capsule.radius_valid) {
+            // Do not interpret insufficient voxel data as body shrinkage.
             capsule.radius = previous;
             continue;
         }
 
-        if (capsule.radius >= previous) {
-            previous = capsule.radius;
-        } else {
-            previous =
-                config_.radius_smoothing_alpha * capsule.radius +
-                (1.0 - config_.radius_smoothing_alpha) * previous;
-        }
+        // Apply smoothing in both directions: faster for growth, slower
+        // for shrinkage. This suppresses isolated upward measurement spikes.
+        const double alpha =
+            capsule.radius > previous ? alpha_up : alpha_down;
 
+        previous += alpha * (capsule.radius - previous);
         capsule.radius = previous;
     }
 }

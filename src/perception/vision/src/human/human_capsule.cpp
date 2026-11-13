@@ -136,21 +136,38 @@ double estimateRadius(
     double radius = segment.default_radius;
 
     if (distances.size() >= config.min_voxels) {
-        const std::size_t index = static_cast<std::size_t>(
-            config.radius_percentile *
-            static_cast<double>(distances.size() - 1));
+        // Interpolate between neighboring ranks instead of snapping to
+        // one voxel distance when the number of samples changes.
+        const double rank = config.radius_percentile *
+            static_cast<double>(distances.size() - 1);
+        const auto lower_index = static_cast<std::size_t>(std::floor(rank));
+        const auto upper_index = static_cast<std::size_t>(std::ceil(rank));
 
         std::nth_element(
             distances.begin(),
-            distances.begin() + index,
+            distances.begin() + lower_index,
             distances.end());
+        const double lower_value = distances[lower_index];
 
-        radius = std::max(radius, distances[index]);
+        double estimated = lower_value;
+        if (upper_index != lower_index) {
+            std::nth_element(
+                distances.begin(),
+                distances.begin() + upper_index,
+                distances.end());
+            const double upper_value = distances[upper_index];
+            estimated += (rank - static_cast<double>(lower_index)) *
+                (upper_value - lower_value);
+        }
+
+        radius = std::max(segment.default_radius, estimated);
     }
 
-    return std::min(
-        segment.max_radius,
-        radius + config.safety_margin);
+    // Keep the configurable margin inside the configured maximum radius.
+    return std::clamp(
+        radius + config.safety_margin,
+        segment.default_radius + config.safety_margin,
+        segment.max_radius);
 }
 
 }  // namespace

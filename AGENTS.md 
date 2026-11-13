@@ -1,0 +1,229 @@
+# CRA Development Instructions
+
+## 1. Project Overview
+
+Project: Cognitive Robotic Arm (CRA)
+
+Main research focus:
+Robot arm motion planning and dynamic obstacle avoidance
+using Growing Neural Gas (GNG) and A*, supported by
+visual perception.
+
+Development environment:
+- ROS 2 Humble
+- MuJoCo
+- Python and C++
+- Five-joint robotic arm
+- Azure Kinect for human perception
+
+## 2. Repository Structure
+
+Main packages:
+- src/perception/vision/ : Human detection and geometry reconstruction
+- src/planning/          : Active GNG and A* planning implementation
+- src/motion/            : Trajectory generation and execution
+- src/simulation/        : MuJoCo simulation
+- src/msgs/              : Custom ROS 2 messages
+- src/cra/               : Main configuration and launch integration
+
+Important:
+- src/planning/ is the only active Planning package.
+- src/workspace_planning/ is legacy code.
+- Some legacy functionality has already been migrated into src/planning/.
+- Do not modify or migrate code from workspace_planning unless explicitly requested.
+
+## 3. Development Principles
+
+- Prioritize correctness, safety, simplicity, and maintainability.
+- Inspect actual source code before proposing changes.
+- Preserve existing functionality and interfaces.
+- Make minimal, targeted changes.
+- Do not rewrite unrelated modules.
+- Avoid unnecessary files, classes, abstractions, and dependencies.
+- Follow existing project structure and coding conventions.
+- Write all code comments in English.
+- Explain technical changes clearly in Indonesian.
+- Do not assume previously discussed changes are already applied.
+
+## 4. Planning Architecture
+
+Preserve the existing planning architecture:
+
+Workspace Sampling
+    -> Growing Neural Gas (GNG)
+    -> Joint Graph
+    -> A* Path Search
+    -> Collision Checking
+    -> Path Validation
+    -> Motion Execution
+
+Responsibilities:
+- GNG: Workspace representation and graph construction.
+- A*: Joint-space path search.
+- CollisionFilter: Robot and obstacle collision validation.
+- PathPlanner: Path planning and validation.
+- PlanningManager: Planning orchestration and environment updates.
+- PlanningNode: ROS 2 communication.
+
+Do not replace GNG or A* without technical justification.
+
+## 5. Vision Integration
+
+Main human geometry interface:
+
+Topic:
+  /vision/human/geometry
+
+Message:
+  msgs/msg/HumanCapsuleArray
+
+Expected frame:
+  base_link
+
+Human geometry:
+- body_id
+- segment_id
+- start
+- end
+- radius
+
+Important:
+- Verify coordinate frames before collision calculations.
+- Validate timestamps and incoming geometry.
+- Distinguish valid, empty, invalid, and stale detections.
+- Do not assume missing detections mean the workspace is clear.
+- Maintain compatibility with existing ROS 2 messages.
+
+## 6. Collision Checking
+
+Collision checking must consider:
+- Joint limits
+- Robot collision geometry
+- Static and simulation obstacles
+- Human capsule geometry
+- State validity
+- Edge validity
+- Path validity
+
+Important:
+- Check relevant robot links, not only the end-effector.
+- Verify MuJoCo and Vision coordinate transformations.
+- Preserve existing collision checking interfaces.
+- Avoid reducing collision margins merely to obtain a path.
+- Diagnose collision failures before changing geometry.
+- Revalidate paths when relevant obstacles change.
+
+## 7. Simulation Configuration
+
+Current experimental configuration:
+
+execute_path: true
+simulation_only_ignore_unknown: true
+
+Preserve these settings unless explicitly requested otherwise.
+
+These settings are intended for controlled simulation
+experiments and do not establish physical robot safety.
+
+When simulation_only_ignore_unknown is true,
+unknown human data may be ignored according to
+the current Planning implementation.
+
+Do not claim successful human avoidance from
+tests where human data was ignored.
+
+## 8. Coding and Refactoring Rules
+
+Before modifying code:
+1. Inspect the target file.
+2. Inspect its callers and dependencies.
+3. Identify the actual problem.
+4. Propose the smallest appropriate change.
+
+When modifying code:
+1. Preserve public methods and ROS 2 interfaces.
+2. Avoid unrelated refactoring.
+3. Keep code readable and maintainable.
+4. Do not introduce unnecessary tools or test modules.
+5. Do not modify legacy packages without permission.
+
+After modifying code:
+1. Report modified files.
+2. Explain what changed and why.
+3. Report actual tests performed.
+4. State remaining limitations.
+5. Update CRA_PROJECT_STATUS.md.
+
+## 9. Testing and Verification
+
+Use progressive verification:
+
+1. Syntax and static checks
+2. Unit or reproducible logic checks
+3. ROS 2 build and communication checks
+4. Collision and path validation
+5. MuJoCo simulation
+6. End-to-end Vision and Planning integration
+
+Never claim a feature works solely because code exists.
+
+Distinguish:
+- Implemented
+- Tested
+- Partially tested
+- In progress
+- Planned
+- Unverified
+
+## 10. Project Documentation
+
+Read these files before significant development:
+
+- AGENTS.md
+- CRA_PROJECT_CONTEXT.json
+- CRA_PROJECT_STATUS.md
+
+The actual repository is the source of truth.
+
+Documentation must reflect the implementation,
+not assumptions or previous discussions.
+
+Update CRA_PROJECT_STATUS.md after significant changes.
+
+## 11. Development Workflow
+
+ChatGPT:
+- Architecture discussion
+- Algorithm understanding
+- Debugging analysis
+- Research evaluation
+- Development planning
+
+Codex:
+- Repository inspection
+- Dependency analysis
+- Targeted implementation
+- Available testing
+- Technical documentation updates
+
+Both must follow the same development principles.
+
+Do not assume ChatGPT and Codex automatically
+share conversation history.
+
+## 12. Current Development Priority
+
+Current focus:
+Debugging human obstacle avoidance after
+Vision and Planning integration.
+
+Known problems:
+1. Path planning frequently fails when human obstacles are active.
+2. Human capsule radius may be excessively large.
+3. Human capsule radius fluctuates between frames.
+4. Collision geometry may be overly conservative.
+5. Vision-to-Planning coordinate consistency requires verification.
+
+Priority:
+Verify and improve the existing integration
+before introducing new planning algorithms.

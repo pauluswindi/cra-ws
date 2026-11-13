@@ -87,6 +87,9 @@ trajectory:
   replan_threshold: 0.005
 
 simulation:
+  target_gui:
+    enabled: true # Start CRA Target Control together with Simulation
+
   obstacles:
     enabled: true
     mocap_body_prefix: obstacle_

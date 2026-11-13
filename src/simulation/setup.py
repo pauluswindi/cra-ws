@@ -25,6 +25,7 @@ setup(
     entry_points={
         "console_scripts": [
             "robot_simulation = simulation.robot_simulation:main",
+            "target_gui = simulation.target_gui:main",
         ],
     },
 )

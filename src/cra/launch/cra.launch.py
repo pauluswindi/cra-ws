@@ -27,7 +27,10 @@ def generate_launch_description():
     simulation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             str(launch_dir / "simulation.launch.py")
-        )
+        ),
+        launch_arguments={
+            "workspace_path": workspace_path,
+        }.items(),
     )
 
     motion_launch = IncludeLaunchDescription(
