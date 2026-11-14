@@ -1,0 +1,142 @@
+Panels:
+- Class: rviz_common/Displays
+  Name: Displays
+- Class: rviz_common/Views
+  Name: Views
+Visualization Manager:
+  Class: ''
+  Displays:
+  - Class: rviz_default_plugins/Grid
+    Enabled: true
+    Name: Grid
+    Cell Size: 0.1
+    Plane Cell Count: 10
+    Plane: XY
+    Alpha: 0.25
+    Value: true
+  - Class: rviz_default_plugins/MarkerArray
+    Enabled: true
+    Name: CRA Robot - measured joints
+    Namespaces: {}
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /planning/robot_model
+    Value: true
+  - Class: rviz_default_plugins/MarkerArray
+    Enabled: false
+    Name: Robot collision spheres - diagnostic
+    Namespaces: {}
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /planning/robot_collision_bounds
+    Value: false
+  - Class: rviz_default_plugins/MarkerArray
+    Enabled: true
+    Name: Human capsules
+    Namespaces: {}
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /vision/human/capsules
+    Value: true
+  - Class: rviz_default_plugins/MarkerArray
+    Enabled: false
+    Name: Human skeleton
+    Namespaces: {}
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /vision/skeleton/base_frame
+    Value: false
+  - Class: rviz_default_plugins/MarkerArray
+    Enabled: true
+    Name: Simulation obstacles
+    Namespaces: {}
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /simulation/obstacles
+    Value: true
+  - Class: rviz_default_plugins/Marker
+    Enabled: true
+    Name: Target
+    Namespaces: {}
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /simulation/target_marker
+    Value: true
+  - Class: rviz_default_plugins/Marker
+    Enabled: true
+    Name: Planned path
+    Namespaces: {}
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /planning/initial_path
+    Value: true
+  - Class: rviz_default_plugins/Marker
+    Enabled: false
+    Name: GNG nodes
+    Namespaces: {}
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /planning/gng_nodes
+    Value: false
+  - Class: rviz_default_plugins/Marker
+    Enabled: false
+    Name: GNG edges
+    Namespaces: {}
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /planning/gng_edges
+    Value: false
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: base_link
+    Frame Rate: 30
+  Name: root
+  Tools:
+  - Class: rviz_default_plugins/Interact
+  - Class: rviz_default_plugins/MoveCamera
+  - Class: rviz_default_plugins/Select
+  - Class: rviz_default_plugins/FocusCamera
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Name: Current View
+      Distance: 1.8
+      Pitch: 0.5
+      Yaw: 3.0
+      Near Clip Distance: 0.01
+      Focal Point:
+        X: 0.25
+        Y: -0.1
+        Z: -0.1
+      Target Frame: <Fixed Frame>
+Window Geometry:
+  Width: 1200
+  Height: 800

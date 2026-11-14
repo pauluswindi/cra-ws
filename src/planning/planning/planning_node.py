@@ -125,6 +125,7 @@ class PlanningNode(Node):
             execute_path=bool(get("execute_path")),
             human_avoidance_enabled=self.human_enabled,
             simulation_only_ignore_unknown=bool(get("simulation_only_ignore_unknown")),
+            human_margin_recovery_enabled=robot.get("mode") == "simulation",
         )
 
         self.human_monitor = HumanCapsuleMonitor(
@@ -134,6 +135,8 @@ class PlanningNode(Node):
         )
 
         self.last_human_report = None
+        self.last_collision_report = None
+        self.last_manager_error = None
 
         self.visualizer = PlanningVisualizer(
             node=self,
@@ -240,7 +243,8 @@ class PlanningNode(Node):
             f"execute_path={self.manager.execute_path}, "
             f"human_avoidance={self.human_enabled}, "
             f"simulation_only_ignore_unknown="
-            f"{self.manager.simulation_only_ignore_unknown}"
+            f"{self.manager.simulation_only_ignore_unknown}, "
+            f"human_margin_recovery={self.manager.human_margin_recovery_enabled}"
         )
 
     def initialize_environment(self):
@@ -361,6 +365,44 @@ class PlanningNode(Node):
 
     def motion_status_callback(self, message):
         self.manager.update_motion_status(message.data)
+
+    def report_collision_diagnostics(self):
+        """Log changed collision conditions and previously hidden exceptions."""
+        manager = self.manager
+        report = manager.human_report
+        blocked = report.get("status") != "FAR"
+        retreat_reason = (
+            manager.human_margin_block_reason
+            if manager.status == "HUMAN_RETREAT_BLOCKED" else None
+        )
+        key = (
+            report.get("detection_status"), report.get("status"), report.get("reason"),
+            report.get("robot_geom") if blocked else None,
+            report.get("body_id") if blocked else None,
+            report.get("segment_id") if blocked else None,
+            retreat_reason,
+        )
+        if key != self.last_collision_report:
+            self.last_collision_report = key
+            self.get_logger().info(
+                f"Human collision: detection={report.get('detection_status')}, "
+                f"revision={report.get('revision')}, "
+                f"q={report.get('joints')}, status={report.get('status')}, "
+                f"reason={report.get('reason')}, "
+                f"retreat_reason={retreat_reason}, "
+                f"clearance={report.get('clearance')}, "
+                f"robot_geom={report.get('robot_geom')}, "
+                f"robot_radius={report.get('robot_radius')}, "
+                f"body_id={report.get('body_id')}, "
+                f"segment_id={report.get('segment_id')}, "
+                f"human_radius={report.get('human_radius')}, "
+                f"safety_margin={self.planner.collision_filter.human_safety_margin}"
+            )
+
+        if manager.last_error != self.last_manager_error:
+            self.last_manager_error = manager.last_error
+            if manager.last_error is not None:
+                self.get_logger().error(manager.last_error)
 
     def failure_reason_callback(self, message):
         self.manager.update_failure_reason(message.data)
@@ -588,6 +630,7 @@ class PlanningNode(Node):
         self.monitor_humans()
 
         decision = self.manager.step()
+        self.report_collision_diagnostics()
 
         self.set_status(decision.status)
 

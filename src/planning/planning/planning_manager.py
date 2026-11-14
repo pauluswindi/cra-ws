@@ -27,6 +27,7 @@ class PlanningManager:
         recovery_stability_tolerance=0.01,
         human_avoidance_enabled=False,
         simulation_only_ignore_unknown=False,
+        human_margin_recovery_enabled=False,
     ):
         self.planner = path_planner
 
@@ -43,6 +44,9 @@ class PlanningManager:
 
         self.human_avoidance_enabled = bool(human_avoidance_enabled)
         self.human_status = "UNKNOWN"
+        self.human_reason = "NO_DATA"
+        self.human_report = {"status": "UNKNOWN", "clearance": None}
+        self.last_error = None
         self.human_revision = None
         self.simulation_only_ignore_unknown = bool(
             simulation_only_ignore_unknown
@@ -50,6 +54,19 @@ class PlanningManager:
         self.human_replan_blocked = False
         self.human_retry_count = 0
         self.human_retry_revision = None
+        self.human_retry_q = None
+        self.human_retry_ready = None
+        self.human_margin_recovery_enabled = bool(
+            human_margin_recovery_enabled and simulation_only_ignore_unknown
+        )
+        self.human_margin_recovery_active = False
+        self.human_margin_previous_q = None
+        self.human_margin_waiting_for_data = False
+        self.human_margin_attempt_revision = None
+        self.human_margin_attempt_q = None
+        self.human_margin_attempt_time = None
+        self.human_margin_attempt_ready = None
+        self.human_margin_block_reason = "NO_CERTIFIED_RETREAT"
         self.safe_position_active = False
         self.safe_position_attempted_revision = None
 
@@ -117,23 +134,73 @@ class PlanningManager:
 
         checker = self.planner.collision_filter
         checker.set_human_capsules(snapshot)
-        self.human_status = checker.human_status
+        self.human_status = snapshot.status
+        self.human_reason = snapshot.reason
+
+    def _record_error(self, context, error):
+        self.last_error = f"{context}: {type(error).__name__}: {error}"
+
+    def _set_human_report(self, report):
+        self.human_report = dict(
+            report,
+            detection_status=self.human_status,
+            revision=self.planner.collision_filter.environment_revision,
+            joints=None if self.current_q is None else self.current_q.tolist(),
+        )
+
+    def _remember_human_block(self):
+        self.human_replan_blocked = True
+        checker = self.planner.collision_filter
+        self.human_retry_revision = checker.environment_revision
+        self.human_retry_ready = checker.human_data_ready()
+        self.human_retry_q = (
+            None if self.current_q is None else self.current_q.copy()
+        )
+
+    def _retry_human_plan(self):
+        """Retry a blocked request only after geometry or measured state changes."""
+        checker = self.planner.collision_filter
+        moved = (
+            self.current_q is not None
+            and self.human_retry_q is not None
+            and np.max(np.abs(self.current_q - self.human_retry_q))
+            > self.recovery_stability_tolerance
+        )
+        if (
+            self.human_replan_blocked
+            and not self._stop_required()
+            and (
+                checker.environment_revision != self.human_retry_revision
+                or checker.human_data_ready() != self.human_retry_ready
+                or moved
+            )
+        ):
+            self.human_replan_blocked = False
+            self.planning_required = True
+            self.recovery_blocked = False
 
     def _human_guard(self):
         """Validate human proximity and the currently commanded path."""
+
+        if self.human_margin_recovery_active:
+            return self._human_margin_guard()
 
         checker = self.planner.collision_filter
         ready = checker.human_data_ready()
 
         if not ready:
+            self._set_human_report({
+                "status": "UNKNOWN", "clearance": None,
+                "reason": self.human_reason,
+            })
+            if self.human_margin_waiting_for_data:
+                return "HUMAN_RETREAT_DATA_UNKNOWN"
             # Permitted only for an isolated MuJoCo experiment.
             # Physical deployments must keep this setting disabled.
             if self.simulation_only_ignore_unknown:
                 checker.enable_human_obstacles(False)
                 self.human_revision = checker.environment_revision
-                if self.human_replan_blocked and not self._stop_required():
-                    self.human_replan_blocked = False
-                    self.planning_required = True
+                self._retry_human_plan()
                 return None
 
             if self.current_path is not None or self.path_sent:
@@ -142,49 +209,42 @@ class PlanningManager:
 
         if self.simulation_only_ignore_unknown:
             checker.enable_human_obstacles(True)
+        self.human_margin_waiting_for_data = False
 
         if not self.feedback_ready():
+            self._set_human_report({
+                "status": "UNKNOWN", "clearance": None,
+                "reason": "WAITING_FOR_FEEDBACK",
+            })
             if self.current_path is not None or self.path_sent:
                 self.invalidate_path()
             return "WAITING_FOR_FEEDBACK"
 
         try:
             report = checker.human_collision_report(self.current_q)
-        except Exception:
-            report = {"status": "UNKNOWN"}
+        except Exception as error:
+            self._record_error("human_collision_report", error)
+            report = {"status": "UNKNOWN", "reason": "COLLISION_CHECK_ERROR"}
+
+        self._set_human_report(report)
 
         if report["status"] == "UNKNOWN":
             if self.current_path is not None or self.path_sent:
                 self.invalidate_path()
+            self._remember_human_block()
+            if report.get("reason") == "INVALID_JOINTS":
+                return "START_INVALID"
             return "HUMAN_VISION_UNKNOWN"
 
         if report["status"] == "NEAR":
-            if self._stop_required():
-                self.invalidate_path()
-                self.human_replan_blocked = True
-                return "HUMAN_TOO_CLOSE"
-
-            # After STOPPED, plan from the measured joint configuration.
-            # A colliding start cannot be used for an ordinary trajectory.
-            if not checker.is_state_valid(self.current_q):
-                self.invalidate_path()
-                self.human_replan_blocked = True
-                return "HUMAN_TOO_CLOSE"
-
-            if self.current_path is not None:
-                if checker.is_path_valid(self.current_path):
-                    self.human_revision = checker.environment_revision
-                    return None
-                self.invalidate_path()
-                self.human_replan_blocked = True
-
-            if self.human_replan_blocked:
-                self.planning_required = True
-                self.human_replan_blocked = False
-            self.human_revision = checker.environment_revision
-            return None
+            # NEAR is itself an invalid start under the existing human margin.
+            # Only the dedicated margin certificate can authorize a retreat.
+            self.invalidate_path()
+            self._remember_human_block()
+            return "HUMAN_TOO_CLOSE"
 
         revision = checker.environment_revision
+        self._retry_human_plan()
         if revision == self.human_revision:
             return None
 
@@ -193,12 +253,9 @@ class PlanningManager:
 
         if path is None:
             # Replan a previously blocked target when human geometry changes.
-            if self.human_replan_blocked and not active:
-                self.planning_required = True
-                self.human_replan_blocked = False
-            elif active:
+            if active:
                 self.invalidate_path()
-                self.human_replan_blocked = True
+                self._remember_human_block()
                 return "HUMAN_PATH_BLOCKED"
 
             self.human_revision = revision
@@ -211,15 +268,127 @@ class PlanningManager:
                 and checker.environment_revision == revision
                 and checker.human_data_ready()
             )
-        except Exception:
+        except Exception as error:
+            self._record_error("human path validation", error)
             valid = False
 
         if not valid:
             self.invalidate_path()
-            self.human_replan_blocked = True
+            self._remember_human_block()
             return "HUMAN_PATH_BLOCKED"
 
         self.human_revision = revision
+        return None
+
+    def _prepare_human_margin_retreat(self, now):
+        """Plan only after an owned STOP and a fresh measured configuration."""
+        if (
+            not self.human_margin_recovery_enabled or not self.execute_path
+            or self.fault or self.motion_status != "STOPPED" or not self.stop_owned
+            or self.pending_action is not None
+            or not self.feedback_ready() or not self.obstacle_data_ready()
+        ):
+            return False
+        checker = self.planner.collision_filter
+        revision = checker.environment_revision
+        unchanged = (
+            revision == self.human_margin_attempt_revision
+            and self.human_margin_attempt_q is not None
+            and checker.human_data_ready() == self.human_margin_attempt_ready
+            and np.max(np.abs(self.current_q - self.human_margin_attempt_q))
+            <= self.recovery_stability_tolerance
+        )
+        if unchanged or (
+            self.human_margin_attempt_time is not None
+            and now - self.human_margin_attempt_time < self.recovery_settle_time
+        ):
+            return False
+        self.human_margin_attempt_revision = revision
+        self.human_margin_attempt_q = self.current_q.copy()
+        self.human_margin_attempt_time = now
+        try:
+            path = self.planner.find_human_margin_retreat(self.current_q.copy())
+            if path is None:
+                self.human_margin_block_reason = self.planner.last_human_retreat_failure
+                return False
+            path = np.asarray(path, dtype=float)
+            if (
+                path.shape != (2, 5) or not np.isfinite(path).all()
+                or not np.array_equal(path[0], self.current_q)
+                or np.max(np.abs(path[-1] - path[0])) > min(
+                    self.planner.max_joint_delta, self.planner.max_segment_delta
+                )
+                or not checker.is_human_margin_transition_valid(path[0], path[1])
+                or not checker.is_state_valid(path[1])
+                or checker.environment_revision != revision
+                or not checker.human_data_ready()
+                or not self.feedback_ready() or not self.obstacle_data_ready()
+            ):
+                self.human_margin_block_reason = "RETREAT_REVALIDATION_FAILED"
+                return False
+        except Exception as error:
+            self._record_error("human margin retreat search", error)
+            self.human_margin_block_reason = "RETREAT_CHECK_ERROR"
+            return False
+        finally:
+            self.human_margin_attempt_ready = checker.human_data_ready()
+        self.current_path = path.copy()
+        self.goal_q = path[-1].copy()
+        self.path_sent = False
+        self.planning_required = False
+        self.human_margin_recovery_active = True
+        self.human_margin_previous_q = self.current_q.copy()
+        self.human_replan_blocked = False
+        return True
+
+    def _human_margin_guard(self):
+        """Revalidate a straight retreat against each new observed snapshot."""
+        checker = self.planner.collision_filter
+        if not checker.human_data_ready():
+            self.human_margin_waiting_for_data = True
+            self._set_human_report({
+                "status": "UNKNOWN", "clearance": None,
+                "reason": self.human_reason,
+            })
+            self.invalidate_path()
+            return "HUMAN_RETREAT_DATA_UNKNOWN"
+        if not self.feedback_ready() or not self.obstacle_data_ready():
+            self.invalidate_path()
+            return "WAITING_FOR_FEEDBACK" if not self.feedback_ready() else "WAITING_FOR_OBSTACLES"
+        try:
+            self._set_human_report(checker.human_collision_report(self.current_q))
+            state = checker.human_margin_state(self.current_q)
+            if state is None:
+                raise ValueError("Cannot establish a fresh, non-contact retreat state")
+            if state["status"] == "FAR":
+                active = self._stop_required() or self.pending_action == "RELEASE"
+                self.invalidate_path()
+                return "HUMAN_RETREAT_CLEAR" if active else None
+            if self._stop_required():
+                # Re-evaluate both measurements against the SAME new geometry;
+                # obstacle motion alone must not be confused with robot motion.
+                previous = checker.human_margin_state(self.human_margin_previous_q)
+                if previous is None or state["pairs"].keys() != previous["pairs"].keys():
+                    raise ValueError("Cannot certify the measured retreat progress")
+                if any(
+                    value < min(previous["pairs"][pair], checker.human_safety_margin) - 1e-9
+                    for pair, value in state["pairs"].items()
+                ):
+                    raise ValueError("Measured robot motion reduced human clearance")
+            if (
+                self.current_path is None
+                or not checker.is_state_valid(self.current_path[-1])
+                or not checker.is_human_margin_transition_valid(
+                    self.current_q, self.current_path[-1]
+                )
+            ):
+                raise ValueError("Retreat is no longer safe in the latest geometry")
+        except Exception as error:
+            self._record_error("human margin retreat validation", error)
+            self.human_margin_waiting_for_data = True
+            self.invalidate_path()
+            return "HUMAN_RETREAT_UNSAFE"
+        self.human_margin_previous_q = self.current_q.copy()
         return None
 
     def update_joint_state(self, joints):
@@ -456,6 +625,8 @@ class PlanningManager:
             self.pending_action = None
             self.pending_since = None
             self.path_sent = False
+            # Feedback received before STOPPED can describe the moving arm.
+            self.feedback_time = None
 
             if not commanded_stop:
                 self.safe_recovery_active = False
@@ -499,6 +670,10 @@ class PlanningManager:
                     self.safe_position_active = False
                     self.human_retry_count = 0
                     self.invalidate_path()
+
+                if self.human_margin_recovery_active:
+                    self.invalidate_path()
+                    self.human_retry_count = 0
 
                 if self.safe_recovery_active:
                     self.safe_recovery_active = False
@@ -567,6 +742,9 @@ class PlanningManager:
                 self.planner.current_path
             )
 
+            if not self.feedback_ready() or not self.obstacle_data_ready():
+                return self._decision(status="RECOVERY_WAITING_FOR_FEEDBACK")
+
             old = self.failed_execution_path
 
             if (
@@ -592,7 +770,8 @@ class PlanningManager:
                 "WAITING_FOR_RELEASE",
             )
 
-        except Exception:
+        except Exception as error:
+            self._record_error("recovery planning", error)
             self.fault = True
             return self._decision(
                 status="RECOVERY_PLANNING_ERROR"
@@ -716,7 +895,8 @@ class PlanningManager:
                 self.safe_position_active = True
                 self.recovery_blocked = False
                 return True
-        except Exception:
+        except Exception as error:
+            self._record_error("safe-position search", error)
             return False
         return False
 
@@ -725,6 +905,8 @@ class PlanningManager:
         self.current_path = None
         self.planning_required = True
         self.path_sent = False
+        self.human_margin_recovery_active = False
+        self.human_margin_previous_q = None
 
     def feedback_ready(self):
         return (
@@ -778,6 +960,7 @@ class PlanningManager:
 
     def step(self):
         now = time.monotonic()
+        self.last_error = None
 
         if self.pending_action == "STOP":
             if now - self.pending_since > self.command_timeout:
@@ -790,6 +973,19 @@ class PlanningManager:
             problem = self._human_guard()
 
             if problem is not None:
+                if (
+                    problem == "HUMAN_TOO_CLOSE" and self.human_margin_recovery_enabled
+                    and self.execute_path and not self.fault
+                ):
+                    # Do not turn a known close human into a blind escape when
+                    # Vision drops out, even in the ordinary UNKNOWN experiment.
+                    self.human_margin_waiting_for_data = True
+                    if self.motion_status in ("IDLE", "COMPLETED") and self.pending_action is None:
+                        return self._send("STOP", "HUMAN_TOO_CLOSE")
+                    if self.motion_status == "STOPPED" and self.stop_owned:
+                        if self._prepare_human_margin_retreat(now):
+                            return self._decision(status="HUMAN_RETREAT_READY")
+                        return self._decision(status="HUMAN_RETREAT_BLOCKED")
                 if (
                     self._stop_required()
                     or self.pending_action == "RELEASE"
@@ -886,7 +1082,8 @@ class PlanningManager:
                         self.current_q
                     )
                 )
-            except Exception:
+            except Exception as error:
+                self._record_error("recovery state validation", error)
                 state_safe = False
 
             if not state_safe:
@@ -915,8 +1112,12 @@ class PlanningManager:
                 )
 
                 if goal is None:
+                    self._remember_human_block()
                     return self._decision(
-                        status="GOAL_UNREACHABLE"
+                        status=(
+                            "GOAL_UNREACHABLE" if self.planner.human_data_ready()
+                            else "HUMAN_VISION_UNKNOWN"
+                        )
                     )
 
                 if not self.planner.plan(
@@ -924,10 +1125,9 @@ class PlanningManager:
                     goal,
                 ):
                     self.human_retry_count += 1
-                    self.human_replan_blocked = True
-                    self.human_retry_revision = (
-                        self.planner.collision_filter.environment_revision
-                    )
+                    self._remember_human_block()
+                    if self.planner.last_plan_failure == "HUMAN_VISION_UNKNOWN":
+                        return self._decision(status="HUMAN_VISION_UNKNOWN")
                     if (
                         self.planner.last_plan_failure
                         == "START_INVALID"
@@ -958,9 +1158,11 @@ class PlanningManager:
 
                 self.path_sent = False
                 self.human_replan_blocked = False
+                self.recovery_blocked = False
                 return self._decision(status="PATH_READY")
 
-            except Exception:
+            except Exception as error:
+                self._record_error("planning", error)
                 self.current_path = None
                 self.goal_q = None
 
@@ -998,25 +1200,13 @@ class PlanningManager:
                 status="WAITING_FOR_RELEASE"
             )
 
-        if (
-            self.resume_after_fault
-            and self.motion_status == "CONTROL_ERROR"
-        ):
-            return self._send(
-                "RELEASE",
-                "WAITING_FOR_RELEASE",
-            )
-
         if self.motion_status == "STOPPED":
-            if self.stop_owned:
-                return self._send(
-                    "RELEASE",
-                    "WAITING_FOR_RELEASE",
-                )
+            if not self.stop_owned:
+                return self._decision(status="STOPPED")
 
-            return self._decision(status="STOPPED")
-
-        if self.motion_status not in ("IDLE", "COMPLETED"):
+        if self.motion_status not in ("IDLE", "COMPLETED", "STOPPED") and not (
+            self.resume_after_fault and self.motion_status == "CONTROL_ERROR"
+        ):
             return self._decision(
                 status="WAITING_FOR_MOTION"
             )
@@ -1037,7 +1227,17 @@ class PlanningManager:
             path = self.current_path.copy()
             path[0] = self.current_q.copy()
 
-            if self.safe_recovery_active:
+            if self.human_margin_recovery_active:
+                checker = self.planner.collision_filter
+                if (
+                    path.shape != (2, 5)
+                    or not checker.is_state_valid(path[-1])
+                    or not checker.is_human_margin_transition_valid(path[0], path[-1])
+                ):
+                    raise ValueError("Human margin retreat has no current safety certificate")
+                execution_path = path
+
+            elif self.safe_recovery_active:
                 checker = self.planner.collision_filter
 
                 if (
@@ -1063,10 +1263,16 @@ class PlanningManager:
                     self.planner.prepare_execution_path(path)
                 )
 
-        except Exception:
+        except Exception as error:
+            self._record_error("execution path preparation", error)
+            if self.human_margin_recovery_active:
+                self.human_margin_waiting_for_data = True
+                self.human_margin_recovery_active = False
+                self.human_margin_previous_q = None
             self.current_path = None
             self.planning_required = False
             self.safe_recovery_active = False
+            self._remember_human_block()
 
             return self._decision(
                 status="TRAJECTORY_ERROR"
@@ -1074,28 +1280,53 @@ class PlanningManager:
 
         if self.human_avoidance_enabled:
             checker = self.planner.collision_filter
+            try:
+                if self.human_margin_recovery_active:
+                    safe = (
+                        checker.human_data_ready()
+                        and checker.is_state_valid(execution_path[-1])
+                        and checker.is_human_margin_transition_valid(
+                            execution_path[0], execution_path[-1]
+                        )
+                    )
+                else:
+                    safe = not (
+                        not checker.human_data_ready()
+                        and not self.simulation_only_ignore_unknown
+                    ) and checker.is_path_valid(execution_path)
+            except Exception as error:
+                self._record_error("execution path validation", error)
+                safe = False
 
-            if (
-                (
-                    not checker.human_data_ready()
-                    and not self.simulation_only_ignore_unknown
-                )
-                or not checker.is_path_valid(execution_path)
-            ):
+            if not safe:
+                if self.human_margin_recovery_active:
+                    self.human_margin_waiting_for_data = True
                 self.invalidate_path()
-                self.human_replan_blocked = True
+                self._remember_human_block()
 
                 return self._decision(
                     status="HUMAN_PATH_BLOCKED"
                 )
+
+        # Preparation can be expensive. Keep STOP latched if its input feedback
+        # has expired, and revalidate again after the RELEASE acknowledgement.
+        if not self.feedback_ready():
+            return self._decision(status="WAITING_FOR_FEEDBACK")
+        if not self.obstacle_data_ready():
+            return self._decision(status="WAITING_FOR_OBSTACLES")
+
+        if self.motion_status == "STOPPED" or (
+            self.resume_after_fault and self.motion_status == "CONTROL_ERROR"
+        ):
+            return self._send("RELEASE", "WAITING_FOR_RELEASE")
 
         self.last_execution_path = execution_path.copy()
 
         return self._send(
             "EXECUTE",
             (
-                "SAFE_RECOVERY_SENT"
-                if self.safe_recovery_active
+                "HUMAN_RETREAT_SENT" if self.human_margin_recovery_active
+                else "SAFE_RECOVERY_SENT" if self.safe_recovery_active
                 else "TRAJECTORY_SENT"
             ),
             execution_path,

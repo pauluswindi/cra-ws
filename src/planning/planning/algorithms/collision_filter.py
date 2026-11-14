@@ -47,6 +47,7 @@ class CollisionFilter:
         self.human_status = "UNKNOWN"
         self.human_capsules = ()
         self.human_received_at = None
+        self.human_expires_at = None
 
         self.joint_names = list(joint_names)
         self.joint_ids = []
@@ -212,6 +213,7 @@ class CollisionFilter:
             if status == "OBSERVED"
             else None
         )
+        self.human_expires_at = getattr(snapshot, "expires_at", None)
 
         if changed and self.human_obstacles_enabled:
             self.environment_revision += 1
@@ -219,11 +221,16 @@ class CollisionFilter:
         return status == "OBSERVED"
 
     def human_data_ready(self):
+        now = time.monotonic()
         return (
             self.human_status == "OBSERVED"
             and self.human_received_at is not None
-            and time.monotonic() - self.human_received_at
+            and now - self.human_received_at
             <= self.human_data_timeout
+            and (
+                self.human_expires_at is None
+                or now <= self.human_expires_at
+            )
         )
 
     @staticmethod
@@ -231,7 +238,7 @@ class CollisionFilter:
         # Retained for compatibility with existing tooling.
         return point_segment_distance(point, start, end)
 
-    def _human_collision_after_forward(self):
+    def _human_collision_after_forward(self, include_pairs=False):
         base_position = self.data.xpos[self.base_id]
         base_rotation = self.data.xmat[self.base_id].reshape(3, 3)
 
@@ -251,7 +258,8 @@ class CollisionFilter:
         )
 
         return nearest_human_collision(
-            geoms, self.human_capsules, self.human_safety_margin
+            geoms, self.human_capsules, self.human_safety_margin,
+            include_pairs=include_pairs,
         )
 
     def human_collision_report(self, joints):
@@ -259,12 +267,14 @@ class CollisionFilter:
             return {
                 "status": "UNKNOWN",
                 "clearance": None,
+                "reason": "HUMAN_DATA_UNKNOWN",
             }
 
         if not self._set_joint_configuration(joints):
             return {
                 "status": "UNKNOWN",
                 "clearance": None,
+                "reason": "INVALID_JOINTS",
             }
 
         return self._human_collision_after_forward()
@@ -593,6 +603,60 @@ class CollisionFilter:
                 default=self.safety_margin,
             ),
         }
+
+    def human_margin_state(self, joints):
+        """Describe a non-contact state, including every robot/human pair.
+
+        Margin retreat may leave an existing human safety buffer. It never
+        permits penetration of either the human approximation or MuJoCo geoms.
+        """
+        if not self.human_obstacles_enabled or not self.human_data_ready():
+            return None
+        revision = self.environment_revision
+        if self.contact_report(joints)["status"] != "CLEAR":
+            return None
+        report = self._human_collision_after_forward(include_pairs=True)
+        if (
+            report["status"] == "UNKNOWN" or report["clearance"] <= 0.0
+            or not self.human_data_ready() or self.environment_revision != revision
+        ):
+            return None
+        return report
+
+    def is_human_margin_transition_valid(self, start, goal):
+        """Certify non-worsening clearance for ALL initially close pairs.
+
+        Pairs outside the margin must stay outside. Initially close pairs
+        must never get closer and must not re-enter the buffer after exiting.
+        Ordinary is_state_valid/is_edge_valid retain the original margins.
+        """
+        start = np.asarray(start, dtype=float)
+        goal = np.asarray(goal, dtype=float)
+        if (
+            start.shape != (5,) or goal.shape != (5,)
+            or not np.isfinite(start).all() or not np.isfinite(goal).all()
+        ):
+            return False
+        revision = self.environment_revision
+        previous = self.human_margin_state(start)
+        if previous is None:
+            return False
+        steps = max(2, int(np.ceil(
+            np.max(np.abs(goal - start)) / min(self.max_joint_step, 0.005)
+        )))
+        for index in range(1, steps + 1):
+            state = self.human_margin_state(start + (goal - start) * (index / steps))
+            if (
+                state is None or self.environment_revision != revision
+                or state["pairs"].keys() != previous["pairs"].keys()
+            ):
+                return False
+            for pair, clearance in state["pairs"].items():
+                floor = min(previous["pairs"][pair], self.human_safety_margin)
+                if clearance < floor - 1e-9:
+                    return False
+            previous = state
+        return self.human_data_ready() and self.environment_revision == revision
 
     def is_recovery_transition_valid(
         self,

@@ -19,6 +19,7 @@ class HumanSnapshot:
     status: str
     reason: str
     capsules: tuple
+    expires_at: float | None = None
 
     @property
     def human_count(self):
@@ -225,4 +226,10 @@ class HumanCapsuleMonitor:
             status=self.status,
             reason=self.reason,
             capsules=self.capsules,
+            # Carry the REMAINING capture/receipt lifetime into synchronous
+            # collision checks; copying a snapshot must not restart its timeout.
+            expires_at=min(
+                self.received_time + self.data_timeout,
+                time.monotonic() + self.data_timeout - max(age, 0.),
+            ),
         )

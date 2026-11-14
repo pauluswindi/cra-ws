@@ -65,7 +65,7 @@ def point_segment_distance(point, start, end):
     return float(np.linalg.norm(point - (start + alpha * axis)))
 
 
-def nearest_human_collision(robot_geometries, capsules, safety_margin):
+def nearest_human_collision(robot_geometries, capsules, safety_margin, include_pairs=False):
     """Return the closest robot-geometry/capsule pair.
 
     robot_geometries yields (geom_name, center_mujoco_base, bounding_radius).
@@ -75,49 +75,58 @@ def nearest_human_collision(robot_geometries, capsules, safety_margin):
     Bounding spheres are intentionally retained for this first fix. The
     returned radii and distance make their conservatism visible in diagnostics.
     """
-    nearest = None
-    rotation = FrameTransform.ROBOT_FROM_MUJOCO_BASE
-
-    for name, center_mujoco, robot_radius in robot_geometries:
-        robot_radius = float(robot_radius)
-        center_mujoco = np.asarray(center_mujoco, dtype=float)
-
-        if (
-            center_mujoco.shape != (3,)
-            or not np.isfinite(center_mujoco).all()
-            or not np.isfinite(robot_radius)
-            or robot_radius < 0.0
-        ):
-            return {"status": "UNKNOWN", "clearance": None,
-                    "reason": "INVALID_ROBOT_GEOMETRY"}
-
-        center = rotation @ center_mujoco
-
-        for key, start, end, human_radius in capsules:
-            distance = point_segment_distance(
-                center,
-                np.asarray(start, dtype=float),
-                np.asarray(end, dtype=float),
-            )
-            clearance = distance - robot_radius - human_radius
-
-            if nearest is None or clearance < nearest["clearance"]:
-                nearest = {
-                    "clearance": float(clearance),
-                    "robot_geom": name,
-                    "body_id": key[0],
-                    "segment_id": key[1],
-                    "center_distance": float(distance),
-                    "robot_radius": robot_radius,
-                    "human_radius": float(human_radius),
-                    "safety_margin": float(safety_margin),
-                }
-
-    if nearest is None:
+    geometries = list(robot_geometries)
+    if not geometries or not capsules:
         return {"status": "UNKNOWN", "clearance": None,
                 "reason": "NO_GEOMETRY"}
 
+    try:
+        centers = np.asarray([item[1] for item in geometries], dtype=float)
+        radii = np.asarray([item[2] for item in geometries], dtype=float)
+    except (TypeError, ValueError, OverflowError):
+        return {"status": "UNKNOWN", "clearance": None,
+                "reason": "INVALID_ROBOT_GEOMETRY"}
+    if (
+        centers.shape != (len(geometries), 3)
+        or radii.shape != (len(geometries),)
+        or not np.isfinite(centers).all() or not np.isfinite(radii).all()
+        or np.any(radii < 0.)
+    ):
+        return {"status": "UNKNOWN", "clearance": None,
+                "reason": "INVALID_ROBOT_GEOMETRY"}
+
+    # Evaluate every pair in one NumPy batch. The geometry and the distance
+    # formula are unchanged; this avoids dozens of small Python/NumPy calls
+    # for each configuration sampled during graph search or margin retreat.
+    centers = centers @ FrameTransform.ROBOT_FROM_MUJOCO_BASE.T
+    starts = np.asarray([item[1] for item in capsules], dtype=float)
+    axes = np.asarray([item[2] for item in capsules], dtype=float) - starts
+    human_radii = np.asarray([item[3] for item in capsules], dtype=float)
+    length_sq = np.einsum('ij,ij->i', axes, axes)
+    offsets = centers[:, None, :] - starts[None, :, :]
+    projection = np.einsum('ijk,jk->ij', offsets, axes)
+    alpha = np.divide(projection, length_sq, out=np.zeros_like(projection),
+                      where=length_sq > 1e-12)
+    np.clip(alpha, 0., 1., out=alpha)
+    distances = np.linalg.norm(offsets - alpha[:, :, None] * axes, axis=2)
+    clearances = distances - radii[:, None] - human_radii[None, :]
+    geom_index, capsule_index = np.unravel_index(np.argmin(clearances), clearances.shape)
+    key = capsules[capsule_index][0]
+    nearest = {
+        "clearance": float(clearances[geom_index, capsule_index]),
+        "robot_geom": geometries[geom_index][0],
+        "body_id": key[0], "segment_id": key[1],
+        "center_distance": float(distances[geom_index, capsule_index]),
+        "robot_radius": float(radii[geom_index]),
+        "human_radius": float(human_radii[capsule_index]),
+        "safety_margin": float(safety_margin),
+    }
     nearest["status"] = (
         "NEAR" if nearest["clearance"] <= safety_margin else "FAR"
     )
+    if include_pairs:
+        nearest["pairs"] = {
+            (i, item[0][0], item[0][1]): float(clearances[i, j])
+            for i in range(len(geometries)) for j, item in enumerate(capsules)
+        }
     return nearest

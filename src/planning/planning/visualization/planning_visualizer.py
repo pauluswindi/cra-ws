@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 import mujoco
 import numpy as np
@@ -12,7 +13,7 @@ from rclpy.qos import (
     ReliabilityPolicy,
 )
 from sensor_msgs.msg import JointState
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 
 from simulation.frame_transform import FrameTransform
 
@@ -46,6 +47,32 @@ class PlanningVisualizer:
 
         self.base_id = self.model.body(base_body).id
         self.eof_id = self.model.body(end_effector_body).id
+        self.robot_meshes = []
+        self.robot_collision_geoms = []
+        self.last_robot_marker_time = None
+        model_path = Path(model_path).resolve()
+        xml = ET.parse(model_path).getroot()
+        compiler = xml.find('compiler')
+        mesh_dir = '' if compiler is None else compiler.get('meshdir', '')
+        assets = {item.get('name'): item for item in xml.findall('./asset/mesh')}
+        for geom_id in range(self.model.ngeom):
+            body = int(self.model.geom_bodyid[geom_id])
+            while body > 0 and body != self.base_id:
+                body = int(self.model.body_parentid[body])
+            if body != self.base_id:
+                continue
+            if self.model.geom_contype[geom_id] or self.model.geom_conaffinity[geom_id]:
+                self.robot_collision_geoms.append(geom_id)
+            if self.model.geom_type[geom_id] != mujoco.mjtGeom.mjGEOM_MESH:
+                continue
+            mesh_id = int(self.model.geom_dataid[geom_id])
+            asset = assets[self.model.mesh(mesh_id).name]
+            resource = (model_path.parent / mesh_dir / asset.get('file')).resolve()
+            scale = np.fromstring(asset.get('scale', '1 1 1'), sep=' ')
+            mesh_rotation = np.empty(9)
+            mujoco.mju_quat2Mat(mesh_rotation, self.model.mesh_quat[mesh_id])
+            self.robot_meshes.append((geom_id, mesh_id, resource.as_uri(), scale,
+                                      mesh_rotation.reshape(3, 3)))
 
         self.qpos_ids = [
             int(
@@ -103,6 +130,9 @@ class PlanningVisualizer:
             "/planning/eof_marker",
             marker_qos,
         )
+        self.robot_pub = node.create_publisher(MarkerArray, '/planning/robot_model', marker_qos)
+        self.robot_bounds_pub = node.create_publisher(
+            MarkerArray, '/planning/robot_collision_bounds', marker_qos)
 
         self.path_publishers = {
             kind: node.create_publisher(
@@ -368,6 +398,56 @@ class PlanningVisualizer:
         eof_position = self.forward_kinematics(joints)
 
         self.publish_eof(eof_position)
+        now = self.node.get_clock().now().nanoseconds
+        if (
+            self.last_robot_marker_time is None
+            or now < self.last_robot_marker_time
+            or now - self.last_robot_marker_time >= 100_000_000
+        ):
+            self.publish_robot()
+            self.last_robot_marker_time = now
+
+    def publish_robot(self):
+        """Render the measured MuJoCo arm in the same CRA frame as capsules."""
+        base = self.data.xpos[self.base_id]
+        rotation = (
+            FrameTransform.ROBOT_FROM_MUJOCO_BASE
+            @ self.data.xmat[self.base_id].reshape(3, 3).T
+        )
+        meshes = MarkerArray()
+        for geom, mesh, resource, scale, mesh_rotation in self.robot_meshes:
+            # MuJoCo centers and rotates mesh vertices during compilation.
+            # Undo that transform before displaying the ORIGINAL STL in RViz.
+            raw_rotation = self.data.geom_xmat[geom].reshape(3, 3) @ mesh_rotation.T
+            raw_position = self.data.geom_xpos[geom] - raw_rotation @ self.model.mesh_pos[mesh]
+            marker = self.make_marker('robot_mesh', Marker.MESH_RESOURCE, 1., (.65, .70, .76))
+            marker.id = geom
+            marker.mesh_resource = resource
+            marker.mesh_use_embedded_materials = False
+            marker.scale.x, marker.scale.y, marker.scale.z = map(float, scale)
+            self.set_marker_pose(
+                marker, rotation @ (raw_position - base), rotation @ raw_rotation)
+            meshes.markers.append(marker)
+        bounds = MarkerArray()
+        for geom in self.robot_collision_geoms:
+            diameter = 2. * float(self.model.geom_rbound[geom])
+            marker = self.make_marker('collision_spheres', Marker.SPHERE, diameter,
+                                      (.2, .6, 1.), alpha=.15)
+            marker.id = geom
+            marker.scale.y = marker.scale.z = diameter
+            self.set_marker_pose(marker, rotation @ (self.data.geom_xpos[geom] - base), np.eye(3))
+            bounds.markers.append(marker)
+        self.robot_pub.publish(meshes)
+        self.robot_bounds_pub.publish(bounds)
+
+    @staticmethod
+    def set_marker_pose(marker, position, rotation):
+        marker.pose.position.x, marker.pose.position.y, marker.pose.position.z = (
+            map(float, position))
+        quaternion = np.empty(4)
+        mujoco.mju_mat2Quat(quaternion, np.asarray(rotation).reshape(9))
+        marker.pose.orientation.w, marker.pose.orientation.x, \
+            marker.pose.orientation.y, marker.pose.orientation.z = map(float, quaternion)
 
     def publish_eof(self, position):
         marker = self.make_marker(

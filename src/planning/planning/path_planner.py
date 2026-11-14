@@ -101,6 +101,7 @@ class PathPlanner:
         self.goal_q = None
         self.path_revision = None
         self.last_plan_failure = "NONE"
+        self.last_human_retreat_failure = "NONE"
         self.safe_recovery_path = None
 
         self.valid_node_mask = None
@@ -432,6 +433,73 @@ class PathPlanner:
 
         return None
 
+    def find_human_margin_retreat(self, current_q, max_steps=32):
+        """Find a bounded retreat out of a human margin, without contact.
+
+        Return only a certified straight joint segment, so execution can be
+        revalidated from measured feedback without inferring waypoint progress.
+        """
+        checker = self.collision_filter
+        self.last_human_retreat_failure = "NONE"
+        start = np.asarray(current_q, dtype=float)
+        initial = checker.human_margin_state(start)
+        if initial is None or initial["status"] != "NEAR":
+            diagnostic = checker.diagnose_state(start)
+            self.last_human_retreat_failure = diagnostic["reason"]
+            if diagnostic["reason"] == "VALID":
+                self.last_human_retreat_failure = "NOT_IN_HUMAN_MARGIN"
+            if (
+                diagnostic["reason"] == "HUMAN_COLLISION"
+                and diagnostic["human"]["clearance"] <= 0.
+            ):
+                self.last_human_retreat_failure = "HUMAN_OVERLAP"
+            return None
+        revision = checker.environment_revision
+        current = start.copy()
+        state = initial
+        step = min(0.01, checker.max_joint_step, self.max_segment_delta)
+        target = checker.human_safety_margin + checker.safety_margin
+        for _ in range(max_steps):
+            best, best_state = None, None
+            improvement = 1e-6
+            for joint in range(5):
+                for sign in (-1., 1.):
+                    candidate = current.copy()
+                    candidate[joint] += sign * step
+                    if np.max(np.abs(candidate - start)) > min(
+                        self.max_joint_delta, self.max_segment_delta
+                    ):
+                        continue
+                    if not checker.is_human_margin_transition_valid(current, candidate):
+                        continue
+                    candidate_state = checker.human_margin_state(candidate)
+                    if candidate_state is None:
+                        self.last_human_retreat_failure = "HUMAN_DATA_OR_STATE_CHANGED"
+                        return None
+                    gain = candidate_state["clearance"] - state["clearance"]
+                    if gain > improvement:
+                        best, best_state, improvement = candidate, candidate_state, gain
+            if (
+                best is None or checker.environment_revision != revision
+                or not checker.human_data_ready()
+            ):
+                self.last_human_retreat_failure = (
+                    "HUMAN_DATA_UNKNOWN" if not checker.human_data_ready()
+                    else "ENVIRONMENT_CHANGED" if checker.environment_revision != revision
+                    else "NO_MONOTONIC_STEP"
+                )
+                return None
+            current, state = best, best_state
+            if (
+                state["clearance"] > target
+                and checker.is_state_valid(current)
+                and checker.is_human_margin_transition_valid(start, current)
+                and checker.environment_revision == revision
+            ):
+                return np.vstack((start, current))
+        self.last_human_retreat_failure = "SEARCH_BUDGET_EXHAUSTED"
+        return None
+
     def find_alternative_path(self, start, goal, revision):
         checker = self.collision_filter
 
@@ -442,6 +510,11 @@ class PathPlanner:
         attempts = 0
 
         for index in np.argsort(distances):
+            if (
+                checker.environment_revision != revision
+                or not self.human_data_ready()
+            ):
+                return None
             intermediate = self.joint_q[index]
 
             if (
@@ -482,8 +555,26 @@ class PathPlanner:
 
         return None
 
-    def _plan_failed(self, reason, message):
+    def _plan_failed(self, reason, message, joints=None):
         self.last_plan_failure = reason
+        if reason == "HUMAN_VISION_UNKNOWN":
+            # Expired observations can leave negative entries in A*'s caches
+            # even when the next fresh observation has identical geometry.
+            self.planner.revision = None
+
+        if joints is not None:
+            try:
+                diagnostic = self.collision_filter.diagnose_state(joints)
+            except Exception as error:
+                diagnostic = {
+                    "reason": "DIAGNOSTIC_ERROR",
+                    "error": f"{type(error).__name__}: {error}",
+                }
+            message += (
+                f"; q={joints.tolist()}, "
+                f"revision={self.collision_filter.environment_revision}, "
+                f"diagnostic={diagnostic}"
+            )
 
         print(
             f"[PathPlanner] NO_PATH: {message}",
@@ -524,12 +615,14 @@ class PathPlanner:
             return self._plan_failed(
                 "START_INVALID",
                 "start configuration is invalid",
+                joints=start,
             )
 
         if not checker.is_state_valid(goal):
             return self._plan_failed(
                 "GOAL_INVALID",
                 "goal configuration is invalid",
+                joints=goal,
             )
 
         if checker.environment_revision != revision:
@@ -540,11 +633,23 @@ class PathPlanner:
 
         path = self.planner.plan(start, goal)
 
+        if not self.human_data_ready():
+            return self._plan_failed(
+                "HUMAN_VISION_UNKNOWN",
+                "Human Vision data expired during graph search",
+            )
+
         if path is None:
             path = self.find_alternative_path(
                 start,
                 goal,
                 revision,
+            )
+
+        if not self.human_data_ready():
+            return self._plan_failed(
+                "HUMAN_VISION_UNKNOWN",
+                "Human Vision data expired during alternative search",
             )
 
         if path is None:
@@ -559,10 +664,16 @@ class PathPlanner:
                 "A* could not connect start to goal",
             )
 
-        if (
-            checker.environment_revision != revision
-            or not self.is_path_valid(path)
-        ):
+        valid = (
+            checker.environment_revision == revision
+            and self.is_path_valid(path)
+        )
+        if not self.human_data_ready():
+            return self._plan_failed(
+                "HUMAN_VISION_UNKNOWN",
+                "Human Vision data expired during final path validation",
+            )
+        if not valid:
             return self._plan_failed(
                 "PATH_INVALID",
                 "final path validation failed",
