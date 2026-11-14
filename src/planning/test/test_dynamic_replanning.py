@@ -128,13 +128,17 @@ class DynamicReplanningTests(unittest.TestCase):
 
     def test_ignored_unknown_does_not_repeat_same_failed_search(self):
         manager = self.make_manager(EMPTY)
-        with patch.object(manager.planner, 'plan', return_value=False) as plan:
+        with patch.object(manager.planner, 'plan', return_value=False) as plan, \
+                patch.object(manager, '_prepare_safe_position', return_value=False) as stage:
             manager.planner.last_plan_failure = 'NO_GRAPH_PATH'
             self.assertEqual(manager.step().status, 'NO_PATH')
+            attempts = plan.call_count
+            self.assertEqual(attempts, manager.planner.max_goal_candidates)
             for _ in range(3):
                 manager.update_human_snapshot(EMPTY)
                 manager.step()
-            self.assertEqual(plan.call_count, 1)
+            self.assertEqual(plan.call_count, attempts)
+            self.assertEqual(stage.call_count, 1)
 
     def test_goal_retries_once_when_unknown_policy_changes_environment(self):
         manager = self.make_manager()
@@ -477,10 +481,20 @@ class DynamicReplanningTests(unittest.TestCase):
         geom = checker.model.geom('link5_visual').id
         center = FrameTransform.mujoco_base_to_robot_base(
             rotation.T @ (checker.data.geom_xpos[geom] - base))
-        point = center + [float(checker.model.geom_rbound[geom]) + .05 + clearance, 0, 0]
-        snapshot = HumanSnapshot('OBSERVED', 'CAPSULES_PRESENT', (
-            HumanCapsule(1, 6, tuple(point), tuple(point), .05),))
-        manager.update_human_snapshot(snapshot)
+        # Place the capsule at the requested measured proxy clearance. Its old
+        # sphere-based offset can now lie in proven empty space beside the mesh.
+        lower, upper = 0., .5
+        for _ in range(40):
+            distance = (lower + upper) * .5
+            point = center + [distance, 0, 0]
+            snapshot = HumanSnapshot('OBSERVED', 'CAPSULES_PRESENT', (
+                HumanCapsule(1, 6, tuple(point), tuple(point), .05),))
+            manager.update_human_snapshot(snapshot)
+            actual = checker.human_collision_report(joints)['clearance']
+            if actual < clearance:
+                lower = distance
+            else:
+                upper = distance
         return manager, snapshot
 
     def execute_margin_retreat(self):
@@ -778,6 +792,372 @@ class DynamicReplanningTests(unittest.TestCase):
         self.assertTrue(checker.human_data_ready())
         self.now.return_value = 100.11
         self.assertFalse(checker.human_data_ready())
+
+    def test_fresh_empty_after_blocked_retreat_resumes_original_target(self):
+        manager, _ = self.margin_manager(clearance=-.01)
+        target = manager.target_base.copy()
+        self.assertEqual(manager.step().action, 'STOP')
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(manager.current_q.copy())
+        self.assertEqual(manager.step().status, 'HUMAN_RETREAT_BLOCKED')
+        manager.update_human_snapshot(EMPTY)
+        self.assertEqual(manager.step().status, 'PATH_READY')
+        self.assertFalse(manager.human_margin_waiting_for_data)
+        self.assertEqual(manager.step().action, 'RELEASE')
+        manager.update_motion_status('IDLE')
+        decision = manager.step()
+        self.assertEqual(decision.action, 'EXECUTE')
+        self.assertTrue(manager.planner.collision_filter.is_path_valid(decision.path))
+        np.testing.assert_array_equal(manager.target_base, target)
+
+    def test_fresh_empty_during_retreat_stops_staging_before_normal_planning(self):
+        manager, _, path = self.execute_margin_retreat()
+        manager.update_joint_state(np.mean(path, axis=0))
+        manager.update_human_snapshot(EMPTY)
+        decision = manager.step()
+        self.assertEqual((decision.action, decision.status), ('STOP', 'HUMAN_RETREAT_CLEAR'))
+        self.assertFalse(manager.human_margin_recovery_active)
+        manager.update_motion_status('STOPPED')
+        self.assertEqual(manager.step().status, 'WAITING_FOR_FEEDBACK')
+        manager.update_joint_state(manager.current_q.copy())
+        self.assertEqual(manager.step().status, 'PATH_READY')
+
+    def test_expired_empty_does_not_clear_close_human_stop(self):
+        for deadline, now in [(100.05, 100.1), (None, 100.6)]:
+            with self.subTest(deadline=deadline):
+                self.now.return_value = 100.
+                manager, _ = self.margin_manager(clearance=-.01)
+                manager.step()
+                manager.update_motion_status('STOPPED')
+                manager.update_joint_state(manager.current_q.copy())
+                manager.step()
+                manager.update_human_snapshot(HumanSnapshot(
+                    'EMPTY', 'NO_ACTIVE_CAPSULES', (), expires_at=deadline))
+                self.now.return_value = now
+                manager.update_joint_state(manager.current_q.copy())
+                self.assertEqual(manager.step().status, 'HUMAN_RETREAT_DATA_UNKNOWN')
+                self.assertTrue(manager.stop_owned)
+
+    def test_invalid_data_after_empty_does_not_clear_close_human_stop(self):
+        manager, _ = self.margin_manager(clearance=-.01)
+        manager.step()
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(manager.current_q.copy())
+        manager.step()
+        manager.update_human_snapshot(EMPTY)
+        manager.update_human_snapshot(HumanSnapshot('UNKNOWN', 'VISION_INVALID', ()))
+        self.assertEqual(manager.step().status, 'HUMAN_RETREAT_DATA_UNKNOWN')
+        self.assertTrue(manager.stop_owned)
+
+    def test_empty_after_retreat_still_requires_static_collision_validation(self):
+        manager, _ = self.margin_manager(clearance=-.01)
+        manager.step()
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(manager.current_q.copy())
+        manager.step()
+        checker = manager.planner.collision_filter
+        checker._set_joint_configuration(manager.current_q)
+        center = checker.data.geom_xpos[checker.model.geom('link5_visual').id].copy()
+        checker.set_obstacle_pose('obstacle_1', center)
+        manager.update_human_snapshot(EMPTY)
+        decision = manager.step()
+        self.assertEqual(decision.action, 'NONE')
+        self.assertNotEqual(checker.contact_report(manager.current_q)['status'], 'CLEAR')
+        self.assertTrue(manager.stop_owned)
+        self.assertIsNone(manager.current_path)
+        self.assertEqual(manager.step().action, 'NONE')
+
+    def test_fresh_empty_does_not_override_unowned_stop(self):
+        manager, _ = self.margin_manager()
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(manager.current_q.copy())
+        manager.step()
+        manager.update_human_snapshot(EMPTY)
+        self.assertEqual(manager.step().status, 'PATH_READY')
+        self.assertEqual(manager.step().status, 'STOPPED')
+        self.assertFalse(manager.stop_owned)
+
+    def test_margin_retreat_waits_for_measured_braking_after_stopped_ack(self):
+        manager, _ = self.margin_manager()
+        self.assertEqual(manager.step().action, 'STOP')
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(manager.current_q.copy(), [.6, 0., 0., 0., 0.])
+        with patch.object(manager.planner, 'find_human_margin_retreat',
+                          wraps=manager.planner.find_human_margin_retreat) as search:
+            self.assertEqual(manager.step().status, 'HUMAN_RETREAT_BLOCKED')
+            self.assertEqual(manager.human_margin_block_reason, 'ROBOT_STILL_MOVING')
+            self.assertFalse(search.called)
+            manager.update_joint_state(manager.current_q.copy(), np.zeros(5))
+            self.assertEqual(manager.step().status, 'HUMAN_RETREAT_READY')
+            self.assertTrue(search.called)
+
+    def test_braking_during_release_cancels_retreat_before_execution(self):
+        manager, _ = self.margin_manager()
+        manager.step()
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(manager.current_q.copy(), np.zeros(5))
+        self.assertEqual(manager.step().status, 'HUMAN_RETREAT_READY')
+        self.assertEqual(manager.step().action, 'RELEASE')
+        manager.update_joint_state(manager.current_q.copy(), [.2, 0., 0., 0., 0.])
+        decision = manager.step()
+        self.assertEqual((decision.action, decision.status), ('STOP', 'WAITING_FOR_ROBOT_SETTLE'))
+        self.assertFalse(manager.human_margin_recovery_active)
+
+    def test_invalid_velocity_does_not_refresh_joint_feedback(self):
+        manager = self.make_manager()
+        received = manager.feedback_time
+        self.now.return_value = 100.1
+        self.assertFalse(manager.update_joint_state(manager.current_q.copy(), [float('nan')] * 5))
+        self.assertEqual(manager.feedback_time, received)
+
+    def test_budget_limited_retreat_can_make_certified_progress_in_stages(self):
+        manager, snapshot = self.margin_manager(clearance=.02)
+        planner = manager.planner
+        checker = planner.collision_filter
+        start = manager.current_q.copy()
+        target = manager.target_base.copy()
+        path = planner.find_human_margin_retreat(start, max_steps=4)
+        self.assertIsNotNone(path)
+        end_state = checker.human_margin_state(path[-1])
+        self.assertEqual(end_state['status'], 'NEAR')
+        self.assertGreaterEqual(end_state['clearance'] - .02, checker.safety_margin)
+        self.assertTrue(checker.is_human_margin_transition_valid(path[0], path[-1]))
+        self.assertFalse(checker.is_path_valid(path))
+        with patch.object(planner, 'find_human_margin_retreat', return_value=path):
+            self.assertEqual(manager.step().action, 'STOP')
+            manager.update_motion_status('STOPPED')
+            manager.update_joint_state(start, np.zeros(5))
+            self.assertEqual(manager.step().status, 'HUMAN_RETREAT_READY')
+            self.assertEqual(manager.step().action, 'RELEASE')
+            manager.update_motion_status('IDLE')
+            decision = manager.step()
+            self.assertEqual((decision.action, decision.status), ('EXECUTE', 'HUMAN_RETREAT_SENT'))
+        manager.update_motion_status('EXECUTING')
+        manager.update_joint_state(np.mean(path, axis=0))
+        self.assertEqual(manager.step().status, 'EXECUTING')
+        manager.update_joint_state(path[-1], np.zeros(5))
+        manager.update_motion_status('COMPLETED')
+        self.now.return_value = 100.5
+        manager.update_human_snapshot(snapshot)
+        manager.update_joint_state(path[-1], np.zeros(5))
+        manager.update_obstacles([])
+        self.assertEqual(manager.step().action, 'STOP')
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(path[-1], np.zeros(5))
+        self.assertEqual(manager.step().status, 'HUMAN_RETREAT_READY')
+        np.testing.assert_array_equal(manager.target_base, target)
+
+    def test_partial_retreat_cannot_use_expired_geometry(self):
+        manager, _ = self.margin_manager(clearance=.02)
+        checker = manager.planner.collision_filter
+        original = checker.is_human_margin_transition_valid
+
+        def expire_final_segment(start, goal):
+            if np.max(np.abs(goal - start)) > .03:
+                self.now.return_value = 100.6
+            return original(start, goal)
+
+        with patch.object(checker, 'is_human_margin_transition_valid',
+                          side_effect=expire_final_segment):
+            self.assertIsNone(manager.planner.find_human_margin_retreat(
+                manager.current_q.copy(), max_steps=4))
+
+    def test_retreat_screening_skips_one_invalid_candidate_and_keeps_searching(self):
+        manager, _ = self.margin_manager()
+        checker = manager.planner.collision_filter
+        original = checker.human_margin_state
+        blocked = manager.current_q.copy()
+        blocked[0] -= .01
+
+        def invalid_candidate(joints):
+            return None if np.array_equal(joints, blocked) else original(joints)
+
+        with patch.object(checker, 'human_margin_state', side_effect=invalid_candidate):
+            path = manager.planner.find_human_margin_retreat(manager.current_q.copy())
+        self.assertIsNotNone(path)
+        self.assertTrue(checker.is_human_margin_transition_valid(path[0], path[-1]))
+        self.assertTrue(checker.is_state_valid(path[-1]))
+
+    def test_improving_endpoints_cannot_bypass_full_retreat_certificate(self):
+        manager, _ = self.margin_manager()
+        checker = manager.planner.collision_filter
+        with patch.object(checker, 'is_human_margin_transition_valid', return_value=False):
+            self.assertIsNone(manager.planner.find_human_margin_retreat(manager.current_q.copy()))
+
+    def test_expiry_during_retreat_candidate_screening_stays_blocked(self):
+        manager, _ = self.margin_manager()
+        checker = manager.planner.collision_filter
+        original = checker.human_margin_state
+        count = 0
+
+        def expire_after_initial(joints):
+            nonlocal count
+            count += 1
+            if count > 1:
+                self.now.return_value = 100.6
+            return original(joints)
+
+        with patch.object(checker, 'human_margin_state', side_effect=expire_after_initial):
+            self.assertIsNone(manager.planner.find_human_margin_retreat(manager.current_q.copy()))
+        self.assertEqual(manager.planner.last_human_retreat_failure, 'HUMAN_DATA_UNKNOWN')
+
+    def disconnected_goal_manager(self):
+        """Use real robot states with two nearby Cartesian goals on separate branches."""
+        manager = self.make_manager()
+        planner = manager.planner
+        checker = planner.collision_filter
+        first = planner.select_goal(manager.target_base, .12, .04)
+        second, start = None, None
+        for candidate in planner.goal_candidates(manager.target_base, .12, .04):
+            if np.max(np.abs(candidate - first)) <= 1.:
+                continue
+            probe = candidate.copy()
+            probe[0] += .03
+            if checker.is_state_valid(probe) and checker.is_edge_valid(probe, candidate):
+                second, start = candidate, probe
+                break
+        self.assertIsNotNone(second)
+        indices = [int(np.flatnonzero(np.all(planner.joint_q == goal, axis=1))[0])
+                   for goal in (first, second)]
+        planner.joint_q = np.vstack((first, second))
+        planner.joint_eof = planner.joint_eof[indices].copy()
+        planner.joint_edges = np.empty((0, 2), dtype=np.int64)
+        planner.joint_costs = np.empty(0)
+        planner.planner = type(planner.planner)(
+            planner.joint_q, planner.joint_edges, planner.joint_costs, checker,
+            max_joint_delta=planner.max_joint_delta, connection_count=1)
+        manager.update_joint_state(start, np.zeros(5))
+        return manager, first, second
+
+    def test_other_joint_goal_for_same_cartesian_target_can_reach_motion(self):
+        manager, first, second = self.disconnected_goal_manager()
+        target = manager.target_base.copy()
+        self.assertEqual(manager.step().status, 'PATH_READY')
+        np.testing.assert_array_equal(manager.goal_q, second)
+        self.assertFalse(np.array_equal(manager.goal_q, first))
+        self.assertEqual(manager.step().action, 'EXECUTE')
+        self.assertTrue(manager.planner.collision_filter.human_obstacles_enabled)
+        self.assertTrue(manager.planner.is_path_valid(manager.last_execution_path))
+        np.testing.assert_array_equal(manager.target_base, target)
+
+    def test_goal_candidate_limit_does_not_turn_failure_into_unchecked_motion(self):
+        manager, _, _ = self.disconnected_goal_manager()
+        manager.planner.max_goal_candidates = 1
+        self.assertEqual(manager.step().status, 'NO_PATH')
+        self.assertIsNone(manager.current_path)
+        self.assertEqual(manager.step().action, 'NONE')
+
+    def test_unsafe_or_expired_input_does_not_trigger_goal_alternatives(self):
+        manager = self.make_manager()
+        planner = manager.planner
+        goal = planner.select_goal(manager.target_base, .12, .04)
+        for reason in ('START_INVALID', 'GOAL_INVALID', 'HUMAN_VISION_UNKNOWN', 'PATH_INVALID'):
+            planner.last_plan_failure = reason
+            with patch.object(planner, 'plan') as plan:
+                result = planner.find_alternative_goal_path(
+                    manager.current_q, manager.target_base, goal, .12, .04)
+                self.assertIsNone(result)
+                self.assertFalse(plan.called)
+
+    def test_goal_alternatives_stop_when_observation_expires(self):
+        manager = self.make_manager()
+        planner = manager.planner
+        goal = planner.select_goal(manager.target_base, .12, .04)
+        self.now.return_value = 100.6
+        planner.last_plan_failure = 'NO_GRAPH_PATH'
+        with patch.object(planner, 'plan') as plan:
+            self.assertIsNone(planner.find_alternative_goal_path(
+                manager.current_q, manager.target_base, goal, .12, .04))
+            self.assertFalse(plan.called)
+        self.assertEqual(planner.last_plan_failure, 'HUMAN_VISION_UNKNOWN')
+
+    def test_first_failed_goal_batch_can_stage_then_replan_original_target_once(self):
+        manager = self.make_manager(EMPTY, joints=START)
+        target = manager.target_base.copy()
+        checker = manager.planner.collision_filter
+        with patch.object(manager.planner, 'plan', return_value=False):
+            manager.planner.last_plan_failure = 'NO_GRAPH_PATH'
+            self.assertEqual(manager.step().status, 'SAFE_POSITION_READY')
+            path = manager.current_path.copy()
+            self.assertTrue(checker.is_path_valid(path))
+            self.assertEqual(manager.step().action, 'EXECUTE')
+            manager.update_motion_status('EXECUTING')
+            manager.update_joint_state(path[-1], np.zeros(5))
+            manager.update_motion_status('COMPLETED')
+            self.assertTrue(manager.planning_required)
+            self.assertFalse(manager.safe_position_active)
+            self.assertEqual(manager.step().status, 'NO_PATH')
+            self.assertIsNone(manager.current_path)
+            self.assertEqual(manager.step().action, 'NONE')
+        np.testing.assert_array_equal(manager.target_base, target)
+
+    def test_staging_does_not_override_an_unowned_stop(self):
+        manager = self.make_manager(EMPTY, joints=START)
+        manager.update_motion_status('STOPPED')
+        manager.update_joint_state(START, np.zeros(5))
+        with patch.object(manager.planner, 'plan', return_value=False):
+            manager.planner.last_plan_failure = 'NO_GRAPH_PATH'
+            self.assertEqual(manager.step().status, 'SAFE_POSITION_READY')
+            decision = manager.step()
+            self.assertEqual((decision.action, decision.status), ('NONE', 'STOPPED'))
+            self.assertFalse(manager.stop_owned)
+
+    def test_invalid_planned_path_does_not_trigger_generic_staging(self):
+        manager = self.make_manager(EMPTY, joints=START)
+        manager.human_retry_count = 1
+        with patch.object(manager.planner, 'plan', return_value=False), \
+                patch.object(manager, '_prepare_safe_position') as stage:
+            manager.planner.last_plan_failure = 'PATH_INVALID'
+            self.assertEqual(manager.step().status, 'NO_PATH')
+            self.assertFalse(stage.called)
+
+    def test_invalidating_a_staging_move_clears_its_completion_context(self):
+        manager = self.make_manager(EMPTY, joints=START)
+        manager.safe_position_active = True
+        manager.invalidate_path()
+        self.assertFalse(manager.safe_position_active)
+
+    def test_staging_expiry_can_retry_after_inputs_are_refreshed(self):
+        for expired_input in ('human', 'feedback', 'obstacles'):
+            with self.subTest(expired_input=expired_input):
+                manager = self.make_manager(FAR, joints=START)
+                checker = manager.planner.collision_filter
+                validate = checker.is_path_valid
+
+                def expire_after_validation(path):
+                    result = validate(path)
+                    if expired_input == 'human':
+                        self.now.return_value = 100.6
+                    elif expired_input == 'feedback':
+                        manager.feedback_time -= manager.feedback_timeout + .1
+                    else:
+                        manager.obstacle_time -= manager.obstacle_timeout + .1
+                    return result
+
+                with patch.object(checker, 'is_path_valid', side_effect=expire_after_validation):
+                    self.assertFalse(manager._prepare_safe_position())
+                self.assertIsNone(manager.safe_position_attempted_revision)
+                self.assertFalse(manager.safe_position_active)
+                self.now.return_value = 100.
+                manager.update_joint_state(START, np.zeros(5))
+                manager.update_obstacles([])
+                manager.update_human_snapshot(FAR)
+                self.assertTrue(manager._prepare_safe_position())
+
+    def test_tracking_fault_cannot_be_released_by_empty_vision_or_staging(self):
+        manager = self.make_manager(EMPTY, joints=START)
+        manager.recovery_attempted = True
+        manager.update_failure_reason('TRACKING_ERROR')
+        manager.update_motion_status('CONTROL_ERROR')
+        self.assertTrue(manager.fault)
+        manager.update_human_snapshot(EMPTY)
+        with patch.object(manager, '_prepare_safe_position') as stage, \
+                patch.object(manager.planner, 'plan') as plan:
+            decision = manager.step()
+            self.assertEqual((decision.action, decision.status), ('NONE', 'MOTION_ERROR'))
+            self.assertFalse(stage.called)
+            self.assertFalse(plan.called)
+        self.assertTrue(manager.fault)
 
 
 if __name__ == '__main__':

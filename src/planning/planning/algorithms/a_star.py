@@ -85,6 +85,7 @@ class AStarPlanner:
         self.edge_cache = {}
 
         self.last_used_local_connections = False
+        self.last_candidate_count = 0
 
     def _check_revision(self):
         if self.checker.environment_revision != self.revision:
@@ -92,26 +93,40 @@ class AStarPlanner:
                 "Obstacle changed during path planning"
             )
 
+    def _human_data_ready(self):
+        return (
+            not getattr(self.checker, "human_obstacles_enabled", False)
+            or self.checker.human_data_ready()
+        )
+
     def _state_valid(self, index, configuration):
         self._check_revision()
+        if not self._human_data_ready():
+            return False
 
         if index not in self.state_cache:
-            self.state_cache[index] = bool(
-                self.checker.is_state_valid(configuration)
-            )
+            valid = bool(self.checker.is_state_valid(configuration))
+            self._check_revision()
+            if not self._human_data_ready():
+                return False
+            self.state_cache[index] = valid
 
         self._check_revision()
         return self.state_cache[index]
 
     def _edge_valid(self, a, b, qa, qb):
         self._check_revision()
+        if not self._human_data_ready():
+            return False
 
         key = (min(a, b), max(a, b))
 
         if key not in self.edge_cache:
-            self.edge_cache[key] = bool(
-                self.checker.is_edge_valid(qa, qb)
-            )
+            valid = bool(self.checker.is_edge_valid(qa, qb))
+            self._check_revision()
+            if not self._human_data_ready():
+                return False
+            self.edge_cache[key] = valid
 
         self._check_revision()
         return self.edge_cache[key]
@@ -183,6 +198,7 @@ class AStarPlanner:
         extra,
         use_local=False,
         frontier=None,
+        lazy_edges=False,
     ):
         n = len(self.q)
         start_id = n
@@ -217,6 +233,8 @@ class AStarPlanner:
 
         while queue:
             self._check_revision()
+            if not self._human_data_ready():
+                return None, expanded
 
             _, cost_so_far, current = heapq.heappop(queue)
 
@@ -241,6 +259,8 @@ class AStarPlanner:
 
                 indices.reverse()
 
+                if lazy_edges:
+                    return indices, expanded
                 return np.vstack([
                     configuration(i) for i in indices
                 ]), expanded
@@ -268,27 +288,23 @@ class AStarPlanner:
                 if neighbor in expanded:
                     continue
 
+                proposed = cost_so_far + edge_cost
+                if proposed + 1e-10 >= g_score.get(neighbor, float("inf")):
+                    continue
                 neighbor_q = configuration(neighbor)
 
-                if not self._state_valid(
-                    neighbor, neighbor_q
-                ):
-                    continue
-
-                if not self._edge_valid(
-                    current,
-                    neighbor,
-                    current_q,
-                    neighbor_q,
-                ):
-                    continue
-
-                proposed = cost_so_far + edge_cost
-
-                if proposed + 1e-10 >= g_score.get(
-                    neighbor, float("inf")
-                ):
-                    continue
+                if lazy_edges:
+                    edge = (min(current, neighbor), max(current, neighbor))
+                    if (
+                        self.state_cache.get(neighbor) is False
+                        or self.edge_cache.get(edge) is False
+                    ):
+                        continue
+                else:
+                    if not self._state_valid(neighbor, neighbor_q):
+                        continue
+                    if not self._edge_valid(current, neighbor, current_q, neighbor_q):
+                        continue
 
                 g_score[neighbor] = proposed
                 predecessor[neighbor] = current
@@ -307,6 +323,38 @@ class AStarPlanner:
                 )
 
         return None, expanded
+
+    def _lazy_search(self, start, goal, extra):
+        """Run A* on optimistic edges, certifying every returned path edge.
+
+        A failed state/edge is cached for this environment revision and removed
+        from subsequent A* candidates. No unchecked path is returned. If no
+        candidate remains, the eager fallback still establishes its valid
+        frontier for the existing local-connection search.
+        """
+        n = len(self.q)
+
+        def configuration(index):
+            return start if index == n else goal if index == n + 1 else self.q[index]
+
+        # Bound optimistic restarts; the original eager A* remains the fallback.
+        for _ in range(32):
+            self._check_revision()
+            if not self._human_data_ready():
+                return None, set()
+            indices, expanded = self._search(start, goal, extra, lazy_edges=True)
+            if indices is None:
+                return None, expanded
+            self.last_candidate_count += 1
+            if not all(self._state_valid(index, configuration(index)) for index in indices):
+                continue
+            if not all(self._edge_valid(a, b, configuration(a), configuration(b))
+                       for a, b in zip(indices[:-1], indices[1:])):
+                continue
+            if not self._human_data_ready():
+                return None, expanded
+            return np.vstack([configuration(index) for index in indices]), expanded
+        return None, set()
 
     def plan(self, start_q, goal_q):
         start = np.asarray(start_q, dtype=float)
@@ -344,6 +392,7 @@ class AStarPlanner:
         }
 
         self.last_used_local_connections = False
+        self.last_candidate_count = 0
 
         if not self._state_valid(start_id, start):
             print("[A*] NO_PATH: invalid start", flush=True)
@@ -426,16 +475,20 @@ class AStarPlanner:
                 (start_id, distance)
             )
 
-        result, reached = self._search(
-            start,
-            goal,
-            extra,
-        )
+        result, reached = self._lazy_search(start, goal, extra)
+        if result is None and self._human_data_ready():
+            result, reached = self._search(
+                start, goal, extra,
+            )
+        if not self._human_data_ready():
+            print("[A*] NO_PATH: human data expired during search", flush=True)
+            return None
 
         print(
             f"[A*] First search expanded: {len(reached)} states",
             flush=True,
         )
+        print(f"[A*] Candidate paths tested: {self.last_candidate_count}", flush=True)
 
         if result is not None:
             print(

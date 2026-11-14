@@ -28,7 +28,8 @@ reconstruction_node:
       forearm_max_radius: 0.085
       hand_max_radius: 0.09
 
-      safety_margin: 0.015
+      # Planning owns the inter-body separation margin; retain measured body radii.
+      safety_margin: 0.0
 
       radius_percentile: 0.80
       min_voxels: 15

@@ -27,7 +27,7 @@ Visualization Manager:
     Value: true
   - Class: rviz_default_plugins/MarkerArray
     Enabled: false
-    Name: Robot collision spheres - diagnostic
+    Name: Robot collision bounds - spheres and mesh boxes
     Namespaces: {}
     Topic:
       Depth: 1

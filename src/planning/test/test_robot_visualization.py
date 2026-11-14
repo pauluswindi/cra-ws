@@ -25,7 +25,7 @@ class Point:
 
 
 class Marker:
-    SPHERE, LINE_STRIP, LINE_LIST, POINTS, MESH_RESOURCE = 2, 4, 5, 8, 10
+    CUBE, SPHERE, LINE_STRIP, LINE_LIST, POINTS, MESH_RESOURCE = 1, 2, 4, 5, 8, 10
     ADD, DELETE = 0, 2
 
     def __init__(self):
@@ -150,16 +150,25 @@ class RobotVisualizationTests(unittest.TestCase):
         visualizer.forward_kinematics([.7, -1.1, .8, -.3, .2])
         visualizer.publish_robot()
         bounds = self.node.messages['/planning/robot_collision_bounds'][-1].markers
-        self.assertEqual(len(bounds), 5)
+        self.assertEqual(len(bounds), 10)
         base = visualizer.data.xpos[visualizer.base_id]
         conversion = (FrameTransform.ROBOT_FROM_MUJOCO_BASE
                       @ visualizer.data.xmat[visualizer.base_id].reshape(3, 3).T)
         for marker in bounds:
             actual = [marker.pose.position.x, marker.pose.position.y, marker.pose.position.z]
-            expected = conversion @ (visualizer.data.geom_xpos[marker.id] - base)
+            rotation = visualizer.data.geom_xmat[marker.id].reshape(3, 3)
+            local_center, half = visualizer.robot_collision_boxes[marker.id]
+            offset = rotation @ local_center if marker.type == Marker.CUBE else 0.
+            expected = conversion @ (visualizer.data.geom_xpos[marker.id] + offset - base)
             np.testing.assert_allclose(actual, expected, atol=1e-12)
-            diameter = 2 * visualizer.model.geom_rbound[marker.id]
-            np.testing.assert_allclose([marker.scale.x, marker.scale.y, marker.scale.z], diameter)
+            dimensions = (2. * half if marker.type == Marker.CUBE
+                          else 2. * visualizer.model.geom_rbound[marker.id])
+            np.testing.assert_allclose(
+                [marker.scale.x, marker.scale.y, marker.scale.z], dimensions)
+            if marker.type == Marker.CUBE:
+                q = marker.pose.orientation
+                np.testing.assert_allclose(self.rotation([q.w, q.x, q.y, q.z]),
+                                           conversion @ rotation, atol=1e-12)
 
     def test_measured_joint_order_throttle_and_invalid_feedback(self):
         visualizer = self.visualizer

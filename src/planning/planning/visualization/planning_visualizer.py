@@ -15,6 +15,7 @@ from rclpy.qos import (
 from sensor_msgs.msg import JointState
 from visualization_msgs.msg import Marker, MarkerArray
 
+from planning.algorithms.human_collision import mesh_local_box
 from simulation.frame_transform import FrameTransform
 
 
@@ -49,6 +50,7 @@ class PlanningVisualizer:
         self.eof_id = self.model.body(end_effector_body).id
         self.robot_meshes = []
         self.robot_collision_geoms = []
+        self.robot_collision_boxes = {}
         self.last_robot_marker_time = None
         model_path = Path(model_path).resolve()
         xml = ET.parse(model_path).getroot()
@@ -66,6 +68,8 @@ class PlanningVisualizer:
             if self.model.geom_type[geom_id] != mujoco.mjtGeom.mjGEOM_MESH:
                 continue
             mesh_id = int(self.model.geom_dataid[geom_id])
+            if geom_id in self.robot_collision_geoms:
+                self.robot_collision_boxes[geom_id] = mesh_local_box(self.model, geom_id)
             asset = assets[self.model.mesh(mesh_id).name]
             resource = (model_path.parent / mesh_dir / asset.get('file')).resolve()
             scale = np.fromstring(asset.get('scale', '1 1 1'), sep=' ')
@@ -169,7 +173,8 @@ class PlanningVisualizer:
         self.publish_static()
 
         self.node.get_logger().info(
-            "PlanningVisualizer initialized"
+            f"PlanningVisualizer initialized: {len(self.robot_meshes)} robot meshes, "
+            f"topic=/planning/robot_model, frame={self.frame_id}; waiting for joint feedback"
         )
 
     @staticmethod
@@ -405,6 +410,11 @@ class PlanningVisualizer:
             or now - self.last_robot_marker_time >= 100_000_000
         ):
             self.publish_robot()
+            if self.last_robot_marker_time is None:
+                self.node.get_logger().info(
+                    f"Robot model published: {len(self.robot_meshes)} measured meshes on "
+                    f"/planning/robot_model; RViz needs a MarkerArray display in {self.frame_id}"
+                )
             self.last_robot_marker_time = now
 
     def publish_robot(self):
@@ -437,6 +447,17 @@ class PlanningVisualizer:
             marker.scale.y = marker.scale.z = diameter
             self.set_marker_pose(marker, rotation @ (self.data.geom_xpos[geom] - base), np.eye(3))
             bounds.markers.append(marker)
+            if geom in self.robot_collision_boxes:
+                center, half = self.robot_collision_boxes[geom]
+                geom_rotation = self.data.geom_xmat[geom].reshape(3, 3)
+                box = self.make_marker('collision_mesh_boxes', Marker.CUBE, 1.,
+                                       (.2, 1., .6), alpha=.2)
+                box.id = geom
+                box.scale.x, box.scale.y, box.scale.z = map(float, 2. * half)
+                self.set_marker_pose(
+                    box, rotation @ (self.data.geom_xpos[geom] + geom_rotation @ center - base),
+                    rotation @ geom_rotation)
+                bounds.markers.append(box)
         self.robot_pub.publish(meshes)
         self.robot_bounds_pub.publish(bounds)
 

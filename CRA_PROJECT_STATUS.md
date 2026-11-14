@@ -162,6 +162,584 @@ Current Target changes only when valid simulation feedback arrives.
 
 ## 5. Recent Development
 
+### 2026-11-14 — Reproduce joint-2 tracking fault and enable bounded staging
+
+Status: Implemented and tested with the actual MuJoCo model headlessly.
+ROS 2 build, transport, live Kinect and complete live execution remain unverified.
+This supersedes the pending stationary-scene diagnosis below.
+
+New live evidence:
+
+- Motion repeatedly reports joint2 TRACKING_ERROR: reference/actual differences
+  of 0.288–0.449 rad, requested velocity 0.789–1.197 rad/s, and filtered velocity
+  0.500 rad/s. The existing recovery replans once, fails again and latches
+  fault=True / CONTROL_ERROR / MOTION_ERROR. A subsequent valid EMPTY frame
+  does not clear that control fault. These are distinct from the earlier
+  HUMAN_TOO_CLOSE / HUMAN_PATH_BLOCKED stops.
+- The final measured configuration is approximately
+  `[2.53958, -2.27872, 2.44299, -0.05139, 1.27958]`; all five angles are within
+  joint limits. Its 0.359 m requested-target error is an interrupted execution
+  error, not evidence that Motion completed at an inaccurate Cartesian goal.
+- At two logged failure poses, the configured model requires 12.2103 and
+  13.7016 Nm of joint2 gravity support. The previous moving target clamp of
+  measured angle +/-0.12 rad, with kp=100, allowed at most 12 Nm of position
+  torque before damping. Thus a positive lifting velocity command could still
+  let the arm sag and exceed the existing tracking threshold without contact.
+
+Changes:
+
+- Simulation now centers that +/-0.12 rad correction allowance on the existing
+  gravity-balanced hold target. Velocity integration, +/-0.5 rad/s command
+  clipping, joint/control limits, model gains and collision behavior are
+  unchanged. The absolute actuator offset can exceed 0.12 rad by the model
+  gravity-support term. Motion's 0.2 rad / 0.5 s tracking guard, one recovery
+  attempt and fault latch are unchanged; no automatic fault-clear was added.
+- Planning's existing safe-position move previously required two failed goal
+  batches, while unchanged-environment caching prevented the second batch.
+  It can now try one bounded staging search after NO_GRAPH_PATH exhausts the
+  configured alternative goals. It still requires a valid measured start,
+  valid candidate/edge/prepared path, fresh inputs and the STOP/RELEASE protocol.
+  Success returns to the original Cartesian target; invalid paths and control
+  faults do not trigger staging, and unowned STOP cannot be released.
+- An interrupted staging move clears its completion context. Input expiry
+  cannot permanently cache a failed staging attempt; fresh input can retry.
+- Target input is Cartesian XYZ in CRA base_link. A* searches joint-space
+  configurations and Motion interpolates joint trajectories. A straight joint
+  segment does not imply a straight end-effector path in Cartesian space.
+
+Verification:
+
+- All 95 tests passed: 89 Planning/geometry/visualization tests and six
+  simulation control tests. The new control regressions exercise three logged
+  poses and actual graph waypoints from the final pose; restoring only the
+  old clamp makes all four cases fail the tracking guard. Six new Planning
+  tests cover staging activation/completion, bounded retries, invalid paths,
+  unowned STOP, expired input and refusal to clear a control fault.
+- The dynamics comparison uses actual simulation callbacks and model physics,
+  with the configured linear reference, gain 2, 0.3 rad/s reference limit and
+  200 Hz command schedule sampled on the model's 2 ms physics timestep. It
+  reproduces the controller equations in Python; it does not run the C++ ROS
+  component. All eight comparison runs have zero contacts. From the final
+  pose along graph waypoints, peak joint2 error is 0.547778 rad before and
+  0.023787 rad after; the corrected run reaches the unchanged 0.02 rad final
+  joint tolerance. The baseline crosses the tracking guard even though the
+  offline comparison continues integrating to expose its behavior.
+- Logs: `/tmp/cra_tracking_fix_planning_tests.log`,
+  `/tmp/cra_tracking_fix_simulation_tests.log`,
+  `/tmp/cra_tracking_control_regression_before.log`, and
+  `/tmp/cra_tracking_control_comparison.json`. These are local debug artifacts.
+
+Rebuild `simulation` and `planning`, source the overlay, then restart the stack
+to load the correction and start a fresh control session. Keep all collision
+and human margins unchanged. Verify the repeated joint2 fault no longer occurs
+in a controlled live simulation; headless results do not establish physical
+robot performance or guaranteed motion through arbitrary human geometry.
+
+### 2026-11-14 — Faster A* validation and alternative joint goals
+
+Status: Implemented and tested headlessly after the user confirmed EMPTY
+recovery works but reported slow response and difficulty routing around humans.
+Live ROS/Kinect movement and latency remain unverified in this environment.
+
+Source findings:
+
+- A* eagerly checked neighboring states/edges, including edges whose proposed
+  cost could not improve the current route. Many tens of thousands of state
+  queries could run synchronously before feedback/Vision callbacks resumed.
+- Normal/recovery goal selection tried only the first valid graph configuration
+  near a Cartesian target. A disconnected joint branch could fail even when
+  another valid end configuration satisfied the same Cartesian bounds.
+- Motion command publication followed path/graph visualization work.
+
+Changes:
+
+- `AStarPlanner._lazy_search()` runs A* on candidate edges and checks every
+  state/edge of a candidate path with the same CollisionFilter. Failed states
+  or edges are cached for that environment revision and excluded from later
+  candidates. Only a fully certified path is returned. Optimistic restarts are
+  bounded at 32; the original eager A* and existing local-connection fallback
+  remain available, with the eager search establishing a valid fallback frontier.
+  GNG data, graph edge costs and the A* heuristic are unchanged.
+- Skip neighbors that cannot improve g_score before expensive collision queries.
+  Both search forms stop when required human data expires. Results computed
+  across expiry or revision changes cannot poison the cache with false blocked
+  states/edges. Temporary start/goal connections are still revalidated per request.
+  The caller's final path validation and pre-execution checks remain required.
+- `PathPlanner.goal_candidates()` preserves the existing 0.04–0.12 m Cartesian
+  goal window. After NO_GRAPH_PATH, `find_alternative_goal_path()` tries other
+  distinct, valid joint configurations, up to the existing joint_graph
+  max_candidates budget (currently four configurations including the first).
+  Normal planning and the existing controlled-error recovery use it. Unsafe
+  starts, invalid goals, invalid paths, expiry and revision changes do not
+  trigger speculative execution or an unbounded retry loop.
+- `PlanningNode.planning_cycle()` dispatches STOP/RELEASE/EXECUTE before runtime
+  distance diagnostics and visualization. No threads, nodes, timer changes,
+  message changes, margin reductions, or relaxed freshness rules were introduced.
+  execute_path=True, simulation_only_ignore_unknown=True, Planning margin
+  0.10 m and Vision extra padding 0.0 m are preserved.
+
+Verification:
+
+- All 87 tests passed: 83 Planning/geometry/visualization tests and four
+  simulation hold tests. Nine new A* tests cover blocked edges/states, all-route
+  failure, valid local fallback frontier, expiry/cache recovery, environment
+  changes, temporary start changes, and agreement with independent Dijkstra
+  costs across 30 randomized blocked graphs. Four new real-model tests cover
+  alternative joint goals reaching Motion decisions, candidate limits, and
+  refusal to retry unsafe/expired input. Test output:
+  `/tmp/cra_responsiveness_all_tests.log` and
+  `/tmp/cra_responsiveness_hold_tests.log`.
+- Controlled cold-cache comparison using identical model, graph, start and goal:
+
+  | Scene | Before | After | State checks before/after |
+  | --- | ---: | ---: | ---: |
+  | EMPTY, human checks disabled by the configured simulation policy | 3.060 s | 0.039 s | 32,784 / 386 |
+  | Eight synthetic OBSERVED capsules | 15.777 s | 0.154 s | 61,247 / 517 |
+
+  Before/after joint paths are numerically identical: 4.54267 rad for the empty
+  scene and 6.29366 rad for the detour, with unchanged refined minimum clearance
+  above 0.10 m. The eight-capsule workload uses one detour capsule and seven
+  remote capsules; it is a controlled computation comparison, not a live
+  Kinect human scene. Geometry benchmarking freezes capture time explicitly.
+- A separate unfrozen-clock eight-capsule search and complete final validation
+  took 0.129 s and retained fresh data within the unchanged 0.5 s deadline.
+  `/tmp/cra_astar_latency_comparison.json` records both comparisons.
+- A real-clock Manager probe with fresh OBSERVED geometry each simulated cycle
+  follows STOPPED -> PATH_READY -> RELEASE -> IDLE -> EXECUTE. Planning takes
+  0.129 s; each preparation/revalidation phase takes about 0.121 s. With explicit
+  0.2 s pauses and mocked Motion acknowledgments, the replan/handshake takes
+  about 0.824 s overall. This is not ROS transport or dynamics execution and
+  search time must not be presented as total response latency.
+  `/tmp/cra_responsive_manager_real_clock.json` records the stages.
+- Direct checks of the actual planning-cycle method confirm all three command
+  types publish before visualization. Syntax, Flake8 (99-character limit),
+  JSON/config parsing and Git whitespace checks passed.
+
+Rebuild `planning`, source the overlay and restart CRA. New logs report A*
+candidate-path counts and alternate Cartesian-goal attempts. This improves
+search responsiveness/options; current-state margin violations still require
+a certified retreat, and a visibly open workspace does not prove a connected
+joint-space route. Stale Vision, tracking failures, coarse graph coverage and
+the existing full historical-path revalidation remain separate limitations.
+No physical robot safety or guaranteed escape claim is made.
+
+### 2026-11-14 — Diagnose stationary EMPTY scene and target offsets
+
+Status: Source audit and offline probes completed; a periodic runtime diagnostic
+was added. Exact live STOP/fault cause remains pending the current Planning and
+Motion status values. Target-selection and collision behavior are unchanged.
+
+The new attachment contains 208 lines, beginning mid-message, and covers about
+42 seconds of a stationary pose. It includes 20 EMPTY, 12 STALE_MESSAGE and
+10 VISION_INVALID transitions, but NO Planning status, Motion status/failure,
+requested-target coordinate, accepted trajectory, or completion message. There
+are no OBSERVED human reports in this excerpt. Joint commands/velocities are
+zero and simulation reports contacts=0. Human diagnostic status UNKNOWN alone
+does not identify the motion blocker under simulation_only_ignore_unknown=True.
+
+Findings:
+
+- Measured joints are approximately
+  `[0.1696632851, -1.9255086910, 2.1852203227, 0.4095203659, -0.1680468340]`.
+  They satisfy all joint limits and diagnose VALID against the default XML
+  environment with humans disabled. The live target/static poses are absent,
+  so this does not certify the actual live environment. Their end-effector
+  coordinate in CRA base_link is approximately
+  `[0.03896674, -0.28463422, -0.25867694]` m.
+- With this measured pose, a fresh EMPTY snapshot and the default XML target,
+  a fresh manager reaches PATH_READY then EXECUTE/TRAJECTORY_SENT with seven
+  validated waypoints. This offline state-machine probe does not reproduce the
+  live target or its unknown prior STOP/fault history; it confirms EMPTY alone
+  does not block a fresh manager under the preserved simulation policy.
+- `PathPlanner.select_goal()` currently selects only stored graph states whose
+  end-effector lies between target_clearance=0.04 m and goal_tolerance=0.12 m
+  from the requested target. States closer than 0.04 m are deliberately skipped.
+  There is no Cartesian IK refinement in this goal-selection function.
+- A controlled graph-node target probe requests graph node 3157's exact,
+  valid end-effector position. The selector skips that zero-error state and
+  chooses node 2780, at 0.046149 m from the requested position. This confirms
+  the existing target stand-off semantics independently of the live fault.
+- Motion COMPLETED checks final JOINT error against the selected joint goal
+  (currently 0.02 rad tolerance). It does not establish that the end-effector
+  has reached the requested Cartesian target center.
+- The red target is also a collidable box in MuJoCo, with half-sizes
+  0.035/0.020/0.025 m and contact masks enabled. Keep target contact checking
+  active; changing center/approach semantics requires an explicit tool/contact
+  goal definition, not just disabling the target collider.
+- The green GNG workspace samples do not certify every interior location,
+  joint-space connection, whole-arm clearance, or successful execution.
+
+Diagnostic correction:
+
+- `PlanningNode.report_runtime_diagnostics()` logs a Planning snapshot every
+  five seconds, even when status does not change. It reports Planning/Motion
+  status, failure reason, fault/STOP ownership/pending command, planning flag,
+  path count, feedback/obstacle readiness, human checking state, latest search
+  failure, requested target/current end-effector and actual/selected-goal target
+  errors in meters. Existing state transitions and command decisions are intact.
+- Distance queries use the visualization scratch model, leaving it at measured
+  joints; they do not mutate CollisionFilter or PlanningManager. Diagnostic FK
+  errors are logged without interrupting command dispatch. Checks with actual
+  MuJoCo and stub transport verified fault visibility, distance reporting,
+  five-second throttling, clock reset, missing inputs and nonfatal FK failure.
+- Syntax, Flake8 (99-character limit) and Git whitespace checks passed. No
+  ROS launch or live movement was executed here; no new end-to-end claim.
+
+To obtain the stored status from a running stack, use transient-local durability
+because these status publishers only publish on changes. The Motion topic is
+`/motion/execution_status`, not `/motion/status`:
+
+```bash
+ros2 topic echo /planning/status --once --qos-durability transient_local
+ros2 topic echo /motion/execution_status --once --qos-durability transient_local
+ros2 topic echo /motion/failure_reason --once --qos-durability transient_local
+```
+
+Remaining live hypotheses include a latched control fault/failed recovery,
+unowned STOP, unchanged failed graph request, or an already completed selected
+stand-off goal. The current excerpt cannot choose between them. Do not clear
+faults, release an external STOP, or relax collision margins based on this image.
+
+### 2026-11-14 — One configured separation margin and faster retreat screening
+
+Status: Implemented and tested headlessly after the user's request to keep the
+extra separation margin in Planning rather than also padding human geometry.
+Live ROS/Kinect execution remains unverified here.
+
+The supplied follow-up log confirms SPHERE_AND_MESH_BOX is active. At constant
+robot joints, refined human clearance ranges from about 0.017 to 0.063 m, with
+one FAR report at 0.172 m. Retreat/search failures repeatedly coincide with
+HUMAN_DATA_UNKNOWN, STALE_MESSAGE and data expiry during graph search. The old
+HUMAN_DATA_OR_STATE_CHANGED reason is also consistent with expiry between two
+consecutive candidate checks; these callbacks do not mutate geometry during
+the synchronous search. The log does not establish that margin alone prevents
+escape or that a certified path exists through the current human geometry.
+
+Changes:
+
+- `cra/config/reconstruction.yaml`: set `capsule.safety_margin` from 0.015 to
+  0.0 for the CRA experiment. Anatomical minimum/maximum radii, voxel-derived
+  estimates, smoothing and ROI settings remain unchanged. Human bodies are
+  still represented by positive-radius capsules. Planning's human separation
+  margin remains 0.10 m; static/contact margin remains 0.005 m. Removing the
+  Vision padding can reduce total conservatism by up to 0.015 m, subject to
+  radius clamping/filtering. It does not establish physical deployment safety.
+- This is a CRA YAML override, not a change to Vision's C++ standalone defaults.
+  `vision/reconstruction.launch.py` already loads that CRA configuration under
+  `reconstruction_node`. Rebuild/source `cra` and restart reconstruction to
+  load it and reset previously filtered radii. Verify with
+  `ros2 param get /reconstruction_node capsule.safety_margin` (expected 0.0).
+- `PathPlanner.find_human_margin_retreat()` now screens candidate endpoints
+  before sampling their complete edges. Endpoints with no improvement or with
+  worse clearance for another protected pair cannot win or pass the existing
+  certificate. Skip these unnecessary edge checks, then run the complete
+  sampled certificate for every potentially winning candidate. The final
+  straight segment and all execution checks remain required.
+- An invalid/static-contact endpoint rejects only that candidate. Expired data
+  or a changed revision aborts with the explicit data/environment reason.
+  No timeout, human-data freshness rule, search-step budget, GNG/A* algorithm,
+  collision margin or execution experiment flag was relaxed.
+
+Verification:
+
+- All 74 tests passed: 70 Planning/geometry/visualization tests plus four
+  simulation hold tests. Three new regressions verify rejection of an invalid
+  candidate without losing other directions, inability to execute an improving
+  endpoint without the full edge certificate, and fail-closed expiry during
+  candidate screening. `/tmp/cra_single_margin_and_retreat_tests.log` records
+  the Planning suite.
+- A fixed eight-capsule comparison returns the identical retreat before/after
+  screening. Full edge checks fall from 271 to 44, state checks from 923 to 497,
+  and measured time from approximately 0.469 to 0.247 s. A separate real-clock
+  probe with 0.35 s of capture lifetime remaining rejects the old search after
+  expiry and returns a still-fresh path in 0.219 s with screening. These local
+  controlled probes are not timing guarantees for the supplied live scene.
+  Results: `/tmp/cra_retreat_screening_benchmark.log` and
+  `/tmp/cra_retreat_remaining_deadline_probe.log`.
+- Config/launch checks confirm positive body radii, CRA parameter-file loading,
+  zero extra Vision padding and the unchanged 0.10 m Planning margin. A finite
+  capsule/box example changes from 0.095 m (NEAR) to 0.110 m (FAR) when only
+  the extra 0.015 m radius padding is removed. Logs are in
+  `/tmp/cra_single_margin_config_check.log`.
+- Flake8 (99-character limit), syntax and Git whitespace checks passed. Full
+  ROS build/transport and live movement were not run in this environment.
+
+The narrower padding alone cannot clear the supplied 0.05286 m state under a
+0.10 m margin (adding 0.015 m yields only 0.06786 m). Retreat still needs fresh
+human geometry and a certified non-worsening path. Long general A* searches,
+upstream invalid/stale detections, capsule motion/noise and joint tracking
+failures remain separate limitations; this change does not guarantee escape.
+
+### 2026-11-14 — Mesh-enclosing boxes for human collision refinement
+
+Status: Implemented and tested headlessly after the user authorized the geometry
+correction. Native ROS/RViz and live human avoidance remain unverified here.
+
+Changes:
+
+- `human_collision.mesh_local_box()` derives an enclosing box from every compiled
+  MuJoCo mesh vertex, using the geom-local frame after MuJoCo mesh scaling,
+  centering and rotation. Boxes have 1 micrometer of numerical enclosure padding.
+  The configured 0.10 m human margin is unchanged.
+- `CollisionFilter` caches boxes for the same five active arm mesh geoms and
+  transforms them with each geom's measured/planned pose. Unsupported non-mesh
+  geoms retain sphere checking. State, edge, path and human-margin retreat checks
+  all use the shared human-distance implementation.
+- Sphere checking remains the broad phase. Potential proximity is refined with
+  finite human-segment/oriented-box distance, minus the human capsule radius.
+  The larger sphere/box clearance lower bound is still conservative because
+  BOTH volumes enclose the mesh. Thus a real mesh contact cannot be made clear
+  merely by discarding the old sphere's empty space.
+- `segment_box_distances()` minimizes squared distance on all piecewise
+  quadratic intervals of the finite segment, split at box-face crossings.
+  It covers point capsules, parallel segments, tangencies, corners and segments
+  whose endpoints lie outside but whose middle crosses the robot enclosure.
+- Sphere-clear checks skip unnecessary box-distance computation. Retreat's
+  all-pair reports always use refined distances, including FAR pairs, to avoid
+  discontinuities in the non-worsening clearance certificate. Invalid potential
+  collision boxes/non-finite distance results return UNKNOWN.
+- Diagnostics add geometry_model, sphere_clearance and box_clearance. The
+  existing robot_radius remains the broad-phase sphere radius; subtracting that
+  radius from center_distance alone no longer describes the refined clearance.
+- RViz's optional `/planning/robot_collision_bounds` display now includes five
+  green mesh boxes plus the existing five blue spheres, using the same bounds
+  helper as CollisionFilter. The measured grey robot mesh is unchanged. The
+  config display is named "Robot collision bounds - spheres and mesh boxes".
+- Regression fixtures now place close/overlapping human capsules at the actual
+  requested proxy clearance, rather than assuming a sphere radius still defines
+  the refined surface. Their original safety assertions are preserved.
+
+Verification:
+
+- All 71 tests passed: 53 existing collision/planning regressions, 11 new
+  distance/enclosure tests, three RViz marker tests and four simulation hold
+  tests. Results: `/tmp/cra_mesh_box_all_tests.log` and
+  `/tmp/cra_mesh_box_hold_tests.log`.
+- Every vertex in all five meshes is enclosed at zero and eight randomized
+  joint configurations. Another 100 samples put capsule centers on actual mesh
+  vertices and confirm they remain blocked. Box distance matches an independent
+  scalar convex minimization for 300 random segments.
+- The prior deterministic synthetic witness changes from sphere NEAR at
+  0.0700 m to refined FAR above 0.22 m, with the same 0.10 m human margin.
+  Separate tests verify the unchanged threshold on both sides of 0.10 m.
+- Actual GNG/A* detour search and STOP/RELEASE/EXECUTE regressions pass with
+  OBSERVED geometry. The frozen-clock detour is 6.294 rad versus the original
+  4.543 rad, with sampled refined minimum clearance 0.1004 m. Its search takes
+  about 14.2 s here: this is an offline geometric result, NOT live freshness or
+  end-to-end avoidance validation within the existing 0.5 s deadline.
+- One-capsule 1,000-query measurements took about 0.087 s for the prior sphere
+  implementation versus 0.233 s with refinement. More precise checking adds
+  work; the sphere-clear fast path avoids needless narrow checks. Measurements
+  are local, not timing guarantees. `/tmp/cra_mesh_box_benchmark.log` records them.
+- Python syntax, Flake8 (99-character limit), config parsing and CRLF-aware Git
+  whitespace checks passed. No safety margin, timeout, GNG/A* algorithm, ROS
+  message or experiment flag was changed. Legacy workspace_planning is untouched.
+
+Rebuild `cra planning`, source the overlay, and restart CRA. Verify the unchanged
+0.10 m margin, green boxes enclosing the grey robot, sphere-vs-box diagnostics,
+and collision behavior with continuously OBSERVED human geometry. Remaining
+VISION_INVALID/expired snapshots, historical-path validation and joint-2
+TRACKING_ERROR findings from the audit below are separate issues; this change
+does not guarantee motion in every human configuration or certify physical use.
+
+### 2026-11-14 — Collision sensitivity audit after RViz confirmation
+
+Status: Diagnostic audit and a headless geometry counterexample completed.
+The user confirms RViz robot rendering now works. No additional production
+source, collision geometry, safety margin, or timeout changes in this audit.
+
+The latest attached run has 17 HUMAN_PATH_BLOCKED, 23 HUMAN_RETREAT_BLOCKED,
+18 HUMAN_RETREAT_DATA_UNKNOWN, and 19 HUMAN_VISION_UNKNOWN status transitions.
+Failed-retreat diagnostics include 21 HUMAN_DATA_UNKNOWN and 12 HUMAN_OVERLAP
+reports. Counts describe logged transitions/reports, not durations or all cycles.
+There are also 34 graph-search data-expiry messages, 114 rejected geometry
+messages, and two Motion TRACKING_ERROR failures for joint 2 (0.318 and
+0.423 rad errors with velocity filtered to 0.500 rad/s). Not every STOP is
+caused by human collision proximity.
+
+Confirmed geometry conservatism:
+
+- `CollisionFilter._human_collision_after_forward()` represents each arm mesh
+  as one sphere using `geom_rbound`. `nearest_human_collision()` checks the
+  sphere against human capsules and applies the configured 0.10 m human margin.
+- The link2 sphere radius is approximately 0.19917 m (diameter 0.39834 m),
+  whereas its compiled mesh-local box spans approximately
+  0.09531 x 0.12647 x 0.32842 m. A sphere around a long, narrow link includes
+  substantial empty space beside the link.
+- A deterministic synthetic point-capsule witness at a joint pose taken from
+  the latest log gives sphere clearance 0.0700 m (NEAR), while its surface
+  clearance to the enclosing oriented boxes of ALL FIVE checked arm meshes
+  is at least 0.22139 m. Since each box encloses its mesh vertices and triangles,
+  this is a conservative lower bound on mesh clearance, above the same 0.10 m
+  margin. This proves a possible false proximity classification in the current
+  proxy; it does not reconstruct the live human's unavailable capsule endpoints
+  or establish that all logged overlap classifications are false.
+- Reproduction output and witness coordinates are in
+  `/tmp/cra_collision_sensitivity_probe.json` and
+  `/tmp/cra_collision_sensitivity_probe.log`. They use the real MuJoCo model,
+  existing frame conversion and unchanged human checking implementation.
+
+Other confirmed mechanisms and remaining hypotheses:
+
+- HUMAN_PATH_BLOCKED can occur with a FAR current-pose report. Current-pose
+  separation does not establish clearance along a future trajectory. The
+  source checks state, full path, revision and freshness; failure of any is
+  grouped under HUMAN_PATH_BLOCKED, so the log does not identify the failing
+  waypoint/edge or distinguish expiry during that check.
+- During active execution `_human_guard()` revalidates the full
+  `last_execution_path`, including already traversed portions. A human near a
+  past portion may cause unnecessary stopping; the latest logs do not include
+  progress/capsule endpoints sufficient to prove that case occurred live.
+- Planning searches execute synchronously in `planning_cycle()` with ordinary
+  `rclpy.spin(node)`. Long searches can delay feedback/Vision callbacks while
+  the existing 0.5 s capture deadline expires. This is an additional freshness
+  mechanism, distinct from upstream VISION_INVALID messages. Increasing the
+  timeout alone would conceal the age rather than establish fresh geometry.
+
+Minimal proposed corrections, not implemented by this audit:
+
+1. Retain the sphere as a broad-phase bound; refine potential proximity with
+   a proven enclosing oriented box or capsule for each arm link. Prove mesh
+   containment and finite-segment distance correctness before enabling it.
+   Preserve the 0.10 m human margin and existing static/contact checks.
+2. Preserve timely receipt of human/feedback snapshots during long searches,
+   with explicit ownership of MuJoCo/planner state. Do not simply make shared
+   collision state concurrently mutable or accept expired geometry.
+3. Report the actual failing path edge/state and expiry reason. Validate the
+   remaining path using trustworthy execution progress, without guessing past
+   self-intersections or skipping unexecuted segments.
+4. Investigate the joint-2 tracking failures separately; do not raise its error
+   limit merely to avoid STOP. Confirm avoidance using continuously OBSERVED
+   data rather than UNKNOWN-ignored simulation execution.
+
+### 2026-11-14 — Staged human retreat and gravity-balanced simulation STOP
+
+Status: Implemented and tested headlessly. Live ROS/Motion/Kinect behavior and
+native RViz rendering remain unverified here.
+
+The latest supplied run sends four HUMAN_RETREAT_SENT trajectories, so retreat
+does reach Motion. Subsequent cancellations include STALE_MESSAGE, changed
+capsule geometry, and "Measured robot motion reduced human clearance". There
+are also 27 HUMAN_OVERLAP reports and three SEARCH_BUDGET_EXHAUSTED reports.
+These are distinct from the previously fixed EMPTY recovery latch.
+
+Changes:
+
+- `RobotSimulation.hold_position_target()` balances the configured CRA unit-gear
+  position actuators using model bias forces and actuator gains when capturing
+  a hold target. Startup, zero command, invalid command, and command timeout use
+  the same bounded target. Repeated zero commands still do not recapture it.
+  Previously setting the position-actuator target to the measured angle removed
+  its supporting torque, allowing gravity to move an otherwise stationary arm.
+  No contact force compensation, model/gain changes, or joint-limit changes
+  were introduced.
+- A controlled 0.5 s probe at the supplied pose
+  `[1.98576289, -0.64575674, 1.22786207, -0.91740616, -0.94390645]` measured
+  0.07318 rad maximum drift with the old hold, versus below 1e-9 rad with the
+  gravity-balanced target. This starts at rest and does not prove instantaneous
+  braking of a moving arm.
+- `PlanningNode.joint_callback()` now passes named measured joint velocities to
+  `PlanningManager`. Malformed/non-finite supplied velocities cannot refresh
+  feedback. Position-only callers retain compatibility, with velocity estimated
+  when two timed positions are available.
+- Retreat search and the pre-execution guard reject measured speeds above
+  `recovery_stability_tolerance / recovery_settle_time` (currently 0.02 rad/s),
+  reporting ROBOT_STILL_MOVING or WAITING_FOR_ROBOT_SETTLE. A STOPPED
+  acknowledgment alone establishes trajectory cancellation, not physical rest.
+  This is a measured-speed gate, not a full braking-distance certificate.
+- `PathPlanner.find_human_margin_retreat()` still prefers an endpoint outside
+  the human margin. After the existing bounded search, it may return a straight
+  partial retreat with at least the existing static safety margin's worth of
+  clearance improvement (currently 0.005 m). Its endpoint can remain NEAR.
+- Partial endpoints use the existing special human-margin certificate: valid
+  joints, no static/MuJoCo contact, positive clearance for every human pair,
+  fresh geometry, and sampled non-worsening clearance for every initially-close
+  pair, without entering another pair's margin. The full straight segment must
+  pass; monotonic search steps alone are insufficient. Manager revalidates the
+  certificate before RELEASE/EXECUTE and during execution. On partial completion
+  it requests STOP and plans the next retreat from measured state; the original
+  Cartesian target is retained. Ordinary GNG/A*/state/edge/path checking and
+  configured margins are unchanged. Overlap or unknown data still blocks retreat.
+- `PlanningVisualizer` logs its six mesh markers' topic/frame at startup and
+  confirms the first measured publication. Existing robot-marker numerical
+  tests pass; no renderer failure was established from the supplied log.
+
+Verification:
+
+- 56 Planning/visualization tests and four simulation hold tests passed. New
+  checks exercise staged completion/retry, expired partial certificates,
+  measured braking before search and during RELEASE, invalid velocity feedback,
+  and the actual simulation zero/timeout/invalid-command hold callbacks.
+- A simplified dynamics probe with one stationary capsule and a bounded partial
+  segment increased measured clearance from 0.0200 to 0.02774 m in 0.2 s with
+  no contacts or sampled non-worsening violations. It uses a linear reference
+  and the actual simulation callbacks, not the complete C++/ROS trajectory stack.
+- Results: `/tmp/cra_staged_retreat_tests.log`,
+  `/tmp/cra_staged_motion_probe.log`, and `/tmp/cra_hold_control_tests.log`.
+- Flake8 (99-character limit), Python syntax, and CRLF-aware Git whitespace
+  checks passed. ROS/colcon and GUI execution are unavailable here.
+
+RViz investigation: the user's saved `~/.rviz2/default.rviz` lacks a robot-model
+display, while the installed `cra/config/cra.rviz` symlink points to the correct
+source configuration. The user reports launching with `rviz:=true`, so the old
+default config alone is not an established cause. All six binary STL resources
+exist and contain finite vertices and unit normals. Actual display status,
+resource loading and viewport visibility remain to be checked on the ROS host.
+Open the exact source config to remove overlay/config selection uncertainty:
+
+```bash
+rviz2 -d ~/living-lab/cra_ws/src/cra/config/cra.rviz
+```
+
+Rebuild `cra planning simulation`, source the overlay, and restart the stack.
+Verify first-publication logging and the robot MarkerArray display; then test
+retreat with a stationary, positively separated capsule before moving humans.
+Compare the robot mesh and diagnostic collision spheres against human capsules
+if negative model clearances disagree with physical separation. The remaining
+VISION_INVALID/STALE_MESSAGE stream and human motion can still interrupt retreat;
+these changes do not establish guaranteed escape or end-to-end human avoidance.
+
+### 2026-11-14 — Release simulation recovery after fresh valid EMPTY
+
+Status: Implemented and tested headlessly. Live ROS/Motion/Kinect execution
+remains unverified in this environment.
+
+The latest supplied run reports workspace SAFE at 1794634696.462, followed by
+Human Vision EMPTY (NO_ACTIVE_CAPSULES) at 1794634696.484, yet Planning stays in
+HUMAN_RETREAT_DATA_UNKNOWN. The recovery latch required OBSERVED geometry even
+after a fresh validated EMPTY. CollisionFilter deliberately maps EMPTY to
+UNKNOWN, so the latch returned before the ordinary simulation policy could
+resume planning. Three reproducing tests failed before the correction.
+
+Changes:
+
+- `PlanningManager` retains a separate EMPTY deadline, bounded by both the
+  snapshot capture expiry and the existing human-data receipt timeout.
+- With `simulation_only_ignore_unknown=True`, fresh validated EMPTY ends the
+  close-human recovery latch and discards the retreat path. Any active retreat
+  or pending RELEASE first requests STOP and waits for acknowledgment and fresh
+  joint feedback. Normal planning then targets the original requested position.
+- This does not itself issue RELEASE or EXECUTE. Ordinary joint, static-contact,
+  edge and path validation and the owned STOP/RELEASE/IDLE handshake still apply.
+  External/unowned STOP cannot be automatically released.
+- UNKNOWN/VISION_INVALID, expired EMPTY, and missing data cannot clear a known
+  close-human stop. Strict mode does not use this simulation-only EMPTY rule.
+  GNG, A*, safety margins and experiment flag defaults are unchanged. An EMPTY
+  simulation execution is not evidence of successful human obstacle avoidance.
+
+Verification:
+
+- All 51 headless tests passed: 48 collision/planning tests and three robot
+  visualization tests, using the real MuJoCo model and graph with explicit
+  Motion acknowledgments. Six new regressions cover EMPTY after a blocked or
+  active retreat, capture/receipt expiry, subsequent invalid data, static
+  contacts, and external STOP ownership.
+- Flake8 (99-character limit) and CRLF-aware Git whitespace checks passed.
+- Test output: `/tmp/cra_empty_resume_tests.log`. ROS/colcon build and live
+  movement were not executed here. Rebuild `planning`, restart the stack, and
+  verify a fresh EMPTY after human removal permits PATH_READY followed by the
+  normal RELEASE/IDLE/EXECUTE sequence when the original target needs motion.
+
 ### 2026-11-14 — RViz robot mesh and collision throughput after live retreat timeout
 
 Status: Implemented and tested headlessly. ROS launch, RViz rendering, and
@@ -319,11 +897,12 @@ Integration and scope:
   PlanningNode enables it only for `robot.mode: simulation`, and the manager
   additionally requires the existing simulation experiment flag to be True.
   It is disabled for physical robot mode. No new node, thread, or timer was added.
-- Once a close human has triggered this recovery context, UNKNOWN/EMPTY cannot
-  be used to execute a blind escape. STOP remains latched until valid observed
-  geometry returns. Ordinary simulation behavior outside this context is
-  unchanged; `simulation_only_ignore_unknown=True` and `execute_path=True` remain
-  unchanged. This narrower recovery rule deliberately requires fresh geometry.
+- Initially this recovery context required fresh OBSERVED geometry after both
+  UNKNOWN and EMPTY. The later "Release simulation recovery after fresh valid
+  EMPTY" correction above supersedes the EMPTY restriction: a validated, fresh
+  EMPTY may return to ordinary simulation planning. UNKNOWN still cannot
+  authorize a blind retreat. `simulation_only_ignore_unknown=True` and
+  `execute_path=True` remain unchanged.
 - Failed searches are not repeated for identical geometry, readiness, and joint
   state. New attempts also wait at least the existing 0.5 s recovery settle time.
   Fresh identical geometry may retry after a data-expiry failure.
@@ -762,7 +1341,8 @@ Proposed and prepared changes:
    - Proposed radius_percentile: 0.80
    - Proposed min_voxels: 15
    - Keep radius_smoothing_alpha: 0.20
-   - Keep capsule safety_margin: 0.015
+   - Original proposal: capsule safety_margin 0.015; superseded by the
+     authorized CRA setting 0.0 described in the latest development entry.
 
 Important:
 These changes were prepared during ChatGPT development.
@@ -779,6 +1359,10 @@ Planning:
 
 execute_path: true
 simulation_only_ignore_unknown: true
+
+Vision capsule extra padding: 0.0 m
+Planning human separation margin: 0.10 m
+Positive anatomical and measured human capsule radii remain active.
 
 These are user-selected experimental settings.
 

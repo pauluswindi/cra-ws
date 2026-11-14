@@ -137,6 +137,7 @@ class PlanningNode(Node):
         self.last_human_report = None
         self.last_collision_report = None
         self.last_manager_error = None
+        self.last_runtime_report_time = None
 
         self.visualizer = PlanningVisualizer(
             node=self,
@@ -312,7 +313,13 @@ class PlanningNode(Node):
             dtype=float,
         )
 
-        self.manager.update_joint_state(joints)
+        velocities = None
+        if message.velocity:
+            if len(message.velocity) != len(message.name):
+                return
+            named_velocities = dict(zip(message.name, message.velocity))
+            velocities = [named_velocities[name] for name in self.joint_names]
+        self.manager.update_joint_state(joints, velocities)
 
     def human_callback(self, message):
         now_ros_ns = self.get_clock().now().nanoseconds
@@ -391,6 +398,9 @@ class PlanningNode(Node):
                 f"reason={report.get('reason')}, "
                 f"retreat_reason={retreat_reason}, "
                 f"clearance={report.get('clearance')}, "
+                f"geometry_model={report.get('geometry_model')}, "
+                f"sphere_clearance={report.get('sphere_clearance')}, "
+                f"box_clearance={report.get('box_clearance')}, "
                 f"robot_geom={report.get('robot_geom')}, "
                 f"robot_radius={report.get('robot_radius')}, "
                 f"body_id={report.get('body_id')}, "
@@ -406,6 +416,46 @@ class PlanningNode(Node):
 
     def failure_reason_callback(self, message):
         self.manager.update_failure_reason(message.data)
+
+    def report_runtime_diagnostics(self):
+        """Keep an unchanged STOP/fault and target offsets visible in logs."""
+        now = self.get_clock().now().nanoseconds
+        previous = self.last_runtime_report_time
+        if previous is not None and 0 <= now - previous < 5_000_000_000:
+            return
+        self.last_runtime_report_time = now
+        manager = self.manager
+        target, actual, goal = manager.target_base, None, None
+        try:
+            if manager.goal_q is not None:
+                goal = self.visualizer.forward_kinematics(manager.goal_q)
+            if manager.current_q is not None:
+                # Leave the visualization scratch model at the measured pose.
+                actual = self.visualizer.forward_kinematics(manager.current_q)
+        except Exception as error:
+            self.get_logger().warning(f"Target distance diagnostic unavailable: {error}")
+        actual_error = None if actual is None or target is None else float(
+            np.linalg.norm(actual - target))
+        goal_error = None if goal is None or target is None else float(
+            np.linalg.norm(goal - target))
+        checker = self.planner.collision_filter
+        self.get_logger().info(
+            f"Planning snapshot: status={manager.status}, motion={manager.motion_status}, "
+            f"failure_reason={manager.failure_reason}, fault={manager.fault}, "
+            f"stop_owned={manager.stop_owned}, pending={manager.pending_action}, "
+            f"planning_required={manager.planning_required}, "
+            f"path_points={0 if manager.current_path is None else len(manager.current_path)}, "
+            f"feedback_ready={manager.feedback_ready()}, "
+            f"obstacles_ready={manager.obstacle_data_ready()}, "
+            f"human={manager.human_status}/{manager.human_reason}, "
+            f"human_checks={checker.human_obstacles_enabled}, "
+            f"plan_failure={self.planner.last_plan_failure}, "
+            f"target={None if target is None else target.tolist()}, "
+            f"eof={None if actual is None else actual.tolist()}, "
+            f"target_error_m={actual_error}, selected_goal_error_m={goal_error}, "
+            f"goal_tolerance_m={manager.goal_tolerance}, "
+            f"target_clearance_m={manager.target_clearance}"
+        )
 
     def target_callback(self, message):
         if (
@@ -633,10 +683,6 @@ class PlanningNode(Node):
         self.report_collision_diagnostics()
 
         self.set_status(decision.status)
-
-        self.update_visualization()
-        self.update_graph_visualization()
-
         if decision.action == "STOP":
             self.stop_pub.publish(
                 Bool(data=True)
@@ -673,6 +719,11 @@ class PlanningNode(Node):
                 f"{decision.status}: "
                 f"{len(trajectory.points)} waypoints sent"
             )
+
+        # Dispatch Motion commands before potentially expensive visualization.
+        self.report_runtime_diagnostics()
+        self.update_visualization()
+        self.update_graph_visualization()
 
 
 def main():

@@ -70,6 +70,9 @@ class PathPlanner:
         self.max_joint_delta = float(
             joint_config["max_joint_delta"]
         )
+        self.max_goal_candidates = int(joint_config.get("max_candidates", 4))
+        if self.max_goal_candidates < 1:
+            raise ValueError("max_candidates must be positive")
 
         self.max_segment_delta = float(
             config["motion"]["joint"]["max_segment_delta"]
@@ -117,8 +120,12 @@ class PathPlanner:
         )
 
     def select_goal(self, target, goal_tolerance, target_clearance):
+        return next(self.goal_candidates(target, goal_tolerance, target_clearance), None)
+
+    def goal_candidates(self, target, goal_tolerance, target_clearance):
+        """Yield valid graph configurations in Cartesian-distance order."""
         if not self.human_data_ready():
-            return None
+            return
 
         target = np.asarray(target, dtype=float)
 
@@ -145,12 +152,44 @@ class PathPlanner:
 
             if distance < target_clearance:
                 continue
+            if not self.human_data_ready():
+                return
 
             joints = self.joint_q[index]
 
             if self.collision_filter.is_state_valid(joints):
-                return joints.copy()
+                yield joints.copy()
 
+    def find_alternative_goal_path(self, start, target, failed_goal,
+                                   goal_tolerance, target_clearance):
+        """Try other valid joint goals for the same Cartesian target bounds.
+
+        Return the successful joint goal, with its fully validated path stored
+        as usual. Do not retry alternatives for unsafe input or expired data.
+        """
+        if self.last_plan_failure != "NO_GRAPH_PATH":
+            return None
+        revision = self.collision_filter.environment_revision
+        candidates = self.goal_candidates(target, goal_tolerance, target_clearance)
+        tried = [np.asarray(failed_goal).copy()]
+        for goal in candidates:
+            if not any(np.array_equal(goal, previous) for previous in tried):
+                if len(tried) >= self.max_goal_candidates:
+                    break
+                tried.append(goal.copy())
+                if self.collision_filter.environment_revision != revision:
+                    self._plan_failed("ENVIRONMENT_CHANGED", "environment changed between goals")
+                    return None
+                print(f"[PathPlanner] Trying Cartesian goal candidate {len(tried)}/"
+                      f"{self.max_goal_candidates}", flush=True)
+                if self.plan(start, goal):
+                    return goal.copy()
+                if self.last_plan_failure != "NO_GRAPH_PATH":
+                    return None
+        if self.collision_filter.environment_revision != revision:
+            self._plan_failed("ENVIRONMENT_CHANGED", "environment changed between goals")
+        elif not self.human_data_ready():
+            self._plan_failed("HUMAN_VISION_UNKNOWN", "human data expired between goal candidates")
         return None
 
     def prepare_execution_path(self, path):
@@ -434,10 +473,12 @@ class PathPlanner:
         return None
 
     def find_human_margin_retreat(self, current_q, max_steps=32):
-        """Find a bounded retreat out of a human margin, without contact.
+        """Find a bounded retreat away from a human, without contact.
 
         Return only a certified straight joint segment, so execution can be
         revalidated from measured feedback without inferring waypoint progress.
+        Prefer leaving the margin; allow certified progress in stages when the
+        search budget cannot reach it in a single segment.
         """
         checker = self.collision_filter
         self.last_human_retreat_failure = "NONE"
@@ -470,14 +511,31 @@ class PathPlanner:
                         self.max_joint_delta, self.max_segment_delta
                     ):
                         continue
-                    if not checker.is_human_margin_transition_valid(current, candidate):
-                        continue
                     candidate_state = checker.human_margin_state(candidate)
                     if candidate_state is None:
-                        self.last_human_retreat_failure = "HUMAN_DATA_OR_STATE_CHANGED"
-                        return None
+                        if (
+                            not checker.human_data_ready()
+                            or checker.environment_revision != revision
+                        ):
+                            self.last_human_retreat_failure = (
+                                "HUMAN_DATA_UNKNOWN" if not checker.human_data_ready()
+                                else "ENVIRONMENT_CHANGED"
+                            )
+                            return None
+                        # Invalid joints or static contact disqualify only this
+                        # candidate, just as the full transition checker would.
+                        continue
                     gain = candidate_state["clearance"] - state["clearance"]
-                    if gain > improvement:
+                    if gain <= improvement:
+                        continue
+                    # A worsening endpoint cannot pass the sampled monotonic
+                    # certificate. Screen it before evaluating the whole edge.
+                    if candidate_state["pairs"].keys() != state["pairs"].keys() or any(
+                        value < min(state["pairs"][pair], checker.human_safety_margin) - 1e-9
+                        for pair, value in candidate_state["pairs"].items()
+                    ):
+                        continue
+                    if checker.is_human_margin_transition_valid(current, candidate):
                         best, best_state, improvement = candidate, candidate_state, gain
             if (
                 best is None or checker.environment_revision != revision
@@ -497,7 +555,18 @@ class PathPlanner:
                 and checker.environment_revision == revision
             ):
                 return np.vstack((start, current))
-        self.last_human_retreat_failure = "SEARCH_BUDGET_EXHAUSTED"
+        if (
+            state["clearance"] - initial["clearance"] >= checker.safety_margin
+            and checker.is_human_margin_transition_valid(start, current)
+            and checker.environment_revision == revision
+            and checker.human_data_ready()
+        ):
+            return np.vstack((start, current))
+        self.last_human_retreat_failure = (
+            "HUMAN_DATA_UNKNOWN" if not checker.human_data_ready()
+            else "ENVIRONMENT_CHANGED" if checker.environment_revision != revision
+            else "SEARCH_BUDGET_EXHAUSTED"
+        )
         return None
 
     def find_alternative_path(self, start, goal, revision):

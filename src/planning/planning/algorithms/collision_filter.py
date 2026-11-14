@@ -6,6 +6,7 @@ import mujoco
 import numpy as np
 
 from planning.algorithms.human_collision import (
+    mesh_local_box,
     nearest_human_collision,
     parse_human_snapshot,
     point_segment_distance,
@@ -135,6 +136,12 @@ class CollisionFilter:
                 "No robot collision geoms found"
             )
 
+        self.robot_human_boxes = {
+            geom: mesh_local_box(self.model, geom)
+            for geom in sorted(self.robot_geoms)
+            if self.model.geom_type[geom] == mujoco.mjtGeom.mjGEOM_MESH
+        }
+
         self.obstacle_geoms = {}
 
         for body_id in range(self.model.nbody):
@@ -257,9 +264,21 @@ class CollisionFilter:
             for geom_id in sorted(self.robot_geoms)
         )
 
+        boxes = []
+        for geom in sorted(self.robot_geoms):
+            if geom not in self.robot_human_boxes:
+                boxes.append(None)
+                continue
+            center, half = self.robot_human_boxes[geom]
+            rotation = self.data.geom_xmat[geom].reshape(3, 3)
+            boxes.append((
+                base_rotation.T @ (self.data.geom_xpos[geom] + rotation @ center - base_position),
+                base_rotation.T @ rotation, half,
+            ))
+
         return nearest_human_collision(
             geoms, self.human_capsules, self.human_safety_margin,
-            include_pairs=include_pairs,
+            include_pairs=include_pairs, robot_boxes=boxes,
         )
 
     def human_collision_report(self, joints):

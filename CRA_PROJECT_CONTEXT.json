@@ -1,9 +1,9 @@
 {
   "metadata": {
     "document_name": "CRA_PROJECT_CONTEXT.json",
-    "version": "1.1",
+    "version": "1.4",
     "created_date": "2026-11-12",
-    "last_updated": "2026-11-13",
+    "last_updated": "2026-11-14",
     "project_name": "Cognitive Robotic Arm",
     "purpose": "Maintain shared project context for ChatGPT and Codex development.",
     "source_of_truth": "Actual repository source code, configuration, and reproducible test results.",
@@ -198,7 +198,7 @@
 
         "a_star": {
           "role": "Search for a path through joint-space graph configurations.",
-          "status": "Implemented in the repository snapshot."
+          "status": "Implemented with lazy candidate-path collision certification, revision/freshness-aware caches, and the original eager/local fallback. Headless checks passed on 2026-11-14; live ROS behavior remains unverified."
         },
 
         "collision_filter": {
@@ -208,7 +208,7 @@
 
         "path_planner": {
           "role": "Coordinate path search and path validation.",
-          "status": "Implemented in the repository snapshot."
+          "status": "Implemented with bounded alternate joint goals after NO_GRAPH_PATH, preserving the existing Cartesian goal window and complete path checks. Current candidate budget is four including the first."
         },
 
         "planning_manager": {
@@ -277,6 +277,15 @@
       "engine": "MuJoCo",
 
       "role": "Simulate the robotic arm, obstacles, and trajectory execution.",
+
+      "tracking_correction_2026_11_14": {
+        "status": "IMPLEMENTED_AND_TESTED_HEADLESSLY",
+        "live_evidence": "Repeated joint2 TRACKING_ERROR after one automatic recovery; fault remains latched with valid EMPTY Vision.",
+        "cause_reproduced": "The measured-angle +/-0.12 rad moving actuator target clamp caps joint2 position torque at 12 Nm, below the 12.21-13.70 Nm gravity load at logged failure poses.",
+        "change": "Center the existing correction allowance on the model gravity-balanced hold target; preserve velocity and joint limits, gains, tracking guard and fault behavior.",
+        "verification": "Actual MuJoCo callbacks and physics pass three logged-pose lift cases and a graph-path case using reproduced Motion controller equations. Peak joint2 graph-path error falls from 0.547778 to 0.023787 rad; ROS execution remains unverified.",
+        "staging": "After a failed NO_GRAPH_PATH goal batch, Planning can try one fully validated staging move per environment revision before retrying the original target. Expiry may retry with fresh input; faults and unowned STOP are not bypassed."
+      },
 
       "verification_needed": [
         "Robot geometry consistency",
@@ -468,14 +477,14 @@
         "forearm_max_radius": 0.085,
         "hand_max_radius": 0.09,
 
-        "safety_margin": 0.015,
+        "safety_margin": 0.0,
         "radius_percentile": 0.80,
         "min_voxels": 15,
         "radius_smoothing_alpha": 0.20
       }
     },
 
-    "parameter_status": "Proposed experimental configuration. Confirm that the active local YAML uses these values.",
+    "parameter_status": "CRA YAML inspected on 2026-11-14. Extra Vision capsule padding is 0.0; Planning retains the 0.10 m inter-body separation margin. Anatomical radii are retained. Vision C++ defaults without the CRA YAML remain 0.015. Live ROS parameter loading must be checked after restart.",
 
     "radius_estimation": {
       "method": "Voxel distance percentile",
@@ -596,7 +605,7 @@
           "Propose radius_percentile of 0.80.",
           "Propose min_voxels of 15.",
           "Preserve radius_smoothing_alpha of 0.20.",
-          "Preserve capsule safety_margin of 0.015."
+          "The original proposal retained capsule safety_margin of 0.015; the later authorized CRA configuration uses 0.0 with Planning retaining its 0.10 m separation margin."
         ],
         "repository_status": "UNVERIFIED"
       }
@@ -706,10 +715,10 @@
 
     {
       "issue": "Motion tracking consistency",
-      "priority": "MEDIUM",
-      "status": "REQUIRES_VERIFICATION",
-      "description": "Previous development notes reported inconsistent trajectory tracking.",
-      "next_action": "Evaluate tracking errors after planning integration is validated."
+      "priority": "HIGH",
+      "status": "CORRECTED_AND_TESTED_HEADLESSLY",
+      "description": "Logged joint2 tracking failures reproduced: moving actuator clamp left insufficient gravity-support torque. Gravity-centered correction allowance fixes the offline regression; control fault and error thresholds remain intact.",
+      "next_action": "Rebuild simulation and planning, restart CRA and verify actual joint2 tracking with ROS and live Vision."
     }
   ],
 

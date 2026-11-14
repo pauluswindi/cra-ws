@@ -210,7 +210,7 @@ class RobotSimulation(Node):
         ):
             raise ValueError("Invalid simulation control parameters")
 
-        self.q_des = self.joint_positions()
+        self.q_des = self.hold_position_target()
         self.command = np.zeros(5)
         self.last_command = None
         self.last_debug_time = 0.0
@@ -346,7 +346,7 @@ class RobotSimulation(Node):
             self.command.fill(0.0)
             self.last_command = None
             if not self.holding_position:
-                self.q_des = self.joint_positions()
+                self.q_des = self.hold_position_target()
             self.holding_position = True
             return
 
@@ -359,10 +359,22 @@ class RobotSimulation(Node):
         moving = bool(np.any(self.command))
         if not moving and not self.holding_position:
             # Capture the hold position once, not on every zero command.
-            self.q_des = self.joint_positions()
+            self.q_des = self.hold_position_target()
 
         self.holding_position = not moving
         self.last_command = time.monotonic()
+
+    def hold_position_target(self):
+        """Balance model gravity when stopping the CRA position actuators.
+
+        CRA uses unit-gear position actuators. Setting their targets directly
+        to measured angles removes the torque supporting the arm, causing a
+        new gravity-driven motion even when the velocity command is zero.
+        Keep the existing joint/control limits; do not compensate contacts.
+        """
+        gains = self.model.actuator_gainprm[self.actuator_ids, 0]
+        target = self.joint_positions() + self.data.qfrc_bias[self.qvel_ids] / gains
+        return np.clip(target, self.q_lower, self.q_upper)
 
     def target_callback(self, message):
         position = self.point_array(message)
@@ -423,16 +435,20 @@ class RobotSimulation(Node):
                 self.command.fill(0.0)
                 self.last_command = None
                 if not self.holding_position:
-                    self.q_des = self.joint_positions()
+                    self.q_des = self.hold_position_target()
                 self.holding_position = True
 
         current = self.joint_positions()
 
         if not self.holding_position:
+            # Reserve the correction allowance after supporting model gravity.
+            # Centering it on measured angles caps joint2 at 12 Nm, below the
+            # gravity load in some valid CRA poses, even for a lifting command.
+            supported = self.hold_position_target()
             self.q_des = np.clip(
                 self.q_des,
-                current - 0.12,
-                current + 0.12,
+                supported - 0.12,
+                supported + 0.12,
             )
 
         self.q_des = np.clip(
