@@ -1,0 +1,5848 @@
+{
+  "analysis_date": "2026-11-17",
+  "timezone": "Asia/Jakarta",
+  "scope": "Read-only live logs and finalized 20.173 s nine-topic recording; no runtime configuration or algorithms changed.",
+  "sources": {
+    "/home/lvinz/.ros/log/python3_4422_1794851823372.log": "5d6cae2c76eb491ddebf9e1a0315d5051b7c2d51533f3475478d25c10c41d5e1",
+    "/home/lvinz/.ros/log/component_container_4420_1794851823064.log": "c95afb84821c3ab8da94306a106c5e564d7a7acdb8fd21e8c1931265766da2e9"
+  },
+  "launch_summary": {
+    "path": "/tmp/cra_profile_1s_20261117_005702.log",
+    "sha256": "ad05959a36e739dc96fc52a0faf507ee702133cb8e4cdbedeb56388d739d7621",
+    "failures": [
+      {
+        "line": 1082,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1097,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1112,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1127,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1139,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1153,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1164,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1177,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1189,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1201,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1272,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during final path validation"
+      },
+      {
+        "line": 1895,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during final path validation"
+      },
+      {
+        "line": 1907,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1918,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1930,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1942,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1953,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1966,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1981,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 1994,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2007,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2018,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2732,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2746,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2818,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2830,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2842,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2851,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2865,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2877,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2892,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2908,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2920,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2932,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2945,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2957,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2968,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2982,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 2994,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      },
+      {
+        "line": 3006,
+        "text": "[planning_node-5] [PathPlanner] NO_PATH: Human Vision data expired during graph search"
+      }
+    ],
+    "faults": [
+      {
+        "line": 881,
+        "text": "[component_container-4] [ERROR] [1794851910.061344419] [motion_component]: Execution failure: STALLED | joint=1 | error=0.112 rad | reference=2.478 | actual=2.366 | command=0.524 | filtered=0.500"
+      },
+      {
+        "line": 1259,
+        "text": "[component_container-4] [ERROR] [1794851944.963260884] [motion_component]: Execution failure: TRACKING_ERROR | joint=5 | error=0.212 rad | reference=-0.693 | actual=-0.905 | command=0.724 | filtered=0.500"
+      },
+      {
+        "line": 1505,
+        "text": "[component_container-4] [ERROR] [1794851981.882250858] [motion_component]: Execution failure: TRACKING_ERROR | joint=4 | error=0.232 rad | reference=0.808 | actual=0.576 | command=0.764 | filtered=0.500"
+      },
+      {
+        "line": 1581,
+        "text": "[component_container-4] [ERROR] [1794851989.404550743] [motion_component]: Execution failure: TRACKING_ERROR | joint=3 | error=0.232 rad | reference=1.822 | actual=2.054 | command=-0.764 | filtered=-0.500"
+      },
+      {
+        "line": 2119,
+        "text": "[component_container-4] [ERROR] [1794852041.529221694] [motion_component]: Execution failure: TRACKING_ERROR | joint=1 | error=0.236 rad | reference=0.501 | actual=0.736 | command=-0.772 | filtered=-0.500"
+      },
+      {
+        "line": 2654,
+        "text": "[component_container-4] [ERROR] [1794852093.073234740] [motion_component]: Execution failure: TRACKING_ERROR | joint=1 | error=0.241 rad | reference=2.946 | actual=2.705 | command=0.782 | filtered=0.500"
+      }
+    ],
+    "other_errors": []
+  },
+  "bag_summary": {
+    "bag": "/tmp/cra_path_diag_1s_20261117_005856",
+    "file_sha256": {
+      "cra_path_diag_1s_20261117_005856_0.db3": "7389dfe53e828ee2648b1c99f7bf7750af15d8c8c50de81a70f788c86d9c8f24"
+    },
+    "start_ns": 1794851936774147134,
+    "end_ns": 1794851956947335795,
+    "duration_s": 20.173188661,
+    "topic_counts": {
+      "/simulation/target_marker": 967,
+      "/simulation/obstacles": 967,
+      "/joint_states": 966,
+      "/motion/execution_status": 4,
+      "/motion/failure_reason": 2,
+      "/vision/human/geometry": 84,
+      "/planning/joint_path_preview": 3,
+      "/planning/status": 17,
+      "/motion/joint_path": 1
+    },
+    "human_counts": {
+      "OBSERVED": 77,
+      "INVALID": 7
+    },
+    "observed_age_s": {
+      "median": 0.27281653,
+      "p95": 0.327375674,
+      "max": 0.369748435
+    },
+    "failure_timeline": [
+      {
+        "receipt_ns": 1794851937738543002,
+        "value": "NONE"
+      },
+      {
+        "receipt_ns": 1794851944965201744,
+        "value": "TRACKING_ERROR"
+      }
+    ],
+    "motion_timeline": [
+      {
+        "receipt_ns": 1794851937733001987,
+        "value": "STOPPED"
+      },
+      {
+        "receipt_ns": 1794851941262282449,
+        "value": "IDLE"
+      },
+      {
+        "receipt_ns": 1794851942715926876,
+        "value": "EXECUTING"
+      },
+      {
+        "receipt_ns": 1794851944965179547,
+        "value": "CONTROL_ERROR"
+      }
+    ],
+    "profiles_in_bag_window": [
+      {
+        "cycle": 555,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 605.203,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851936165523635,
+        "capture_age_start_ms": 397.546,
+        "capture_to_callback_ms": 267.295,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 5.528,
+            "remaining_before_ms": 598.164,
+            "remaining_after_ms": 592.619,
+            "revision_before": 52,
+            "revision_after": 52,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 8.899,
+            "remaining_before_ms": 598.179,
+            "remaining_after_ms": 589.265,
+            "revision_before": 52,
+            "revision_after": 52,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "goal_selection",
+            "wall_ms": 7.606,
+            "remaining_before_ms": 589.246,
+            "remaining_after_ms": 581.623,
+            "revision_before": 52,
+            "revision_after": 52,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "path_search",
+            "wall_ms": 582.441,
+            "remaining_before_ms": 581.61,
+            "remaining_after_ms": -0.844,
+            "revision_before": 52,
+            "revision_after": 52,
+            "outcome": "FALSE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 599.051,
+            "remaining_before_ms": 598.195,
+            "remaining_after_ms": -0.865,
+            "revision_before": 52,
+            "revision_after": 52,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": -2.698,
+            "remaining_after_ms": -2.709,
+            "revision_before": 52,
+            "revision_after": 52,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": -2.713,
+            "remaining_after_ms": -2.717,
+            "revision_before": 52,
+            "revision_after": 52,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 471,
+        "time_s": 1794851937.1686757
+      },
+      {
+        "cycle": 557,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 506.992,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851936865765658,
+        "capture_age_start_ms": 496.778,
+        "capture_to_callback_ms": 314.411,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.971,
+            "remaining_before_ms": 502.032,
+            "remaining_after_ms": 501.052,
+            "revision_before": 54,
+            "revision_after": 54,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 1.025,
+            "remaining_before_ms": 502.043,
+            "remaining_after_ms": 501.014,
+            "revision_before": 54,
+            "revision_after": 54,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "goal_selection",
+            "wall_ms": 2.07,
+            "remaining_before_ms": 501.002,
+            "remaining_after_ms": 498.914,
+            "revision_before": 54,
+            "revision_after": 54,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "path_search",
+            "wall_ms": 501.535,
+            "remaining_before_ms": 498.904,
+            "remaining_after_ms": -2.651,
+            "revision_before": 54,
+            "revision_after": 54,
+            "outcome": "FALSE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 504.737,
+            "remaining_before_ms": 502.053,
+            "remaining_after_ms": -2.693,
+            "revision_before": 54,
+            "revision_after": 54,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": -3.724,
+            "remaining_after_ms": -3.735,
+            "revision_before": 54,
+            "revision_after": 54,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": -3.742,
+            "remaining_after_ms": -3.748,
+            "revision_before": 54,
+            "revision_after": 54,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 476,
+        "time_s": 1794851937.870209
+      },
+      {
+        "cycle": 559,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 606.185,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851937565589693,
+        "capture_age_start_ms": 397.019,
+        "capture_to_callback_ms": 321.409,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 1.441,
+            "remaining_before_ms": 596.512,
+            "remaining_after_ms": 595.059,
+            "revision_before": 56,
+            "revision_after": 56,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 1.504,
+            "remaining_before_ms": 596.528,
+            "remaining_after_ms": 595.017,
+            "revision_before": 56,
+            "revision_after": 56,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "goal_selection",
+            "wall_ms": 6.033,
+            "remaining_before_ms": 595.003,
+            "remaining_after_ms": 588.954,
+            "revision_before": 56,
+            "revision_after": 56,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "path_search",
+            "wall_ms": 589.167,
+            "remaining_before_ms": 588.941,
+            "remaining_after_ms": -0.25,
+            "revision_before": 56,
+            "revision_after": 56,
+            "outcome": "FALSE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 596.823,
+            "remaining_before_ms": 596.542,
+            "remaining_after_ms": -0.293,
+            "revision_before": 56,
+            "revision_after": 56,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": -3.148,
+            "remaining_after_ms": -3.162,
+            "revision_before": 56,
+            "revision_after": 56,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": -3.168,
+            "remaining_after_ms": -3.174,
+            "revision_before": 56,
+            "revision_after": 56,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 481,
+        "time_s": 1794851938.5695295
+      },
+      {
+        "cycle": 561,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 636.707,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851938398972571,
+        "capture_age_start_ms": 364.256,
+        "capture_to_callback_ms": 272.939,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 7.537,
+            "remaining_before_ms": 623.918,
+            "remaining_after_ms": 616.363,
+            "revision_before": 58,
+            "revision_after": 58,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 7.617,
+            "remaining_before_ms": 623.933,
+            "remaining_after_ms": 616.307,
+            "revision_before": 58,
+            "revision_after": 58,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "goal_selection",
+            "wall_ms": 13.051,
+            "remaining_before_ms": 616.291,
+            "remaining_after_ms": 603.223,
+            "revision_before": 58,
+            "revision_after": 58,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "path_search",
+            "wall_ms": 603.369,
+            "remaining_before_ms": 603.21,
+            "remaining_after_ms": -0.176,
+            "revision_before": 58,
+            "revision_after": 58,
+            "outcome": "FALSE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 624.146,
+            "remaining_before_ms": 623.951,
+            "remaining_after_ms": -0.207,
+            "revision_before": 58,
+            "revision_after": 58,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": -0.911,
+            "remaining_after_ms": -0.921,
+            "revision_before": 58,
+            "revision_after": 58,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.001,
+            "remaining_before_ms": -0.926,
+            "remaining_after_ms": -0.931,
+            "revision_before": 58,
+            "revision_after": 58,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 486,
+        "time_s": 1794851939.4004664
+      },
+      {
+        "cycle": 563,
+        "status": "PATH_READY",
+        "action": "NONE",
+        "cycle_work_ms": 434.749,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851939166112182,
+        "capture_age_start_ms": 398.442,
+        "capture_to_callback_ms": 297.026,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.873,
+            "remaining_before_ms": 599.362,
+            "remaining_after_ms": 598.475,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.96,
+            "remaining_before_ms": 599.378,
+            "remaining_after_ms": 598.409,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "goal_selection",
+            "wall_ms": 4.986,
+            "remaining_before_ms": 598.394,
+            "remaining_after_ms": 593.392,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "path_search",
+            "wall_ms": 384.922,
+            "remaining_before_ms": 593.379,
+            "remaining_after_ms": 208.443,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 390.97,
+            "remaining_before_ms": 599.395,
+            "remaining_after_ms": 208.413,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 39.849,
+            "remaining_before_ms": 206.754,
+            "remaining_after_ms": 166.885,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": 166.872,
+            "remaining_after_ms": 166.864,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 492,
+        "time_s": 1794851940.0137684
+      },
+      {
+        "cycle": 564,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 154.587,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "DATA_EXPIRED",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851939166112182,
+        "capture_age_start_ms": 856.284,
+        "capture_to_callback_ms": 297.026,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.714,
+            "remaining_before_ms": 143.321,
+            "remaining_after_ms": 142.598,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.775,
+            "remaining_before_ms": 143.331,
+            "remaining_after_ms": 142.553,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "execution_prepare_path",
+            "wall_ms": 145.115,
+            "remaining_before_ms": 142.512,
+            "remaining_after_ms": -2.625,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "ERROR"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 146.01,
+            "remaining_before_ms": 143.341,
+            "remaining_after_ms": -2.678,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.057,
+            "remaining_before_ms": -10.757,
+            "remaining_after_ms": -10.83,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": -10.839,
+            "remaining_after_ms": -10.846,
+            "revision_before": 60,
+            "revision_after": 60,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 495,
+        "time_s": 1794851940.1777725
+      },
+      {
+        "cycle": 568,
+        "status": "WAITING_FOR_RELEASE",
+        "action": "RELEASE",
+        "cycle_work_ms": 494.756,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851940499305286,
+        "capture_age_start_ms": 263.417,
+        "capture_to_callback_ms": 258.732,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.682,
+            "remaining_before_ms": 735.36,
+            "remaining_after_ms": 734.668,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 244.471,
+            "remaining_before_ms": 733.984,
+            "remaining_after_ms": 489.487,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 245.909,
+            "remaining_before_ms": 735.374,
+            "remaining_after_ms": 489.459,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "execution_prepare_path",
+            "wall_ms": 118.15,
+            "remaining_before_ms": 489.387,
+            "remaining_after_ms": 371.212,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "execution_final_path",
+            "wall_ms": 126.75,
+            "remaining_before_ms": 371.199,
+            "remaining_after_ms": 244.436,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 490.987,
+            "remaining_before_ms": 735.397,
+            "remaining_after_ms": 244.4,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.056,
+            "remaining_before_ms": 241.944,
+            "remaining_after_ms": 241.872,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 241.865,
+            "remaining_after_ms": 241.858,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 502,
+        "time_s": 1794851941.2582688
+      },
+      {
+        "cycle": 569,
+        "status": "WAITING_FOR_RELEASE",
+        "action": "NONE",
+        "cycle_work_ms": 1.123,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851940499305286,
+        "capture_age_start_ms": 759.88,
+        "capture_to_callback_ms": 258.732,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.63,
+            "remaining_before_ms": 239.795,
+            "remaining_after_ms": 239.155,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.687,
+            "remaining_before_ms": 239.805,
+            "remaining_after_ms": 239.111,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.714,
+            "remaining_before_ms": 239.814,
+            "remaining_after_ms": 239.093,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.018,
+            "remaining_before_ms": 239.056,
+            "remaining_after_ms": 239.031,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.001,
+            "remaining_before_ms": 239.026,
+            "remaining_after_ms": 239.021,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 503,
+        "time_s": 1794851941.261014
+      },
+      {
+        "cycle": 570,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 304.474,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "DATA_EXPIRED",
+        "path_failure_id": 2,
+        "commanded_path_id": 5,
+        "next_waypoint": 2,
+        "candidate_next_waypoint": 2,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851940665829228,
+        "capture_age_start_ms": 698.362,
+        "capture_to_callback_ms": 602.73,
+        "stages": [
+          {
+            "stage": "release_ack_wait",
+            "origin_cycle": 568,
+            "wall_ms": 13.261,
+            "remaining_before_ms": 244.418,
+            "remaining_after_ms": 231.146,
+            "revision_before": 62,
+            "revision_after": 62,
+            "outcome": "IDLE"
+          },
+          {
+            "stage": "current_clearance",
+            "wall_ms": 3.942,
+            "remaining_before_ms": 301.235,
+            "remaining_after_ms": 297.261,
+            "revision_before": 63,
+            "revision_after": 63,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 246.457,
+            "remaining_before_ms": 296.393,
+            "remaining_after_ms": 49.912,
+            "revision_before": 63,
+            "revision_after": 63,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 251.369,
+            "remaining_before_ms": 301.251,
+            "remaining_after_ms": 49.875,
+            "revision_before": 63,
+            "revision_after": 63,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "execution_prepare_path",
+            "wall_ms": 50.121,
+            "remaining_before_ms": 49.809,
+            "remaining_after_ms": -0.33,
+            "revision_before": 63,
+            "revision_after": 63,
+            "outcome": "ERROR"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 301.62,
+            "remaining_before_ms": 301.266,
+            "remaining_after_ms": -0.364,
+            "revision_before": 63,
+            "revision_after": 63,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.057,
+            "remaining_before_ms": -2.721,
+            "remaining_after_ms": -2.789,
+            "revision_before": 63,
+            "revision_after": 63,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": -2.794,
+            "remaining_after_ms": -2.8,
+            "revision_before": 63,
+            "revision_after": 63,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 506,
+        "time_s": 1794851941.6692514
+      },
+      {
+        "cycle": 574,
+        "status": "TRAJECTORY_SENT",
+        "action": "EXECUTE",
+        "cycle_work_ms": 554.19,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "COMMAND_SENT",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851941798959460,
+        "capture_age_start_ms": 364.746,
+        "capture_to_callback_ms": 237.668,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.542,
+            "remaining_before_ms": 628.669,
+            "remaining_after_ms": 628.119,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 125.309,
+            "remaining_before_ms": 627.681,
+            "remaining_after_ms": 502.357,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 126.334,
+            "remaining_before_ms": 628.681,
+            "remaining_after_ms": 502.343,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "execution_prepare_path",
+            "wall_ms": 186.999,
+            "remaining_before_ms": 502.3,
+            "remaining_after_ms": 315.29,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "execution_final_path",
+            "wall_ms": 225.94,
+            "remaining_before_ms": 315.281,
+            "remaining_after_ms": 89.328,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 539.397,
+            "remaining_before_ms": 628.693,
+            "remaining_after_ms": 89.285,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "trajectory_build",
+            "wall_ms": 0.417,
+            "remaining_before_ms": 85.819,
+            "remaining_after_ms": 85.388,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.06,
+            "remaining_before_ms": 81.19,
+            "remaining_after_ms": 81.111,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": 81.103,
+            "remaining_after_ms": 81.096,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 517,
+        "time_s": 1794851942.7190194
+      },
+      {
+        "cycle": 575,
+        "status": "TRAJECTORY_SENT",
+        "action": "NONE",
+        "cycle_work_ms": 1.292,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "COMMAND_SENT",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851941798959460,
+        "capture_age_start_ms": 922.47,
+        "capture_to_callback_ms": 237.668,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.759,
+            "remaining_before_ms": 77.188,
+            "remaining_after_ms": 76.417,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.822,
+            "remaining_before_ms": 77.199,
+            "remaining_after_ms": 76.37,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.852,
+            "remaining_before_ms": 77.208,
+            "remaining_after_ms": 76.348,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.022,
+            "remaining_before_ms": 76.306,
+            "remaining_after_ms": 76.277,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 76.272,
+            "remaining_after_ms": 76.266,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 518,
+        "time_s": 1794851942.726596
+      },
+      {
+        "cycle": 576,
+        "status": "EXECUTING",
+        "action": "NONE",
+        "cycle_work_ms": 148.14,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "STATIONARY",
+        "segment_evidence_reason": "STATIONARY",
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851941965588804,
+        "capture_age_start_ms": 797.093,
+        "capture_to_callback_ms": 775.03,
+        "stages": [
+          {
+            "stage": "execute_ack_wait",
+            "origin_cycle": 574,
+            "wall_ms": 30.559,
+            "remaining_before_ms": 89.305,
+            "remaining_after_ms": 58.736,
+            "revision_before": 65,
+            "revision_after": 65,
+            "outcome": "EXECUTING"
+          },
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.727,
+            "remaining_before_ms": 199.553,
+            "remaining_after_ms": 198.816,
+            "revision_before": 66,
+            "revision_after": 66,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 141.452,
+            "remaining_before_ms": 198.136,
+            "remaining_after_ms": 56.668,
+            "revision_before": 66,
+            "revision_after": 66,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 142.923,
+            "remaining_before_ms": 199.569,
+            "remaining_after_ms": 56.639,
+            "revision_before": 66,
+            "revision_after": 66,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 142.958,
+            "remaining_before_ms": 199.582,
+            "remaining_after_ms": 56.615,
+            "revision_before": 66,
+            "revision_after": 66,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.068,
+            "remaining_before_ms": 54.893,
+            "remaining_after_ms": 54.807,
+            "revision_before": 66,
+            "revision_after": 66,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": 54.799,
+            "remaining_after_ms": 54.792,
+            "revision_before": 66,
+            "revision_after": 66,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 520,
+        "time_s": 1794851942.9123876
+      },
+      {
+        "cycle": 577,
+        "status": "EXECUTING",
+        "action": "NONE",
+        "cycle_work_ms": 197.559,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851942466298749,
+        "capture_age_start_ms": 499.201,
+        "capture_to_callback_ms": 454.307,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.893,
+            "remaining_before_ms": 500.394,
+            "remaining_after_ms": 499.488,
+            "revision_before": 67,
+            "revision_after": 67,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 195.189,
+            "remaining_before_ms": 498.704,
+            "remaining_after_ms": 303.491,
+            "revision_before": 67,
+            "revision_after": 67,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 196.941,
+            "remaining_before_ms": 500.412,
+            "remaining_after_ms": 303.464,
+            "revision_before": 67,
+            "revision_after": 67,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 196.99,
+            "remaining_before_ms": 500.429,
+            "remaining_after_ms": 303.427,
+            "revision_before": 67,
+            "revision_after": 67,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.028,
+            "remaining_before_ms": 303.326,
+            "remaining_after_ms": 303.29,
+            "revision_before": 67,
+            "revision_after": 67,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 303.284,
+            "remaining_after_ms": 303.277,
+            "revision_before": 67,
+            "revision_after": 67,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 521,
+        "time_s": 1794851943.164221
+      },
+      {
+        "cycle": 579,
+        "status": "EXECUTING",
+        "action": "NONE",
+        "cycle_work_ms": 193.947,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851942899557179,
+        "capture_age_start_ms": 464.404,
+        "capture_to_callback_ms": 278.583,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.821,
+            "remaining_before_ms": 533.602,
+            "remaining_after_ms": 532.764,
+            "revision_before": 68,
+            "revision_after": 68,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 187.912,
+            "remaining_before_ms": 529.801,
+            "remaining_after_ms": 341.868,
+            "revision_before": 68,
+            "revision_after": 68,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 191.762,
+            "remaining_before_ms": 533.616,
+            "remaining_after_ms": 341.846,
+            "revision_before": 68,
+            "revision_after": 68,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 191.798,
+            "remaining_before_ms": 533.63,
+            "remaining_after_ms": 341.821,
+            "revision_before": 68,
+            "revision_after": 68,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.023,
+            "remaining_before_ms": 341.76,
+            "remaining_after_ms": 341.729,
+            "revision_before": 68,
+            "revision_after": 68,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 341.724,
+            "remaining_after_ms": 341.717,
+            "revision_before": 68,
+            "revision_after": 68,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 522,
+        "time_s": 1794851943.56001
+      },
+      {
+        "cycle": 581,
+        "status": "EXECUTING",
+        "action": "NONE",
+        "cycle_work_ms": 134.329,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851943099326560,
+        "capture_age_start_ms": 664.866,
+        "capture_to_callback_ms": 484.882,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.651,
+            "remaining_before_ms": 334.845,
+            "remaining_after_ms": 334.185,
+            "revision_before": 69,
+            "revision_after": 69,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 132.695,
+            "remaining_before_ms": 333.651,
+            "remaining_after_ms": 200.943,
+            "revision_before": 69,
+            "revision_after": 69,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 133.927,
+            "remaining_before_ms": 334.859,
+            "remaining_after_ms": 200.928,
+            "revision_before": 69,
+            "revision_after": 69,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 133.955,
+            "remaining_before_ms": 334.869,
+            "remaining_after_ms": 200.909,
+            "revision_before": 69,
+            "revision_after": 69,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.018,
+            "remaining_before_ms": 200.856,
+            "remaining_after_ms": 200.834,
+            "revision_before": 69,
+            "revision_after": 69,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.001,
+            "remaining_before_ms": 200.831,
+            "remaining_after_ms": 200.827,
+            "revision_before": 69,
+            "revision_after": 69,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 523,
+        "time_s": 1794851943.8994052
+      },
+      {
+        "cycle": 582,
+        "status": "EXECUTING",
+        "action": "NONE",
+        "cycle_work_ms": 136.574,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851943632192787,
+        "capture_age_start_ms": 332.945,
+        "capture_to_callback_ms": 293.552,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.665,
+            "remaining_before_ms": 666.742,
+            "remaining_after_ms": 666.068,
+            "revision_before": 70,
+            "revision_after": 70,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 134.789,
+            "remaining_before_ms": 665.51,
+            "remaining_after_ms": 530.699,
+            "revision_before": 70,
+            "revision_after": 70,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 136.076,
+            "remaining_before_ms": 666.756,
+            "remaining_after_ms": 530.676,
+            "revision_before": 70,
+            "revision_after": 70,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 136.118,
+            "remaining_before_ms": 666.766,
+            "remaining_after_ms": 530.643,
+            "revision_before": 70,
+            "revision_after": 70,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.025,
+            "remaining_before_ms": 530.544,
+            "remaining_after_ms": 530.514,
+            "revision_before": 70,
+            "revision_after": 70,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 530.511,
+            "remaining_after_ms": 530.505,
+            "revision_before": 70,
+            "revision_after": 70,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 525,
+        "time_s": 1794851944.1025178
+      },
+      {
+        "cycle": 585,
+        "status": "EXECUTING",
+        "action": "NONE",
+        "cycle_work_ms": 114.011,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851944232364690,
+        "capture_age_start_ms": 330.179,
+        "capture_to_callback_ms": 314.4,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.477,
+            "remaining_before_ms": 669.586,
+            "remaining_after_ms": 669.102,
+            "revision_before": 72,
+            "revision_after": 72,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 112.61,
+            "remaining_before_ms": 668.641,
+            "remaining_after_ms": 556.015,
+            "revision_before": 72,
+            "revision_after": 72,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 113.604,
+            "remaining_before_ms": 669.596,
+            "remaining_after_ms": 555.987,
+            "revision_before": 72,
+            "revision_after": 72,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 113.637,
+            "remaining_before_ms": 669.603,
+            "remaining_after_ms": 555.96,
+            "revision_before": 72,
+            "revision_after": 72,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.033,
+            "remaining_before_ms": 555.89,
+            "remaining_after_ms": 555.847,
+            "revision_before": 72,
+            "revision_after": 72,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": 555.841,
+            "remaining_after_ms": 555.834,
+            "revision_before": 72,
+            "revision_after": 72,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 526,
+        "time_s": 1794851944.6773818
+      },
+      {
+        "cycle": 587,
+        "status": "EXECUTING",
+        "action": "NONE",
+        "cycle_work_ms": 156.176,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851944631997722,
+        "capture_age_start_ms": 332.259,
+        "capture_to_callback_ms": 295.288,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.564,
+            "remaining_before_ms": 667.471,
+            "remaining_after_ms": 666.896,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "remaining_path_validation",
+            "wall_ms": 154.508,
+            "remaining_before_ms": 666.299,
+            "remaining_after_ms": 511.764,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "TRUE"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 155.736,
+            "remaining_before_ms": 667.481,
+            "remaining_after_ms": 511.741,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 155.774,
+            "remaining_before_ms": 667.49,
+            "remaining_after_ms": 511.71,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.022,
+            "remaining_before_ms": 511.624,
+            "remaining_after_ms": 511.598,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 511.593,
+            "remaining_after_ms": 511.589,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 527,
+        "time_s": 1794851945.126113
+      },
+      {
+        "cycle": 588,
+        "status": "RECOVERY_SETTLING",
+        "action": "NONE",
+        "cycle_work_ms": 10.295,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "CLEAR",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851944631997722,
+        "capture_age_start_ms": 539.446,
+        "capture_to_callback_ms": 295.288,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.532,
+            "remaining_before_ms": 460.344,
+            "remaining_after_ms": 459.802,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.588,
+            "remaining_before_ms": 460.354,
+            "remaining_after_ms": 459.761,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.612,
+            "remaining_before_ms": 460.361,
+            "remaining_after_ms": 459.744,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.693,
+            "remaining_before_ms": 450.996,
+            "remaining_after_ms": 450.29,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.001,
+            "remaining_before_ms": 450.284,
+            "remaining_after_ms": 450.279,
+            "revision_before": 73,
+            "revision_after": 73,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 529,
+        "time_s": 1794851945.1822534
+      },
+      {
+        "cycle": 591,
+        "status": "RECOVERY_NO_PATH",
+        "action": "NONE",
+        "cycle_work_ms": 238.807,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851944999135849,
+        "capture_age_start_ms": 764.062,
+        "capture_to_callback_ms": 279.024,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.693,
+            "remaining_before_ms": 235.577,
+            "remaining_after_ms": 234.872,
+            "revision_before": 74,
+            "revision_after": 74,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.765,
+            "remaining_before_ms": 235.59,
+            "remaining_after_ms": 234.817,
+            "revision_before": 74,
+            "revision_after": 74,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 236.782,
+            "remaining_before_ms": 235.601,
+            "remaining_after_ms": -1.199,
+            "revision_before": 74,
+            "revision_after": 74,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": -2.812,
+            "remaining_after_ms": -2.826,
+            "revision_before": 74,
+            "revision_after": 74,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": -2.831,
+            "remaining_after_ms": -2.837,
+            "revision_before": 74,
+            "revision_after": 74,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 531,
+        "time_s": 1794851946.0031507
+      },
+      {
+        "cycle": 592,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 2.092,
+        "human_status": "UNKNOWN",
+        "human_reason": "STALE_MESSAGE",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "STALE_MESSAGE",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851944999135849,
+        "capture_age_start_ms": 1011.752,
+        "capture_to_callback_ms": 279.024,
+        "stages": [
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.013,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 75,
+            "revision_after": 75,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.029,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 75,
+            "revision_after": 75,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 75,
+            "revision_after": 75,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.001,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 75,
+            "revision_after": 75,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 535,
+        "time_s": 1794851946.0135698
+      },
+      {
+        "cycle": 593,
+        "status": "MOTION_ERROR",
+        "action": "NONE",
+        "cycle_work_ms": 5.548,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851945799237725,
+        "capture_age_start_ms": 365.942,
+        "capture_to_callback_ms": 256.086,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.814,
+            "remaining_before_ms": 633.168,
+            "remaining_after_ms": 632.346,
+            "revision_before": 76,
+            "revision_after": 76,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.871,
+            "remaining_before_ms": 633.181,
+            "remaining_after_ms": 632.306,
+            "revision_before": 76,
+            "revision_after": 76,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.889,
+            "remaining_before_ms": 633.191,
+            "remaining_after_ms": 632.296,
+            "revision_before": 76,
+            "revision_after": 76,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.005,
+            "remaining_before_ms": 628.559,
+            "remaining_after_ms": 628.544,
+            "revision_before": 76,
+            "revision_after": 76,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 628.539,
+            "remaining_after_ms": 628.534,
+            "revision_before": 76,
+            "revision_after": 76,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 539,
+        "time_s": 1794851946.174553
+      },
+      {
+        "cycle": 602,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 5.083,
+        "human_status": "UNKNOWN",
+        "human_reason": "VISION_INVALID",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "VISION_INVALID",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": null,
+        "capture_age_start_ms": null,
+        "capture_to_callback_ms": null,
+        "stages": [
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.025,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 81,
+            "revision_after": 81,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.062,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 81,
+            "revision_after": 81,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.004,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 81,
+            "revision_after": 81,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 81,
+            "revision_after": 81,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 545,
+        "time_s": 1794851947.9688268
+      },
+      {
+        "cycle": 603,
+        "status": "MOTION_ERROR",
+        "action": "NONE",
+        "cycle_work_ms": 12.18,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851947698944367,
+        "capture_age_start_ms": 476.966,
+        "capture_to_callback_ms": 309.495,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.925,
+            "remaining_before_ms": 518.166,
+            "remaining_after_ms": 517.226,
+            "revision_before": 82,
+            "revision_after": 82,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 1.015,
+            "remaining_before_ms": 518.182,
+            "remaining_after_ms": 517.158,
+            "revision_before": 82,
+            "revision_after": 82,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 1.049,
+            "remaining_before_ms": 518.202,
+            "remaining_after_ms": 517.139,
+            "revision_before": 82,
+            "revision_after": 82,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.005,
+            "remaining_before_ms": 510.931,
+            "remaining_after_ms": 510.91,
+            "revision_before": 82,
+            "revision_after": 82,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": 510.902,
+            "remaining_after_ms": 510.895,
+            "revision_before": 82,
+            "revision_after": 82,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 549,
+        "time_s": 1794851948.188902
+      },
+      {
+        "cycle": 612,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 5.259,
+        "human_status": "UNKNOWN",
+        "human_reason": "VISION_INVALID",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "VISION_INVALID",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": null,
+        "capture_age_start_ms": null,
+        "capture_to_callback_ms": null,
+        "stages": [
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.023,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 89,
+            "revision_after": 89,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.048,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 89,
+            "revision_after": 89,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 89,
+            "revision_after": 89,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 89,
+            "revision_after": 89,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 554,
+        "time_s": 1794851949.970644
+      },
+      {
+        "cycle": 613,
+        "status": "MOTION_ERROR",
+        "action": "NONE",
+        "cycle_work_ms": 7.888,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851949698473932,
+        "capture_age_start_ms": 507.964,
+        "capture_to_callback_ms": 277.377,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 0.684,
+            "remaining_before_ms": 490.871,
+            "remaining_after_ms": 490.176,
+            "revision_before": 90,
+            "revision_after": 90,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.754,
+            "remaining_before_ms": 490.884,
+            "remaining_after_ms": 490.122,
+            "revision_before": 90,
+            "revision_after": 90,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.784,
+            "remaining_before_ms": 490.896,
+            "remaining_after_ms": 490.103,
+            "revision_before": 90,
+            "revision_after": 90,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.003,
+            "remaining_before_ms": 484.209,
+            "remaining_after_ms": 484.193,
+            "revision_before": 90,
+            "revision_after": 90,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 484.186,
+            "remaining_after_ms": 484.18,
+            "revision_before": 90,
+            "revision_after": 90,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 558,
+        "time_s": 1794851950.21669
+      },
+      {
+        "cycle": 638,
+        "status": "HUMAN_VISION_UNKNOWN",
+        "action": "NONE",
+        "cycle_work_ms": 4.167,
+        "human_status": "UNKNOWN",
+        "human_reason": "VISION_INVALID",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "VISION_INVALID",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": null,
+        "capture_age_start_ms": null,
+        "capture_to_callback_ms": null,
+        "stages": [
+          {
+            "stage": "human_guard",
+            "wall_ms": 0.02,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 105,
+            "revision_after": 105,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 0.045,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 105,
+            "revision_after": 105,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 105,
+            "revision_after": 105,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": null,
+            "remaining_after_ms": null,
+            "revision_before": 105,
+            "revision_after": 105,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 565,
+        "time_s": 1794851955.1687434
+      },
+      {
+        "cycle": 639,
+        "status": "MOTION_ERROR",
+        "action": "NONE",
+        "cycle_work_ms": 8.951,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "human_timeout_ms": 1000.0,
+        "path_validation": "NO_PATH",
+        "path_failure_id": 2,
+        "commanded_path_id": 6,
+        "next_waypoint": 1,
+        "candidate_next_waypoint": 1,
+        "progress_reason": "NO_EXECUTION",
+        "segment_evidence_reason": null,
+        "retreat_reason": null,
+        "human_capture_stamp_ns": 1794851955032547794,
+        "capture_age_start_ms": 330.314,
+        "capture_to_callback_ms": 273.199,
+        "stages": [
+          {
+            "stage": "current_clearance",
+            "wall_ms": 1.709,
+            "remaining_before_ms": 664.23,
+            "remaining_after_ms": 662.51,
+            "revision_before": 106,
+            "revision_after": 106,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "human_guard",
+            "wall_ms": 1.773,
+            "remaining_before_ms": 664.249,
+            "remaining_after_ms": 662.471,
+            "revision_before": 106,
+            "revision_after": 106,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "manager_step",
+            "wall_ms": 1.796,
+            "remaining_before_ms": 664.267,
+            "remaining_after_ms": 662.459,
+            "revision_before": 106,
+            "revision_after": 106,
+            "outcome": "RETURNED"
+          },
+          {
+            "stage": "visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 660.777,
+            "remaining_after_ms": 660.769,
+            "revision_before": 106,
+            "revision_after": 106,
+            "outcome": "NONE"
+          },
+          {
+            "stage": "graph_visualization",
+            "wall_ms": 0.002,
+            "remaining_before_ms": 660.764,
+            "remaining_after_ms": 660.76,
+            "revision_before": 106,
+            "revision_after": 106,
+            "outcome": "NONE"
+          }
+        ],
+        "log_line": 569,
+        "time_s": 1794851955.3728676
+      }
+    ]
+  },
+  "profile_scope": {
+    "sampled_rows": 297,
+    "span_s": 304.4025139808655,
+    "status_counts": {
+      "WAITING_FOR_FEEDBACK": 1,
+      "PATH_READY": 15,
+      "TRAJECTORY_SENT": 41,
+      "EXECUTING": 59,
+      "COMPLETED": 20,
+      "HUMAN_TOO_CLOSE": 2,
+      "HUMAN_RETREAT_BLOCKED": 10,
+      "WAITING_FOR_RELEASE": 38,
+      "RECOVERY_SETTLING": 5,
+      "HUMAN_PATH_BLOCKED": 5,
+      "HUMAN_VISION_UNKNOWN": 72,
+      "RECOVERY_NO_PATH": 1,
+      "MOTION_ERROR": 14,
+      "HUMAN_RETREAT_DATA_UNKNOWN": 8,
+      "HUMAN_RETREAT_READY": 3,
+      "HUMAN_RETREAT_SENT": 1,
+      "HUMAN_RETREAT_CLEAR": 1,
+      "RECOVERY_UNSAFE": 1
+    },
+    "action_counts": {
+      "NONE": 221,
+      "EXECUTE": 30,
+      "STOP": 20,
+      "RELEASE": 26
+    }
+  },
+  "stage_statistics": {
+    "human_guard": {
+      "count": 297,
+      "median_ms": 0.738,
+      "max_ms": 333.691,
+      "p95_ms": 175.701,
+      "outcomes": {
+        "NONE": 243,
+        "RETURNED": 54
+      },
+      "deadline_crossing_count": 0
+    },
+    "manager_step": {
+      "count": 297,
+      "median_ms": 60.139,
+      "max_ms": 705.885,
+      "p95_ms": 634.55,
+      "outcomes": {
+        "RETURNED": 297
+      },
+      "deadline_crossing_count": 54
+    },
+    "visualization": {
+      "count": 297,
+      "median_ms": 0.031,
+      "max_ms": 39.849,
+      "p95_ms": 7.896,
+      "outcomes": {
+        "NONE": 297
+      },
+      "deadline_crossing_count": 0
+    },
+    "graph_visualization": {
+      "count": 297,
+      "median_ms": 0.001,
+      "max_ms": 0.235,
+      "p95_ms": 0.003,
+      "outcomes": {
+        "NONE": 297
+      },
+      "deadline_crossing_count": 0
+    },
+    "goal_selection": {
+      "count": 54,
+      "median_ms": 4.968999999999999,
+      "max_ms": 17.735,
+      "p95_ms": 13.112,
+      "outcomes": {
+        "RETURNED": 54
+      },
+      "deadline_crossing_count": 0
+    },
+    "path_search": {
+      "count": 54,
+      "median_ms": 560.74,
+      "max_ms": 703.78,
+      "p95_ms": 701.628,
+      "outcomes": {
+        "TRUE": 15,
+        "FALSE": 39
+      },
+      "deadline_crossing_count": 39
+    },
+    "execution_prepare_path": {
+      "count": 57,
+      "median_ms": 58.127,
+      "max_ms": 213.982,
+      "p95_ms": 186.999,
+      "outcomes": {
+        "RETURNED": 51,
+        "ERROR": 6
+      },
+      "deadline_crossing_count": 6
+    },
+    "execution_final_path": {
+      "count": 51,
+      "median_ms": 48.468,
+      "max_ms": 225.94,
+      "p95_ms": 161.441,
+      "outcomes": {
+        "TRUE": 50,
+        "FALSE": 1
+      },
+      "deadline_crossing_count": 1
+    },
+    "trajectory_build": {
+      "count": 30,
+      "median_ms": 0.365,
+      "max_ms": 1.57,
+      "p95_ms": 1.486,
+      "outcomes": {
+        "RETURNED": 30
+      },
+      "deadline_crossing_count": 0
+    },
+    "execute_ack_wait": {
+      "count": 30,
+      "median_ms": 17.0825,
+      "max_ms": 120.943,
+      "p95_ms": 30.559,
+      "outcomes": {
+        "EXECUTING": 30
+      },
+      "deadline_crossing_count": 1
+    },
+    "current_clearance": {
+      "count": 180,
+      "median_ms": 0.762,
+      "max_ms": 8.732,
+      "p95_ms": 5.208,
+      "outcomes": {
+        "RETURNED": 180
+      },
+      "deadline_crossing_count": 0
+    },
+    "stop_ack_wait": {
+      "count": 20,
+      "median_ms": 15.574,
+      "max_ms": 48.115,
+      "p95_ms": 36.163,
+      "outcomes": {
+        "STOPPED": 20
+      },
+      "deadline_crossing_count": 0
+    },
+    "retreat_search": {
+      "count": 10,
+      "median_ms": 341.693,
+      "max_ms": 665.27,
+      "p95_ms": 665.27,
+      "outcomes": {
+        "NONE": 6,
+        "RETURNED": 4
+      },
+      "deadline_crossing_count": 5
+    },
+    "retreat_preparation": {
+      "count": 13,
+      "median_ms": 324.611,
+      "max_ms": 667.617,
+      "p95_ms": 667.617,
+      "outcomes": {
+        "FALSE": 10,
+        "TRUE": 3
+      },
+      "deadline_crossing_count": 6
+    },
+    "remaining_path_validation": {
+      "count": 74,
+      "median_ms": 113.54599999999999,
+      "max_ms": 326.963,
+      "p95_ms": 258.682,
+      "outcomes": {
+        "TRUE": 69,
+        "FALSE": 5
+      },
+      "deadline_crossing_count": 0
+    },
+    "release_ack_wait": {
+      "count": 26,
+      "median_ms": 17.479,
+      "max_ms": 42.322,
+      "p95_ms": 33.413,
+      "outcomes": {
+        "IDLE": 26
+      },
+      "deadline_crossing_count": 0
+    },
+    "retreat_candidate_validation": {
+      "count": 4,
+      "median_ms": 22.5475,
+      "max_ms": 36.465,
+      "p95_ms": 36.465,
+      "outcomes": {
+        "TRUE": 3,
+        "FALSE": 1
+      },
+      "deadline_crossing_count": 1
+    },
+    "retreat_guard_validation": {
+      "count": 6,
+      "median_ms": 34.8875,
+      "max_ms": 74.443,
+      "p95_ms": 74.443,
+      "outcomes": {
+        "TRUE": 6
+      },
+      "deadline_crossing_count": 0
+    },
+    "retreat_guard": {
+      "count": 8,
+      "median_ms": 33.2995,
+      "max_ms": 82.593,
+      "p95_ms": 82.593,
+      "outcomes": {
+        "NONE": 6,
+        "RETURNED": 2
+      },
+      "deadline_crossing_count": 0
+    },
+    "execution_prepare_retreat": {
+      "count": 4,
+      "median_ms": 35.8525,
+      "max_ms": 55.668,
+      "p95_ms": 55.668,
+      "outcomes": {
+        "TRUE": 3,
+        "FALSE": 1
+      },
+      "deadline_crossing_count": 1
+    },
+    "execution_final_retreat": {
+      "count": 3,
+      "median_ms": 27.68,
+      "max_ms": 29.997,
+      "p95_ms": 29.997,
+      "outcomes": {
+        "TRUE": 3
+      },
+      "deadline_crossing_count": 0
+    }
+  },
+  "stop_decisions": [
+    {
+      "cycle": 252,
+      "status": "HUMAN_TOO_CLOSE",
+      "action": "STOP",
+      "cycle_work_ms": 6.84,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 0,
+      "commanded_path_id": 1,
+      "next_waypoint": 3,
+      "candidate_next_waypoint": 3,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794851873930948245,
+      "capture_age_start_ms": 433.069,
+      "capture_to_callback_ms": 266.736,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.501,
+          "remaining_before_ms": 566.678,
+          "remaining_after_ms": 565.161,
+          "revision_before": 15,
+          "revision_after": 15,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.558,
+          "remaining_before_ms": 566.69,
+          "remaining_after_ms": 565.127,
+          "revision_before": 15,
+          "revision_after": 15,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 1.59,
+          "remaining_before_ms": 566.7,
+          "remaining_after_ms": 565.104,
+          "revision_before": 15,
+          "revision_after": 15,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 1.191,
+          "remaining_before_ms": 561.345,
+          "remaining_after_ms": 560.136,
+          "revision_before": 15,
+          "revision_after": 15,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": 560.126,
+          "remaining_after_ms": 560.118,
+          "revision_before": 15,
+          "revision_after": 15,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 116,
+      "time_s": 1794851874.3716056
+    },
+    {
+      "cycle": 534,
+      "status": "HUMAN_PATH_BLOCKED",
+      "action": "STOP",
+      "cycle_work_ms": 7.153,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "PATH_COLLISION",
+      "path_failure_id": 1,
+      "commanded_path_id": 5,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794851930466391803,
+      "capture_age_start_ms": 296.358,
+      "capture_to_callback_ms": 267.867,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 0.453,
+          "remaining_before_ms": 703.407,
+          "remaining_after_ms": 702.947,
+          "revision_before": 38,
+          "revision_after": 38,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "remaining_path_validation",
+          "wall_ms": 3.686,
+          "remaining_before_ms": 702.5,
+          "remaining_after_ms": 698.8,
+          "revision_before": 38,
+          "revision_after": 38,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 4.839,
+          "remaining_before_ms": 703.417,
+          "remaining_after_ms": 698.574,
+          "revision_before": 38,
+          "revision_after": 38,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 4.863,
+          "remaining_before_ms": 703.424,
+          "remaining_after_ms": 698.557,
+          "revision_before": 38,
+          "revision_after": 38,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.557,
+          "remaining_before_ms": 697.092,
+          "remaining_after_ms": 696.522,
+          "revision_before": 38,
+          "revision_after": 38,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": 696.516,
+          "remaining_after_ms": 696.511,
+          "revision_before": 38,
+          "revision_after": 38,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 420,
+      "time_s": 1794851930.7705727
+    },
+    {
+      "cycle": 980,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 8.202,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 2,
+      "commanded_path_id": 10,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.019,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 151,
+          "revision_after": 151,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.043,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 151,
+          "revision_after": 151,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.045,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 151,
+          "revision_after": 151,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 151,
+          "revision_after": 151,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 980,
+      "time_s": 1794852023.572886
+    },
+    {
+      "cycle": 1015,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 8.788,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 3,
+      "commanded_path_id": 11,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.022,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 179,
+          "revision_after": 179,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.047,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 179,
+          "revision_after": 179,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.048,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 179,
+          "revision_after": 179,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 179,
+          "revision_after": 179,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1073,
+      "time_s": 1794852034.3726904
+    },
+    {
+      "cycle": 1109,
+      "status": "HUMAN_PATH_BLOCKED",
+      "action": "STOP",
+      "cycle_work_ms": 58.887,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "PATH_COLLISION",
+      "path_failure_id": 4,
+      "commanded_path_id": 14,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794852052833388996,
+      "capture_age_start_ms": 329.852,
+      "capture_to_callback_ms": 313.704,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 8.134,
+          "remaining_before_ms": 663.609,
+          "remaining_after_ms": 655.441,
+          "revision_before": 182,
+          "revision_after": 182,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "remaining_path_validation",
+          "wall_ms": 17.963,
+          "remaining_before_ms": 647.937,
+          "remaining_after_ms": 629.939,
+          "revision_before": 182,
+          "revision_after": 182,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 34.055,
+          "remaining_before_ms": 663.633,
+          "remaining_after_ms": 629.569,
+          "revision_before": 181,
+          "revision_after": 182,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 34.1,
+          "remaining_before_ms": 663.661,
+          "remaining_after_ms": 629.54,
+          "revision_before": 181,
+          "revision_after": 182,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.89,
+          "remaining_before_ms": 612.212,
+          "remaining_after_ms": 611.304,
+          "revision_before": 182,
+          "revision_after": 182,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": 611.296,
+          "remaining_after_ms": 611.289,
+          "revision_before": 182,
+          "revision_after": 182,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1212,
+      "time_s": 1794852053.2228572
+    },
+    {
+      "cycle": 1131,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 8.681,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 15,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "execute_ack_wait",
+          "origin_cycle": 1129,
+          "wall_ms": 18.719,
+          "remaining_before_ms": 207.694,
+          "remaining_after_ms": 188.963,
+          "revision_before": 195,
+          "revision_after": 195,
+          "outcome": "EXECUTING"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.026,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 196,
+          "revision_after": 196,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.064,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 196,
+          "revision_after": 196,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.064,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 196,
+          "revision_after": 196,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 196,
+          "revision_after": 196,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1267,
+      "time_s": 1794852058.7766623
+    },
+    {
+      "cycle": 1134,
+      "status": "HUMAN_TOO_CLOSE",
+      "action": "STOP",
+      "cycle_work_ms": 15.041,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 15,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794852059068264205,
+      "capture_age_start_ms": 496.549,
+      "capture_to_callback_ms": 392.034,
+      "stages": [
+        {
+          "stage": "release_ack_wait",
+          "origin_cycle": 1132,
+          "wall_ms": 33.413,
+          "remaining_before_ms": 175.292,
+          "remaining_after_ms": 141.867,
+          "revision_before": 197,
+          "revision_after": 197,
+          "outcome": "IDLE"
+        },
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.358,
+          "remaining_before_ms": 503.106,
+          "remaining_after_ms": 501.736,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.408,
+          "remaining_before_ms": 503.119,
+          "remaining_after_ms": 501.708,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 1.436,
+          "remaining_before_ms": 503.13,
+          "remaining_after_ms": 501.688,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.715,
+          "remaining_before_ms": 489.188,
+          "remaining_after_ms": 488.452,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": 488.444,
+          "remaining_after_ms": 488.44,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1275,
+      "time_s": 1794852059.5804534
+    },
+    {
+      "cycle": 1154,
+      "status": "HUMAN_RETREAT_CLEAR",
+      "action": "STOP",
+      "cycle_work_ms": 13.868,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 16,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "FINAL_WAYPOINT_PENDING",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794852063733883548,
+      "capture_age_start_ms": 428.796,
+      "capture_to_callback_ms": 340.74,
+      "stages": [
+        {
+          "stage": "retreat_guard",
+          "wall_ms": 2.482,
+          "remaining_before_ms": 570.83,
+          "remaining_after_ms": 568.334,
+          "revision_before": 210,
+          "revision_after": 210,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 2.508,
+          "remaining_before_ms": 570.837,
+          "remaining_after_ms": 568.322,
+          "revision_before": 210,
+          "revision_after": 210,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 2.545,
+          "remaining_before_ms": 570.849,
+          "remaining_after_ms": 568.296,
+          "revision_before": 210,
+          "revision_after": 210,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.879,
+          "remaining_before_ms": 558.282,
+          "remaining_after_ms": 557.381,
+          "revision_before": 210,
+          "revision_after": 210,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": 557.372,
+          "remaining_after_ms": 557.365,
+          "revision_before": 210,
+          "revision_after": 210,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1328,
+      "time_s": 1794852064.180644
+    },
+    {
+      "cycle": 1172,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 6.595,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 17,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.017,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 216,
+          "revision_after": 216,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.045,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 216,
+          "revision_after": 216,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.051,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 216,
+          "revision_after": 216,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 216,
+          "revision_after": 216,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1366,
+      "time_s": 1794852067.9699254
+    },
+    {
+      "cycle": 1177,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 4.764,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 18,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "execute_ack_wait",
+          "origin_cycle": 1175,
+          "wall_ms": 18.665,
+          "remaining_before_ms": 50.345,
+          "remaining_after_ms": 31.665,
+          "revision_before": 218,
+          "revision_after": 218,
+          "outcome": "EXECUTING"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.023,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 219,
+          "revision_after": 219,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.058,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 219,
+          "revision_after": 219,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.043,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 219,
+          "revision_after": 219,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 219,
+          "revision_after": 219,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1380,
+      "time_s": 1794852068.977867
+    },
+    {
+      "cycle": 1193,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 2.356,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 19,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.017,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 228,
+          "revision_after": 228,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.044,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 228,
+          "revision_after": 228,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.046,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 228,
+          "revision_after": 228,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 228,
+          "revision_after": 228,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1400,
+      "time_s": 1794852072.19451
+    },
+    {
+      "cycle": 1209,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 1.664,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 20,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.016,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 236,
+          "revision_after": 236,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.036,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 236,
+          "revision_after": 236,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.044,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 236,
+          "revision_after": 236,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 236,
+          "revision_after": 236,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1417,
+      "time_s": 1794852075.3652294
+    },
+    {
+      "cycle": 1214,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 13.13,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 21,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "execute_ack_wait",
+          "origin_cycle": 1213,
+          "wall_ms": 9.947,
+          "remaining_before_ms": 270.895,
+          "remaining_after_ms": 260.94,
+          "revision_before": 237,
+          "revision_after": 237,
+          "outcome": "EXECUTING"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.016,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 238,
+          "revision_after": 238,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.038,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 238,
+          "revision_after": 238,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.065,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 238,
+          "revision_after": 238,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 238,
+          "revision_after": 238,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1431,
+      "time_s": 1794852076.386833
+    },
+    {
+      "cycle": 1222,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 6.441,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 22,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.017,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 241,
+          "revision_after": 241,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 1.484,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 241,
+          "revision_after": 241,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.082,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 241,
+          "revision_after": 241,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 241,
+          "revision_after": 241,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1447,
+      "time_s": 1794852077.97215
+    },
+    {
+      "cycle": 1227,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 6.373,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 23,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "execute_ack_wait",
+          "origin_cycle": 1225,
+          "wall_ms": 12.502,
+          "remaining_before_ms": 100.086,
+          "remaining_after_ms": 87.57,
+          "revision_before": 242,
+          "revision_after": 242,
+          "outcome": "EXECUTING"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.016,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 243,
+          "revision_after": 243,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.041,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 243,
+          "revision_after": 243,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.053,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 243,
+          "revision_after": 243,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 243,
+          "revision_after": 243,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1461,
+      "time_s": 1794852078.969688
+    },
+    {
+      "cycle": 1242,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 4.018,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 24,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.02,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 252,
+          "revision_after": 252,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.051,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 252,
+          "revision_after": 252,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.052,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 252,
+          "revision_after": 252,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 252,
+          "revision_after": 252,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1479,
+      "time_s": 1794852081.969926
+    },
+    {
+      "cycle": 1262,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 11.682,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 4,
+      "commanded_path_id": 25,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.038,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 267,
+          "revision_after": 267,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.08,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 267,
+          "revision_after": 267,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.06,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 267,
+          "revision_after": 267,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 267,
+          "revision_after": 267,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1500,
+      "time_s": 1794852085.975066
+    },
+    {
+      "cycle": 1384,
+      "status": "HUMAN_PATH_BLOCKED",
+      "action": "STOP",
+      "cycle_work_ms": 13.862,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "PATH_COLLISION",
+      "path_failure_id": 5,
+      "commanded_path_id": 27,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794852110634167719,
+      "capture_age_start_ms": 528.461,
+      "capture_to_callback_ms": 455.805,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 0.704,
+          "remaining_before_ms": 470.181,
+          "remaining_after_ms": 469.466,
+          "revision_before": 294,
+          "revision_after": 294,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "remaining_path_validation",
+          "wall_ms": 7.12,
+          "remaining_before_ms": 468.774,
+          "remaining_after_ms": 461.636,
+          "revision_before": 294,
+          "revision_after": 294,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 8.876,
+          "remaining_before_ms": 470.194,
+          "remaining_after_ms": 461.309,
+          "revision_before": 294,
+          "revision_after": 294,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 8.914,
+          "remaining_before_ms": 470.21,
+          "remaining_after_ms": 461.282,
+          "revision_before": 294,
+          "revision_after": 294,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.873,
+          "remaining_before_ms": 458.615,
+          "remaining_after_ms": 457.726,
+          "revision_before": 294,
+          "revision_after": 294,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": 457.717,
+          "remaining_after_ms": 457.71,
+          "revision_before": 294,
+          "revision_after": 294,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1631,
+      "time_s": 1794852111.1772783
+    },
+    {
+      "cycle": 1433,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 1.529,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 5,
+      "commanded_path_id": 28,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.017,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 329,
+          "revision_after": 329,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.04,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 329,
+          "revision_after": 329,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.033,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 329,
+          "revision_after": 329,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 329,
+          "revision_after": 329,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1743,
+      "time_s": 1794852126.3644433
+    },
+    {
+      "cycle": 1438,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "STOP",
+      "cycle_work_ms": 1.867,
+      "human_status": "UNKNOWN",
+      "human_reason": "VISION_INVALID",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "VISION_INVALID",
+      "path_failure_id": 5,
+      "commanded_path_id": 29,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "OUTSIDE_FEEDBACK_CHORD",
+      "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+      "retreat_reason": null,
+      "human_capture_stamp_ns": null,
+      "capture_age_start_ms": null,
+      "capture_to_callback_ms": null,
+      "stages": [
+        {
+          "stage": "execute_ack_wait",
+          "origin_cycle": 1436,
+          "wall_ms": 13.592,
+          "remaining_before_ms": 8.201,
+          "remaining_after_ms": -5.405,
+          "revision_before": 331,
+          "revision_after": 331,
+          "outcome": "EXECUTING"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 0.027,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 332,
+          "revision_after": 332,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 0.057,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 332,
+          "revision_after": 332,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.048,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 332,
+          "revision_after": 332,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": null,
+          "remaining_after_ms": null,
+          "revision_before": 332,
+          "revision_after": 332,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1757,
+      "time_s": 1794852127.964857
+    }
+  ],
+  "retreat_blocks": [
+    {
+      "cycle": 253,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 4.934,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 0,
+      "commanded_path_id": 1,
+      "next_waypoint": 3,
+      "candidate_next_waypoint": 3,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "HUMAN_OVERLAP",
+      "human_capture_stamp_ns": 1794851874164146206,
+      "capture_age_start_ms": 399.967,
+      "capture_to_callback_ms": 252.876,
+      "stages": [
+        {
+          "stage": "stop_ack_wait",
+          "origin_cycle": 252,
+          "wall_ms": 8.376,
+          "remaining_before_ms": 565.116,
+          "remaining_after_ms": 556.73,
+          "revision_before": 15,
+          "revision_after": 15,
+          "outcome": "STOPPED"
+        },
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.115,
+          "remaining_before_ms": 599.706,
+          "remaining_after_ms": 598.58,
+          "revision_before": 16,
+          "revision_after": 16,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.167,
+          "remaining_before_ms": 599.721,
+          "remaining_after_ms": 598.551,
+          "revision_before": 16,
+          "revision_after": 16,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_search",
+          "wall_ms": 1.668,
+          "remaining_before_ms": 598.514,
+          "remaining_after_ms": 596.835,
+          "revision_before": 16,
+          "revision_after": 16,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 1.712,
+          "remaining_before_ms": 598.542,
+          "remaining_after_ms": 596.827,
+          "revision_before": 16,
+          "revision_after": 16,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 2.91,
+          "remaining_before_ms": 599.733,
+          "remaining_after_ms": 596.818,
+          "revision_before": 16,
+          "revision_after": 16,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": 595.139,
+          "remaining_after_ms": 595.131,
+          "revision_before": 16,
+          "revision_after": 16,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": 595.128,
+          "remaining_after_ms": 595.124,
+          "revision_before": 16,
+          "revision_after": 16,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 119,
+      "time_s": 1794851874.5694253
+    },
+    {
+      "cycle": 1110,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 7.926,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 14,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "ROBOT_STILL_MOVING",
+      "human_capture_stamp_ns": 1794852053033372361,
+      "capture_age_start_ms": 340.288,
+      "capture_to_callback_ms": 291.998,
+      "stages": [
+        {
+          "stage": "stop_ack_wait",
+          "origin_cycle": 1109,
+          "wall_ms": 36.163,
+          "remaining_before_ms": 629.556,
+          "remaining_after_ms": 593.381,
+          "revision_before": 182,
+          "revision_after": 182,
+          "outcome": "STOPPED"
+        },
+        {
+          "stage": "current_clearance",
+          "wall_ms": 6.072,
+          "remaining_before_ms": 659.511,
+          "remaining_after_ms": 653.429,
+          "revision_before": 183,
+          "revision_after": 183,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 6.11,
+          "remaining_before_ms": 659.52,
+          "remaining_after_ms": 653.406,
+          "revision_before": 183,
+          "revision_after": 183,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 0.044,
+          "remaining_before_ms": 653.397,
+          "remaining_after_ms": 653.349,
+          "revision_before": 183,
+          "revision_after": 183,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 6.182,
+          "remaining_before_ms": 659.527,
+          "remaining_after_ms": 653.34,
+          "revision_before": 183,
+          "revision_after": 183,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": 651.822,
+          "remaining_after_ms": 651.812,
+          "revision_before": 183,
+          "revision_after": 183,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": 651.808,
+          "remaining_after_ms": 651.803,
+          "revision_before": 183,
+          "revision_after": 183,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1215,
+      "time_s": 1794852053.3871582
+    },
+    {
+      "cycle": 1113,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 343.261,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 14,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "HUMAN_DATA_UNKNOWN",
+      "human_capture_stamp_ns": 1794852053299879612,
+      "capture_age_start_ms": 662.748,
+      "capture_to_callback_ms": 305.169,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.475,
+          "remaining_before_ms": 336.895,
+          "remaining_after_ms": 335.408,
+          "revision_before": 185,
+          "revision_after": 185,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.522,
+          "remaining_before_ms": 336.906,
+          "remaining_after_ms": 335.377,
+          "revision_before": 185,
+          "revision_after": 185,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_search",
+          "wall_ms": 339.031,
+          "remaining_before_ms": 335.333,
+          "remaining_after_ms": -3.722,
+          "revision_before": 185,
+          "revision_after": 185,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 339.101,
+          "remaining_before_ms": 335.368,
+          "remaining_after_ms": -3.741,
+          "revision_before": 185,
+          "revision_after": 185,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 340.667,
+          "remaining_before_ms": 336.918,
+          "remaining_after_ms": -3.76,
+          "revision_before": 185,
+          "revision_after": 185,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.003,
+          "remaining_before_ms": -5.947,
+          "remaining_after_ms": -5.965,
+          "revision_before": 185,
+          "revision_after": 185,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": -5.973,
+          "remaining_after_ms": -5.979,
+          "revision_before": 185,
+          "revision_after": 185,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1217,
+      "time_s": 1794852054.3069117
+    },
+    {
+      "cycle": 1115,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 10.787,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 14,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "ROBOT_STILL_MOVING",
+      "human_capture_stamp_ns": 1794852054066908294,
+      "capture_age_start_ms": 295.706,
+      "capture_to_callback_ms": 277.417,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 2.819,
+          "remaining_before_ms": 702.97,
+          "remaining_after_ms": 700.134,
+          "revision_before": 187,
+          "revision_after": 187,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 2.895,
+          "remaining_before_ms": 702.999,
+          "remaining_after_ms": 700.096,
+          "revision_before": 187,
+          "revision_after": 187,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 0.033,
+          "remaining_before_ms": 700.083,
+          "remaining_after_ms": 700.041,
+          "revision_before": 187,
+          "revision_after": 187,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 2.977,
+          "remaining_before_ms": 703.016,
+          "remaining_after_ms": 700.026,
+          "revision_before": 187,
+          "revision_after": 187,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.003,
+          "remaining_before_ms": 693.564,
+          "remaining_after_ms": 693.549,
+          "revision_before": 187,
+          "revision_after": 187,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": 693.543,
+          "remaining_after_ms": 693.537,
+          "revision_before": 187,
+          "revision_after": 187,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1225,
+      "time_s": 1794852054.3741596
+    },
+    {
+      "cycle": 1116,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 676.106,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 14,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "HUMAN_DATA_UNKNOWN",
+      "human_capture_stamp_ns": 1794852054233619883,
+      "capture_age_start_ms": 329.933,
+      "capture_to_callback_ms": 255.311,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 4.35,
+          "remaining_before_ms": 669.657,
+          "remaining_after_ms": 665.288,
+          "revision_before": 188,
+          "revision_after": 188,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 4.41,
+          "remaining_before_ms": 669.669,
+          "remaining_after_ms": 665.251,
+          "revision_before": 188,
+          "revision_after": 188,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_search",
+          "wall_ms": 665.27,
+          "remaining_before_ms": 665.197,
+          "remaining_after_ms": -0.087,
+          "revision_before": 188,
+          "revision_after": 188,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 665.332,
+          "remaining_before_ms": 665.239,
+          "remaining_after_ms": -0.098,
+          "revision_before": 188,
+          "revision_after": 188,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 669.782,
+          "remaining_before_ms": 669.679,
+          "remaining_after_ms": -0.109,
+          "revision_before": 188,
+          "revision_after": 188,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": -5.984,
+          "remaining_after_ms": -5.995,
+          "revision_before": 188,
+          "revision_after": 188,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": -6.0,
+          "remaining_after_ms": -6.005,
+          "revision_before": 188,
+          "revision_after": 188,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1228,
+      "time_s": 1794852055.240122
+    },
+    {
+      "cycle": 1118,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 641.831,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 14,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "HUMAN_DATA_UNKNOWN",
+      "human_capture_stamp_ns": 1794852055000347823,
+      "capture_age_start_ms": 365.557,
+      "capture_to_callback_ms": 280.085,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.103,
+          "remaining_before_ms": 633.61,
+          "remaining_after_ms": 632.494,
+          "revision_before": 190,
+          "revision_after": 190,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.147,
+          "remaining_before_ms": 633.619,
+          "remaining_after_ms": 632.469,
+          "revision_before": 190,
+          "revision_after": 190,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_search",
+          "wall_ms": 633.319,
+          "remaining_before_ms": 632.435,
+          "remaining_after_ms": -0.898,
+          "revision_before": 190,
+          "revision_after": 190,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 633.369,
+          "remaining_before_ms": 632.461,
+          "remaining_after_ms": -0.913,
+          "revision_before": 190,
+          "revision_after": 190,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 634.55,
+          "remaining_before_ms": 633.63,
+          "remaining_after_ms": -0.93,
+          "revision_before": 190,
+          "revision_after": 190,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.004,
+          "remaining_before_ms": -5.39,
+          "remaining_after_ms": -5.411,
+          "revision_before": 190,
+          "revision_after": 190,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": -5.42,
+          "remaining_after_ms": -5.425,
+          "revision_before": 190,
+          "revision_after": 190,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1237,
+      "time_s": 1794852056.008608
+    },
+    {
+      "cycle": 1135,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 308.666,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 15,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "HUMAN_DATA_UNKNOWN",
+      "human_capture_stamp_ns": 1794852059068264205,
+      "capture_age_start_ms": 694.359,
+      "capture_to_callback_ms": 392.034,
+      "stages": [
+        {
+          "stage": "stop_ack_wait",
+          "origin_cycle": 1134,
+          "wall_ms": 48.115,
+          "remaining_before_ms": 501.698,
+          "remaining_after_ms": 453.558,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "STOPPED"
+        },
+        {
+          "stage": "current_clearance",
+          "wall_ms": 3.897,
+          "remaining_before_ms": 305.399,
+          "remaining_after_ms": 301.479,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 3.965,
+          "remaining_before_ms": 305.409,
+          "remaining_after_ms": 301.441,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_search",
+          "wall_ms": 301.481,
+          "remaining_before_ms": 301.392,
+          "remaining_after_ms": -0.105,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 301.543,
+          "remaining_before_ms": 301.429,
+          "remaining_after_ms": -0.12,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 305.546,
+          "remaining_before_ms": 305.418,
+          "remaining_after_ms": -0.135,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.004,
+          "remaining_before_ms": -2.971,
+          "remaining_after_ms": -2.989,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": -2.995,
+          "remaining_after_ms": -3.0,
+          "revision_before": 198,
+          "revision_after": 198,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1278,
+      "time_s": 1794852060.0720456
+    },
+    {
+      "cycle": 1137,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 6.002,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 15,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "HUMAN_DATA_UNKNOWN",
+      "human_capture_stamp_ns": 1794852059734563824,
+      "capture_age_start_ms": 428.096,
+      "capture_to_callback_ms": 356.967,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.564,
+          "remaining_before_ms": 570.71,
+          "remaining_after_ms": 569.132,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.616,
+          "remaining_before_ms": 570.721,
+          "remaining_after_ms": 569.099,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 0.028,
+          "remaining_before_ms": 569.089,
+          "remaining_after_ms": 569.053,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 1.686,
+          "remaining_before_ms": 570.734,
+          "remaining_after_ms": 569.039,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.003,
+          "remaining_before_ms": 565.96,
+          "remaining_after_ms": 565.944,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": 565.937,
+          "remaining_after_ms": 565.932,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1286,
+      "time_s": 1794852060.1694431
+    },
+    {
+      "cycle": 1138,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 373.368,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 15,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "HUMAN_DATA_UNKNOWN",
+      "human_capture_stamp_ns": 1794852059734563824,
+      "capture_age_start_ms": 628.185,
+      "capture_to_callback_ms": 356.967,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.271,
+          "remaining_before_ms": 371.552,
+          "remaining_after_ms": 370.267,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.325,
+          "remaining_before_ms": 371.559,
+          "remaining_after_ms": 370.231,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_search",
+          "wall_ms": 370.518,
+          "remaining_before_ms": 370.192,
+          "remaining_after_ms": -0.34,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 370.569,
+          "remaining_before_ms": 370.221,
+          "remaining_after_ms": -0.351,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 371.925,
+          "remaining_before_ms": 371.567,
+          "remaining_after_ms": -0.362,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": -1.517,
+          "remaining_after_ms": -1.526,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": -1.53,
+          "remaining_after_ms": -1.534,
+          "revision_before": 200,
+          "revision_after": 200,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1288,
+      "time_s": 1794852060.736593
+    },
+    {
+      "cycle": 1141,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "action": "NONE",
+      "cycle_work_ms": 678.385,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "CURRENT_CLEARANCE",
+      "path_failure_id": 4,
+      "commanded_path_id": 15,
+      "next_waypoint": 1,
+      "candidate_next_waypoint": 1,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": "RETREAT_REVALIDATION_FAILED",
+      "human_capture_stamp_ns": 1794852060634730267,
+      "capture_age_start_ms": 330.607,
+      "capture_to_callback_ms": 265.749,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.106,
+          "remaining_before_ms": 664.941,
+          "remaining_after_ms": 663.822,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 4.518,
+          "remaining_before_ms": 664.951,
+          "remaining_after_ms": 660.42,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_search",
+          "wall_ms": 650.34,
+          "remaining_before_ms": 660.354,
+          "remaining_after_ms": 9.999,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "retreat_candidate_validation",
+          "wall_ms": 14.298,
+          "remaining_before_ms": 7.153,
+          "remaining_after_ms": -7.171,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "retreat_preparation",
+          "wall_ms": 667.617,
+          "remaining_before_ms": 660.407,
+          "remaining_after_ms": -7.217,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 672.192,
+          "remaining_before_ms": 664.963,
+          "remaining_after_ms": -7.239,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": -8.938,
+          "remaining_after_ms": -8.949,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": -8.955,
+          "remaining_after_ms": -8.96,
+          "revision_before": 202,
+          "revision_after": 202,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 1299,
+      "time_s": 1794852061.652412
+    }
+  ],
+  "path_failures": [
+    {
+      "id": 1,
+      "cycle": 534,
+      "stage": "human_guard",
+      "path_source": "remaining_execution",
+      "checked_next_waypoint": 2,
+      "motion": "EXECUTING",
+      "pending": null,
+      "revision": 38,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 698.62,
+      "input_path_points": 13,
+      "checked_path_points": 13,
+      "checked_path_start_q": [
+        2.0299957757131377,
+        -0.8036085480936541,
+        1.796751780858372,
+        -0.37751342241043706,
+        -1.3827015094670196
+      ],
+      "checked_path_goal_q": [
+        0.07122599333524704,
+        -1.0752387046813965,
+        1.8768740892410278,
+        1.5630946159362793,
+        1.5083645582199097
+      ],
+      "current_state_report": {
+        "clearance": 0.13803362492686388,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.3872050306442084,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.05,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE",
+        "sphere_clearance": 0.13803362492686388,
+        "box_clearance": null,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 38,
+        "joints": [
+          2.0299957757131377,
+          -0.8036085480936541,
+          1.796751780858372,
+          -0.37751342241043706,
+          -1.3827015094670196
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.7069493532180786,
+            -0.7639258503913879,
+            1.551785945892334,
+            -0.41650643944740295,
+            -0.9389348030090332
+          ],
+          "revision": 38,
+          "human": {
+            "clearance": 0.09848962480103816,
+            "robot_geom": "link3_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.27251871287167134,
+            "robot_radius": 0.16226254521185388,
+            "human_radius": 0.05,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.060256167659817464,
+            "box_clearance": 0.09848962480103816,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 13,
+        "revision_before": 38,
+        "revision_after": 38,
+        "point_index": 3,
+        "edge_index": null,
+        "point_q": [
+          1.7069493532180786,
+          -0.7639258503913879,
+          1.551785945892334,
+          -0.41650643944740295,
+          -0.9389348030090332
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 2,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 14,
+        "current_q": [
+          2.0299957757131377,
+          -0.8036085480936541,
+          1.796751780858372,
+          -0.37751342241043706,
+          -1.3827015094670196
+        ],
+        "ordered_next_q": [
+          2.016958236694336,
+          -0.8392205238342285,
+          1.841589331626892,
+          -0.3556724190711975,
+          -1.4882358312606812
+        ],
+        "ordered_next_max_error_rad": 0.10553432179366151,
+        "nearest_waypoint_index": 2,
+        "nearest_waypoint_l2_error_rad": 0.12273189765519978,
+        "nearest_segment_index": 2,
+        "nearest_segment_fraction": 0.18745221923855662,
+        "nearest_segment_l2_error_rad": 0.0550990946483671,
+        "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "commanded_path_id": 5,
+        "candidate_next_waypoint": 2,
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "segment_corridor_tolerance_rad": 0.04
+      },
+      "failed_commanded_waypoint": 4,
+      "log_line": 419,
+      "time_s": 1794851930.769228
+    },
+    {
+      "id": 2,
+      "cycle": 537,
+      "stage": "human_guard",
+      "path_source": "planned_path",
+      "checked_next_waypoint": 2,
+      "motion": "STOPPED",
+      "pending": null,
+      "revision": 40,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 460.916,
+      "input_path_points": 13,
+      "checked_path_points": 13,
+      "checked_path_start_q": [
+        2.013430850213952,
+        -0.7968393314408441,
+        1.7917781812113631,
+        -0.3804060640525273,
+        -1.3679157164880695
+      ],
+      "checked_path_goal_q": [
+        0.07122599333524704,
+        -1.0752387046813965,
+        1.8768740892410278,
+        1.5630946159362793,
+        1.5083645582199097
+      ],
+      "current_state_report": {
+        "clearance": 0.1489296937395987,
+        "robot_geom": "link3_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.30442146338111403,
+        "robot_radius": 0.16226254521185388,
+        "human_radius": 0.06517249582304725,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.0769864223462129,
+        "box_clearance": 0.1489296937395987,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 40,
+        "joints": [
+          2.0193605777801964,
+          -0.8003240694776417,
+          1.7923399202282209,
+          -0.38039439571216815,
+          -1.3679468835040505
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.8297877311706543,
+            -1.0248956680297852,
+            2.2912583351135254,
+            -0.5173335671424866,
+            -0.9914926886558533
+          ],
+          "revision": 40,
+          "human": {
+            "clearance": 0.08714274062046758,
+            "robot_geom": "link3_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.2737749953702624,
+            "robot_radius": 0.16226254521185388,
+            "human_radius": 0.06517249582304725,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.04633995433536127,
+            "box_clearance": 0.08714274062046758,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 13,
+        "revision_before": 40,
+        "revision_after": 40,
+        "point_index": 1,
+        "edge_index": null,
+        "point_q": [
+          1.8297877311706543,
+          -1.0248956680297852,
+          2.2912583351135254,
+          -0.5173335671424866,
+          -0.9914926886558533
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 2,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 14,
+        "current_q": [
+          2.0193605777801964,
+          -0.8003240694776417,
+          1.7923399202282209,
+          -0.38039439571216815,
+          -1.3679468835040505
+        ],
+        "ordered_next_q": [
+          2.016958236694336,
+          -0.8392205238342285,
+          1.841589331626892,
+          -0.3556724190711975,
+          -1.4882358312606812
+        ],
+        "ordered_next_max_error_rad": 0.12028894775663068,
+        "nearest_waypoint_index": 2,
+        "nearest_waypoint_l2_error_rad": 0.13793047889700286,
+        "nearest_segment_index": 2,
+        "nearest_segment_fraction": 0.21931502974694342,
+        "nearest_segment_l2_error_rad": 0.050610096838357356,
+        "last_update_reason": "NO_EXECUTION",
+        "commanded_path_id": 5,
+        "candidate_next_waypoint": 2,
+        "segment_evidence_reason": null,
+        "segment_corridor_tolerance_rad": 0.04
+      },
+      "log_line": 428,
+      "time_s": 1794851931.6440809
+    },
+    {
+      "id": 3,
+      "cycle": 983,
+      "stage": "human_guard",
+      "path_source": "planned_path",
+      "checked_next_waypoint": 2,
+      "motion": "IDLE",
+      "pending": null,
+      "revision": 153,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 217.74,
+      "input_path_points": 9,
+      "checked_path_points": 9,
+      "checked_path_start_q": [
+        2.20233300030538,
+        -1.6813597226663746,
+        2.212155429814042,
+        -0.11388083557223706,
+        0.6168815592171863
+      ],
+      "checked_path_goal_q": [
+        0.07122599333524704,
+        -1.0752387046813965,
+        1.8768740892410278,
+        1.5630946159362793,
+        1.5083645582199097
+      ],
+      "current_state_report": {
+        "clearance": 0.1456192444925254,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.2971431807336828,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.05118649644500815,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.046785278571330094,
+        "box_clearance": 0.1456192444925254,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 153,
+        "joints": [
+          2.2033426536218372,
+          -1.6678025961748504,
+          2.213258687530286,
+          -0.11384870308127613,
+          0.6168426873118089
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.1526881456375122,
+            -1.7183693647384644,
+            2.1340668201446533,
+            0.8113343119621277,
+            1.0878103971481323
+          ],
+          "revision": 153,
+          "human": {
+            "clearance": 0.06457105805467123,
+            "robot_geom": "link4_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.16014369122525732,
+            "robot_radius": 0.06018336476416798,
+            "human_radius": 0.05118649644500815,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.04877383001608118,
+            "box_clearance": 0.06457105805467123,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 9,
+        "revision_before": 153,
+        "revision_after": 153,
+        "point_index": 3,
+        "edge_index": null,
+        "point_q": [
+          1.1526881456375122,
+          -1.7183693647384644,
+          2.1340668201446533,
+          0.8113343119621277,
+          1.0878103971481323
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 2,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 10,
+        "current_q": [
+          2.2033426536218372,
+          -1.6678025961748504,
+          2.213258687530286,
+          -0.11384870308127613,
+          0.6168426873118089
+        ],
+        "ordered_next_q": [
+          1.9423469305038452,
+          -1.853438138961792,
+          2.298039436340332,
+          0.14433416724205017,
+          0.38246050477027893
+        ],
+        "ordered_next_max_error_rad": 0.260995723117992,
+        "nearest_waypoint_index": 1,
+        "nearest_waypoint_l2_error_rad": 0.4260985797513535,
+        "nearest_segment_index": 1,
+        "nearest_segment_fraction": 0.4695993277746915,
+        "nearest_segment_l2_error_rad": 0.0305941281462765,
+        "last_update_reason": "NO_EXECUTION",
+        "commanded_path_id": 10,
+        "candidate_next_waypoint": 2,
+        "segment_evidence_reason": null,
+        "segment_corridor_tolerance_rad": 0.04
+      },
+      "log_line": 988,
+      "time_s": 1794852024.5844927
+    },
+    {
+      "id": 4,
+      "cycle": 1109,
+      "stage": "human_guard",
+      "path_source": "remaining_execution",
+      "checked_next_waypoint": 2,
+      "motion": "EXECUTING",
+      "pending": null,
+      "revision": 182,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 629.644,
+      "input_path_points": 12,
+      "checked_path_points": 12,
+      "checked_path_start_q": [
+        0.3482833415098548,
+        -1.3114530051098512,
+        1.8973037848995309,
+        1.1310062539956312,
+        1.2514284323950555
+      ],
+      "checked_path_goal_q": [
+        2.9648923873901367,
+        -0.8797190189361572,
+        1.867236852645874,
+        -0.5033348798751831,
+        1.155487298965454
+      ],
+      "current_state_report": {
+        "clearance": 0.10415187495086778,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.2994866644211328,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.08705130916855985,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.013263949535228414,
+        "box_clearance": 0.10415187495086778,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 182,
+        "joints": [
+          0.3482833415098548,
+          -1.3114530051098512,
+          1.8973037848995309,
+          1.1310062539956312,
+          1.2514284323950555
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.1888501644134521,
+            -1.5653820037841797,
+            2.0501456260681152,
+            0.4771578013896942,
+            1.0121796131134033
+          ],
+          "revision": 182,
+          "human": {
+            "clearance": 0.0920328504616581,
+            "robot_geom": "link4_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.22001877989861066,
+            "robot_radius": 0.06018336476416798,
+            "human_radius": 0.08705130916855985,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.0727841059658828,
+            "box_clearance": 0.0920328504616581,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 12,
+        "revision_before": 182,
+        "revision_after": 182,
+        "point_index": 4,
+        "edge_index": null,
+        "point_q": [
+          1.1888501644134521,
+          -1.5653820037841797,
+          2.0501456260681152,
+          0.4771578013896942,
+          1.0121796131134033
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 2,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 13,
+        "current_q": [
+          0.3482833415098548,
+          -1.3114530051098512,
+          1.8973037848995309,
+          1.1310062539956312,
+          1.2514284323950555
+        ],
+        "ordered_next_q": [
+          0.498790979385376,
+          -1.451546549797058,
+          1.8985379934310913,
+          0.8736725449562073,
+          1.1099854707717896
+        ],
+        "ordered_next_max_error_rad": 0.2573337090394239,
+        "nearest_waypoint_index": 1,
+        "nearest_waypoint_l2_error_rad": 0.11833736727983098,
+        "nearest_segment_index": 1,
+        "nearest_segment_fraction": 0.24729739196146627,
+        "nearest_segment_l2_error_rad": 0.012181473388928356,
+        "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "commanded_path_id": 14,
+        "candidate_next_waypoint": 2,
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "segment_corridor_tolerance_rad": 0.04
+      },
+      "failed_commanded_waypoint": 5,
+      "log_line": 1211,
+      "time_s": 1794852053.2210004
+    },
+    {
+      "id": 5,
+      "cycle": 1384,
+      "stage": "human_guard",
+      "path_source": "remaining_execution",
+      "checked_next_waypoint": 1,
+      "motion": "EXECUTING",
+      "pending": null,
+      "revision": 294,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 461.377,
+      "input_path_points": 17,
+      "checked_path_points": 17,
+      "checked_path_start_q": [
+        2.6088475194375293,
+        -0.6764961388279507,
+        1.8603804039293768,
+        -1.1649130487004593,
+        0.41824601820616136
+      ],
+      "checked_path_goal_q": [
+        -0.5945708751678467,
+        -0.7294697761535645,
+        1.5451797246932983,
+        -1.4338924884796143,
+        -1.4736884832382202
+      ],
+      "current_state_report": {
+        "clearance": 0.15804892302486806,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.43448926152958395,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.07726893278737135,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE",
+        "sphere_clearance": 0.15804892302486806,
+        "box_clearance": null,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 294,
+        "joints": [
+          2.6088475194375293,
+          -0.6764961388279507,
+          1.8603804039293768,
+          -1.1649130487004593,
+          0.41824601820616136
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.6877968311309814,
+            -0.7141562700271606,
+            2.1778509616851807,
+            -0.7976110577583313,
+            -0.6733422875404358
+          ],
+          "revision": 294,
+          "human": {
+            "clearance": 0.09690421881963754,
+            "robot_geom": "link3_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.30144021342327615,
+            "robot_radius": 0.16226254521185388,
+            "human_radius": 0.07726893278737135,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.061908735424050926,
+            "box_clearance": 0.09690421881963754,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 17,
+        "revision_before": 294,
+        "revision_after": 294,
+        "point_index": 7,
+        "edge_index": null,
+        "point_q": [
+          1.6877968311309814,
+          -0.7141562700271606,
+          2.1778509616851807,
+          -0.7976110577583313,
+          -0.6733422875404358
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 1,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 17,
+        "current_q": [
+          2.6088475194375293,
+          -0.6764961388279507,
+          1.8603804039293768,
+          -1.1649130487004593,
+          0.41824601820616136
+        ],
+        "ordered_next_q": [
+          2.841101884841919,
+          -0.7341606020927429,
+          1.9567217826843262,
+          -0.7285060286521912,
+          0.672808051109314
+        ],
+        "ordered_next_max_error_rad": 0.43640702004826815,
+        "nearest_waypoint_index": 2,
+        "nearest_waypoint_l2_error_rad": 0.058178406822897114,
+        "nearest_segment_index": 2,
+        "nearest_segment_fraction": 0.0630844444908497,
+        "nearest_segment_l2_error_rad": 0.04316455205796705,
+        "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "commanded_path_id": 27,
+        "candidate_next_waypoint": 1,
+        "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+        "segment_corridor_tolerance_rad": 0.04
+      },
+      "failed_commanded_waypoint": 7,
+      "log_line": 1630,
+      "time_s": 1794852111.1753879
+    }
+  ],
+  "motion_fault_counts": {
+    "STALLED": 1,
+    "TRACKING_ERROR": 5
+  },
+  "search_deadline_examples": [
+    {
+      "cycle": 538,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "NONE",
+      "cycle_work_ms": 340.04,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "NO_PATH",
+      "path_failure_id": 2,
+      "commanded_path_id": 5,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794851931099234334,
+      "capture_age_start_ms": 665.201,
+      "capture_to_callback_ms": 520.58,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.444,
+          "remaining_before_ms": 334.364,
+          "remaining_after_ms": 332.909,
+          "revision_before": 40,
+          "revision_after": 40,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.511,
+          "remaining_before_ms": 334.383,
+          "remaining_after_ms": 332.867,
+          "revision_before": 40,
+          "revision_after": 40,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "goal_selection",
+          "wall_ms": 6.409,
+          "remaining_before_ms": 332.85,
+          "remaining_after_ms": 326.429,
+          "revision_before": 40,
+          "revision_after": 40,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "path_search",
+          "wall_ms": 326.569,
+          "remaining_before_ms": 326.421,
+          "remaining_after_ms": -0.17,
+          "revision_before": 40,
+          "revision_after": 40,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 334.604,
+          "remaining_before_ms": 334.395,
+          "remaining_after_ms": -0.219,
+          "revision_before": 40,
+          "revision_after": 40,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.003,
+          "remaining_before_ms": -5.179,
+          "remaining_after_ms": -5.194,
+          "revision_before": 40,
+          "revision_after": 40,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": -5.2,
+          "remaining_after_ms": -5.207,
+          "revision_before": 40,
+          "revision_after": 40,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 431,
+      "time_s": 1794851932.105169
+    },
+    {
+      "cycle": 542,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "NONE",
+      "cycle_work_ms": 705.076,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "NO_PATH",
+      "path_failure_id": 2,
+      "commanded_path_id": 5,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794851932265960744,
+      "capture_age_start_ms": 296.677,
+      "capture_to_callback_ms": 246.615,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 3.191,
+          "remaining_before_ms": 700.892,
+          "remaining_after_ms": 697.686,
+          "revision_before": 42,
+          "revision_after": 42,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 3.274,
+          "remaining_before_ms": 700.907,
+          "remaining_after_ms": 697.625,
+          "revision_before": 42,
+          "revision_after": 42,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "goal_selection",
+          "wall_ms": 2.755,
+          "remaining_before_ms": 697.607,
+          "remaining_after_ms": 694.839,
+          "revision_before": 42,
+          "revision_after": 42,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "path_search",
+          "wall_ms": 695.758,
+          "remaining_before_ms": 694.828,
+          "remaining_after_ms": -0.954,
+          "revision_before": 42,
+          "revision_after": 42,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 701.912,
+          "remaining_before_ms": 700.918,
+          "remaining_after_ms": -1.002,
+          "revision_before": 42,
+          "revision_after": 42,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": -1.709,
+          "remaining_after_ms": -1.717,
+          "revision_before": 42,
+          "revision_after": 42,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.001,
+          "remaining_before_ms": -1.722,
+          "remaining_after_ms": -1.726,
+          "revision_before": 42,
+          "revision_after": 42,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 439,
+      "time_s": 1794851933.2725513
+    },
+    {
+      "cycle": 545,
+      "status": "HUMAN_VISION_UNKNOWN",
+      "action": "NONE",
+      "cycle_work_ms": 574.548,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "human_timeout_ms": 1000.0,
+      "path_validation": "NO_PATH",
+      "path_failure_id": 2,
+      "commanded_path_id": 5,
+      "next_waypoint": 2,
+      "candidate_next_waypoint": 2,
+      "progress_reason": "NO_EXECUTION",
+      "segment_evidence_reason": null,
+      "retreat_reason": null,
+      "human_capture_stamp_ns": 1794851933133123614,
+      "capture_age_start_ms": 429.514,
+      "capture_to_callback_ms": 281.326,
+      "stages": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 1.729,
+          "remaining_before_ms": 569.009,
+          "remaining_after_ms": 567.268,
+          "revision_before": 44,
+          "revision_after": 44,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 1.798,
+          "remaining_before_ms": 569.025,
+          "remaining_after_ms": 567.219,
+          "revision_before": 44,
+          "revision_after": 44,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "goal_selection",
+          "wall_ms": 5.667,
+          "remaining_before_ms": 566.277,
+          "remaining_after_ms": 560.587,
+          "revision_before": 44,
+          "revision_after": 44,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "path_search",
+          "wall_ms": 563.583,
+          "remaining_before_ms": 560.573,
+          "remaining_after_ms": -3.025,
+          "revision_before": 44,
+          "revision_after": 44,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 572.086,
+          "remaining_before_ms": 569.04,
+          "remaining_after_ms": -3.058,
+          "revision_before": 44,
+          "revision_after": 44,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "visualization",
+          "wall_ms": 0.003,
+          "remaining_before_ms": -4.006,
+          "remaining_after_ms": -4.019,
+          "revision_before": 44,
+          "revision_after": 44,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "graph_visualization",
+          "wall_ms": 0.002,
+          "remaining_before_ms": -4.025,
+          "remaining_after_ms": -4.032,
+          "revision_before": 44,
+          "revision_after": 44,
+          "outcome": "NONE"
+        }
+      ],
+      "log_line": 447,
+      "time_s": 1794851934.1409657
+    }
+  ],
+  "accepted_segment_progress_profiles": [
+    {
+      "cycle": 530,
+      "commanded_path_id": 5,
+      "cursor": 2
+    },
+    {
+      "cycle": 976,
+      "commanded_path_id": 10,
+      "cursor": 2
+    },
+    {
+      "cycle": 1170,
+      "commanded_path_id": 17,
+      "cursor": 2
+    },
+    {
+      "cycle": 1189,
+      "commanded_path_id": 19,
+      "cursor": 2
+    }
+  ],
+  "verified_findings": [
+    "Startup confirms enabled segment tracker, 0.04 rad progress corridor, 1.0 s human timeout and unchanged experimental execution settings.",
+    "39 of 54 profiled path_search stages return FALSE; all 39 cross the human-data deadline. The wider launch prints 40 PathPlanner expiry NO_PATH messages, including 38 graph-search and two final-validation expiries. Message counts are not assumed one-to-one with the profiled main stage.",
+    "In the bag window, search cycle 555 has 581.610 ms remaining but spends 582.441 ms and ends at -0.844 ms. Four main searches expire and one succeeds in that window.",
+    "The bag has 77 valid observed and seven invalid human messages; observed receipt-age median is 0.272817 s. Valid=False is separate from capture-age expiry.",
+    "14 of 20 recorded manager STOP actions in the wider log follow VISION_INVALID; three follow fresh-data PATH_COLLISION, two current human proximity, and one retreat-clear cancellation.",
+    "The wider Motion log reports five TRACKING_ERROR faults and one STALLED fault. In the bag, Motion enters CONTROL_ERROR at 8.191 s with failure_reason TRACKING_ERROR; subsequent profiles include recovery/no-path and MOTION_ERROR.",
+    "Joint-5 fault at 1794851944.963 reports 0.212 rad tracking error, requested velocity 0.724 rad/s and filtered velocity 0.500 rad/s. Saturation is verified; the complete controller/plant cause is not proven.",
+    "Current Motion source already uses reference max velocity 0.6 * configured joint speed, with the guard at the full configured speed; do not recommend adding this existing reserve as a new fix.",
+    "All five new failed-path traces reject waypoints, rather than the old measured-to-stale-waypoint connector. Four emitted profiles explicitly record accepted segment progress. This is not proof that every possible route now has perfect progress.",
+    "Retreat also encounters HUMAN_OVERLAP, ROBOT_STILL_MOVING, capture expiry and a revalidation failure; no graph-route guarantee follows for these starts."
+  ],
+  "hypotheses_and_next_checks": [
+    "Near-human geometry may increase rejected candidate/edge checks. The current path_search timing does not isolate graph queue work from collision evaluation; profile geometry work before changing the graph algorithm.",
+    "Reproduce the recorded tracking fault with the original trajectory/controller/MuJoCo in an isolated headless test and inspect reference, measured velocity, applied command, actuator force and contacts. Saturation alone does not establish a unique cause.",
+    "Instrument upstream Vision validity reasons without changing ROS message interfaces to distinguish missing/stale inputs, synchronization and frame/body-index validity.",
+    "Optimizing repeated same-snapshot collision work could reduce deadline failures. All cache reuse must preserve exact input, revision, margins and freshness. No such optimization is implemented in this inspection."
+  ],
+  "limits": [
+    "Five-minute launch statistics and the 20-second bag have different coverage; do not combine their denominators.",
+    "Profile rows sample fast unchanged cycles; these stage summaries are conditional on emitted rows.",
+    "The STALLED log joint index is selected from maximum tracking error, not necessarily the joint that triggered the monitor stall condition.",
+    "The bag lacks continuous reference/applied-command/actuator-force telemetry, so it cannot by itself establish the full dynamics cause.",
+    "A 2 s age budget can help search deadlines but cannot repair valid=False inputs or Motion tracking faults."
+  ]
+}

@@ -64,6 +64,9 @@ K4AROSDevice::K4AROSDevice()
   this->declare_parameter("color_format", "");
   this->declare_parameter("color_resolution", "");
   this->declare_parameter<int>("fps", 30);
+  capture_timeout_limit_ = this->declare_parameter<int>("capture_max_consecutive_timeouts", 5);
+  // Validate before opening any device or creating worker threads.
+  (void)k4a_driver::CaptureTimeoutPolicy(capture_timeout_limit_);
   this->declare_parameter<bool>("point_cloud", true);
   this->declare_parameter<bool>("rgb_point_cloud", true);
   this->declare_parameter<bool>("point_cloud_in_depth_frame", true);
@@ -296,44 +299,41 @@ K4AROSDevice::K4AROSDevice()
 
 K4AROSDevice::~K4AROSDevice()
 {
-  // Start tearing down the publisher threads
-  running_ = false;
-
+  // Stop producers and interrupt SDK waits before joining. Some workers may
+  // never have started if initialization failed partway through startup.
+  RCLCPP_INFO(this->get_logger(), "Stopping camera streams and workers");
+  k4a_driver::stopAndJoin(running_, [this]() {
+    stopCameras();
+    stopImu();
 #if defined(K4A_BODY_TRACKING)
-  // Join the publisher thread
-  RCLCPP_INFO(this->get_logger(),"Joining body publisher thread");
-  body_publisher_thread_.join();
-  RCLCPP_INFO(this->get_logger(),"Body publisher thread joined");
+    if (tracker_started_)
+    {
+      k4abt_tracker_.shutdown();
+      tracker_started_ = false;
+    }
 #endif
-
-  // Join the publisher thread
-  RCLCPP_INFO(this->get_logger(),"Joining camera publisher thread");
-  frame_publisher_thread_.join();
-  RCLCPP_INFO(this->get_logger(),"Camera publisher thread joined");
-
-  // Join the publisher thread
-  RCLCPP_INFO(this->get_logger(),"Joining IMU publisher thread");
-  imu_publisher_thread_.join();
-  RCLCPP_INFO(this->get_logger(),"IMU publisher thread joined");
-
-  stopCameras();
-  stopImu();
+  }, {
+#if defined(K4A_BODY_TRACKING)
+    &body_publisher_thread_,
+#endif
+    &frame_publisher_thread_, &imu_publisher_thread_
+  });
+  RCLCPP_INFO(this->get_logger(), "Camera stream workers stopped");
 
   if (k4a_playback_handle_)
   {
     k4a_playback_handle_.close();
   }
 
-#if defined(K4A_BODY_TRACKING)
-  if (k4abt_tracker_)
-  {
-    k4abt_tracker_.shutdown();
-  }
-#endif
 }
 
 k4a_result_t K4AROSDevice::startCameras()
 {
+  if (!k4a_device_ && !k4a_playback_handle_)
+  {
+    RCLCPP_ERROR(this->get_logger(), "Cannot start cameras: no open device or recording");
+    return K4A_RESULT_FAILED;
+  }
   k4a_device_configuration_t k4a_configuration = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
   k4a_result_t result = params_.GetDeviceConfig(&k4a_configuration);
 
@@ -361,6 +361,7 @@ k4a_result_t K4AROSDevice::startCameras()
   if (params_.body_tracking_enabled)
   {
     k4abt_tracker_ = k4abt::tracker::create(calibration_data_.k4a_calibration_);
+    tracker_started_ = true;
     k4abt_tracker_.set_temporal_smoothing(params_.body_tracking_smoothing_factor);
   }
 #endif
@@ -369,6 +370,7 @@ k4a_result_t K4AROSDevice::startCameras()
   {
     RCLCPP_INFO_STREAM(this->get_logger(),"STARTING CAMERAS");
     k4a_device_.start_cameras(&k4a_configuration);
+    cameras_started_ = true;
   }
 
   // Cannot assume the device timestamp begins increasing upon starting the cameras.
@@ -381,9 +383,14 @@ k4a_result_t K4AROSDevice::startCameras()
   running_ = true;
 
   // Start the thread that will poll the cameras and publish frames
-  frame_publisher_thread_ = thread(&K4AROSDevice::framePublisherThread, this);
+  frame_publisher_thread_ = thread(&K4AROSDevice::workerMain, this, "camera",
+                                  &K4AROSDevice::framePublisherThread);
 #if defined(K4A_BODY_TRACKING)
-  body_publisher_thread_ = thread(&K4AROSDevice::bodyPublisherThread, this);
+  if (tracker_started_)
+  {
+    body_publisher_thread_ = thread(&K4AROSDevice::workerMain, this, "body tracker",
+                                   &K4AROSDevice::bodyPublisherThread);
+  }
 #endif
 
   return K4A_RESULT_SUCCEEDED;
@@ -391,22 +398,30 @@ k4a_result_t K4AROSDevice::startCameras()
 
 k4a_result_t K4AROSDevice::startImu()
 {
+  if (!running_ || (!k4a_device_ && !k4a_playback_handle_))
+  {
+    RCLCPP_ERROR(this->get_logger(), "Cannot start IMU before a valid camera stream");
+    return K4A_RESULT_FAILED;
+  }
   if (k4a_device_)
   {
     RCLCPP_INFO_STREAM(this->get_logger(),"STARTING IMU");
     k4a_device_.start_imu();
+    imu_started_ = true;
   }
 
   // Start the IMU publisher thread
-  imu_publisher_thread_ = thread(&K4AROSDevice::imuPublisherThread, this);
+  imu_publisher_thread_ = thread(&K4AROSDevice::workerMain, this, "IMU",
+                                &K4AROSDevice::imuPublisherThread);
 
   return K4A_RESULT_SUCCEEDED;
 }
 
 void K4AROSDevice::stopCameras()
 {
-  if (k4a_device_)
+  if (k4a_device_ && cameras_started_)
   {
+    cameras_started_ = false;
     // Stop the K4A SDK
     RCLCPP_INFO(this->get_logger(),"Stopping K4A device");
     k4a_device_.stop_cameras();
@@ -416,10 +431,23 @@ void K4AROSDevice::stopCameras()
 
 void K4AROSDevice::stopImu()
 {
-  if (k4a_device_)
+  if (k4a_device_ && imu_started_)
   {
+    imu_started_ = false;
     k4a_device_.stop_imu();
   }
+}
+
+void K4AROSDevice::workerMain(const char* name, void (K4AROSDevice::*work)())
+{
+  k4a_driver::runWorker(running_, [this, work]() { (this->*work)(); },
+    [this, name](const char* message) {
+      if (rclcpp::ok())
+      {
+        RCLCPP_ERROR(this->get_logger(), "%s stream failed: %s", name, message);
+        rclcpp::shutdown();
+      }
+    });
 }
 
 k4a_result_t K4AROSDevice::getDepthFrame(const k4a::capture& capture, std::shared_ptr<sensor_msgs::msg::Image>& depth_image,
@@ -885,6 +913,9 @@ void K4AROSDevice::framePublisherThread()
   const std::chrono::milliseconds firstFrameWaitTime = std::chrono::milliseconds(4 * 1000);
   const std::chrono::milliseconds regularFrameWaitTime = std::chrono::milliseconds(1000 * 5 / params_.fps);
   std::chrono::milliseconds waitTime = firstFrameWaitTime;
+  k4a_driver::CaptureTimeoutPolicy capture_timeouts(capture_timeout_limit_);
+  RCLCPP_INFO(this->get_logger(), "Capture retry limit=%d, regular wait=%ld ms",
+              capture_timeout_limit_, static_cast<long>(regularFrameWaitTime.count()));
 
   while (running_ && rclcpp::ok())
   {
@@ -892,12 +923,35 @@ void K4AROSDevice::framePublisherThread()
     {
       if (!k4a_device_.get_capture(&capture, waitTime))
       {
-        RCLCPP_FATAL(this->get_logger(),"Failed to poll cameras: node cannot continue.");
-        rclcpp::shutdown();
-        return;
+        if (!running_ || !rclcpp::ok())
+        {
+          return;
+        }
+        capture = k4a::capture();
+        if (capture_timeouts.timedOut())
+        {
+          RCLCPP_ERROR(this->get_logger(),
+                       "No capture after %d consecutive timeouts; stopping stream",
+                       capture_timeouts.count());
+          running_ = false;
+          rclcpp::shutdown();
+          return;
+        }
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+                             "Capture timeout (%d/%d); retrying without publishing stale data",
+                             capture_timeouts.count(), capture_timeouts.limit());
+        // Only the initial attempt uses the long first-frame wait.
+        waitTime = regularFrameWaitTime;
+        continue;
       }
       else
       {
+        if (capture_timeouts.count() > 0)
+        {
+          RCLCPP_INFO(this->get_logger(), "Capture resumed after %d timeout(s)",
+                      capture_timeouts.count());
+        }
+        capture_timeouts.received();
         if (params_.depth_enabled)
         {
           // Update the timestamp offset based on the difference between the system timestamp (i.e., arrival at USB bus)

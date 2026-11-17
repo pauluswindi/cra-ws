@@ -1,0 +1,366 @@
+{
+  "scope": "Offline counterfactual control: recorded command/feedback, FAR synthetic human during traversal, then exact recorded failure geometry. Original manager collision checks run at ~5 Hz. Not a moving-human replay or live execution.",
+  "recorded_bag": "/tmp/cra_path_diag_1s_20261116_235941",
+  "source_capture_ns": 1794848407327306578,
+  "configuration": {
+    "corridor_tolerance": 0.04,
+    "confirmation_samples": 2,
+    "handoff_fraction": 0.9,
+    "max_feedback_step": 0.05
+  },
+  "results": [
+    {
+      "segment_progress_enabled": false,
+      "cursor_before_final_scene": 5,
+      "candidate_cursor": 5,
+      "decision": {
+        "action": "STOP",
+        "status": "HUMAN_PATH_BLOCKED"
+      },
+      "cursor_after_final_scene": 5,
+      "ordered_advances": [
+        {
+          "elapsed_s": 0.800088268,
+          "before": 1,
+          "after": 2,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 2.688441918,
+          "before": 2,
+          "after": 3,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 4.4021175,
+          "before": 3,
+          "after": 4,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 5.300633712,
+          "before": 4,
+          "after": 5,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        }
+      ],
+      "failure_event": {
+        "id": 1,
+        "cycle": 83,
+        "stage": "human_guard",
+        "path_source": "remaining_execution",
+        "checked_next_waypoint": 5,
+        "motion": "EXECUTING",
+        "pending": null,
+        "revision": 7,
+        "human_status": "OBSERVED",
+        "human_reason": "CAPSULES_PRESENT",
+        "remaining_human_ms": 736.655,
+        "input_path_points": 10,
+        "checked_path_points": 10,
+        "checked_path_start_q": [
+          0.039034214793258845,
+          -1.4043194016276992,
+          2.0602511147703684,
+          1.200935971315337,
+          1.2647636818110546
+        ],
+        "checked_path_goal_q": [
+          0.08347058296203613,
+          -1.187291145324707,
+          2.1032681465148926,
+          1.0600529909133911,
+          1.2562031745910645
+        ],
+        "current_state_report": {
+          "clearance": 0.16757389361417474,
+          "robot_geom": "link5_visual",
+          "body_id": 1,
+          "segment_id": 6,
+          "center_distance": 0.28149267181972154,
+          "robot_radius": 0.06770139687365663,
+          "human_radius": 0.06399649116187006,
+          "safety_margin": 0.1,
+          "geometry_model": "SPHERE_AND_MESH_BOX",
+          "sphere_clearance": 0.14979478378419486,
+          "box_clearance": 0.16757389361417474,
+          "status": "FAR",
+          "detection_status": "OBSERVED",
+          "revision": 7,
+          "joints": [
+            0.039034214793258845,
+            -1.4043194016276992,
+            2.0602511147703684,
+            1.200935971315337,
+            1.2647636818110546
+          ]
+        },
+        "failure": {
+          "check": "EDGE_SAMPLE",
+          "failure": {
+            "sample_index": 20,
+            "sample_count": 95,
+            "fraction": 0.2127659574468085,
+            "state": {
+              "reason": "HUMAN_COLLISION",
+              "q": [
+                0.4372945006352096,
+                -1.5131213659449467,
+                2.0133356144700922,
+                1.0536169259323804,
+                1.1598635591241595
+              ],
+              "revision": 7,
+              "human": {
+                "clearance": 0.09985260246006741,
+                "robot_geom": "link5_visual",
+                "body_id": 1,
+                "segment_id": 6,
+                "center_distance": 0.21810127346063055,
+                "robot_radius": 0.06770139687365663,
+                "human_radius": 0.06399649116187006,
+                "safety_margin": 0.1,
+                "geometry_model": "SPHERE_AND_MESH_BOX",
+                "sphere_clearance": 0.08640338542510384,
+                "box_clearance": 0.09985260246006741,
+                "status": "NEAR"
+              }
+            }
+          },
+          "traversal": "WAYPOINTS_THEN_EDGES",
+          "path_points": 10,
+          "revision_before": 7,
+          "revision_after": 7,
+          "point_index": null,
+          "edge_index": 0,
+          "edge_start_q": [
+            0.039034214793258845,
+            -1.4043194016276992,
+            2.0602511147703684,
+            1.200935971315337,
+            1.2647636818110546
+          ],
+          "edge_goal_q": [
+            1.9108575582504272,
+            -1.9156886339187622,
+            1.8397482633590698,
+            0.5085364580154419,
+            0.7717331051826477
+          ]
+        },
+        "progress": {
+          "ordered_next_waypoint": 5,
+          "waypoint_tolerance_rad": 0.02,
+          "nearest_is_progress_evidence": false,
+          "commanded_path_points": 14,
+          "current_q": [
+            0.039034214793258845,
+            -1.4043194016276992,
+            2.0602511147703684,
+            1.200935971315337,
+            1.2647636818110546
+          ],
+          "ordered_next_q": [
+            1.9108575582504272,
+            -1.9156886339187622,
+            1.8397482633590698,
+            0.5085364580154419,
+            0.7717331051826477
+          ],
+          "ordered_next_max_error_rad": 1.8718233434571685,
+          "nearest_waypoint_index": 12,
+          "nearest_waypoint_l2_error_rad": 0.14250366204060724,
+          "nearest_segment_index": 12,
+          "nearest_segment_fraction": 0.3479695458131869,
+          "nearest_segment_l2_error_rad": 0.01346035997167375,
+          "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+          "commanded_path_id": 5,
+          "candidate_next_waypoint": 5,
+          "segment_evidence_reason": null,
+          "segment_corridor_tolerance_rad": 0.04
+        },
+        "failed_commanded_edge": [
+          null,
+          5
+        ],
+        "measured_to_ordered_connector": true
+      },
+      "profile": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 0.501,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 7,
+          "revision_after": 7,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "remaining_path_validation",
+          "wall_ms": 10.727,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 7,
+          "revision_after": 7,
+          "outcome": "FALSE"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 11.959,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 7,
+          "revision_after": 7,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 11.99,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 7,
+          "revision_after": 7,
+          "outcome": "RETURNED"
+        }
+      ],
+      "path_is_original_command": true
+    },
+    {
+      "segment_progress_enabled": true,
+      "cursor_before_final_scene": 13,
+      "candidate_cursor": 13,
+      "decision": {
+        "action": "NONE",
+        "status": "EXECUTING"
+      },
+      "cursor_after_final_scene": 13,
+      "ordered_advances": [
+        {
+          "elapsed_s": 0.800088268,
+          "before": 1,
+          "after": 2,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 2.688441918,
+          "before": 2,
+          "after": 3,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 4.4021175,
+          "before": 3,
+          "after": 4,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 5.300633712,
+          "before": 4,
+          "after": 5,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 7.20704983,
+          "before": 5,
+          "after": 6,
+          "reason": "SEGMENT_PROGRESS_VALIDATED"
+        },
+        {
+          "elapsed_s": 8.650047914,
+          "before": 6,
+          "after": 7,
+          "reason": "SEGMENT_PROGRESS_VALIDATED"
+        },
+        {
+          "elapsed_s": 9.473072182,
+          "before": 7,
+          "after": 8,
+          "reason": "SEGMENT_PROGRESS_VALIDATED"
+        },
+        {
+          "elapsed_s": 10.735101621,
+          "before": 8,
+          "after": 9,
+          "reason": "SEGMENT_PROGRESS_VALIDATED"
+        },
+        {
+          "elapsed_s": 12.05709848,
+          "before": 9,
+          "after": 10,
+          "reason": "OUTSIDE_FEEDBACK_CHORD"
+        },
+        {
+          "elapsed_s": 13.856192663,
+          "before": 10,
+          "after": 11,
+          "reason": "SEGMENT_PROGRESS_VALIDATED"
+        },
+        {
+          "elapsed_s": 15.709698471,
+          "before": 11,
+          "after": 12,
+          "reason": "SEGMENT_PROGRESS_VALIDATED"
+        },
+        {
+          "elapsed_s": 16.556169989,
+          "before": 12,
+          "after": 13,
+          "reason": "ADVANCED"
+        }
+      ],
+      "failure_event": null,
+      "profile": [
+        {
+          "stage": "current_clearance",
+          "wall_ms": 0.477,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 12,
+          "revision_after": 12,
+          "outcome": "RETURNED"
+        },
+        {
+          "stage": "remaining_path_validation",
+          "wall_ms": 5.982,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 12,
+          "revision_after": 12,
+          "outcome": "TRUE"
+        },
+        {
+          "stage": "human_guard",
+          "wall_ms": 7.144,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 12,
+          "revision_after": 12,
+          "outcome": "NONE"
+        },
+        {
+          "stage": "manager_step",
+          "wall_ms": 7.176,
+          "remaining_before_ms": 736.655,
+          "remaining_after_ms": 736.655,
+          "revision_before": 12,
+          "revision_after": 12,
+          "outcome": "RETURNED"
+        }
+      ],
+      "path_is_original_command": true
+    }
+  ],
+  "analysis_date": "2026-11-17",
+  "limits": [
+    "FAR synthetic human geometry is used during recorded feedback traversal; the exact original failure frame is installed only at the end.",
+    "Monotonic time is frozen to isolate progress/geometry. This does not measure live capture expiry, scheduling or execution success.",
+    "No ROS node, publisher, bag playback or physical/simulated motion command is created by the replay.",
+    "A valid final decision in this control does not establish safety for changing human geometry throughout a live run."
+  ],
+  "source_sha256": {
+    "src/planning/planning/execution_progress.py": "aeb74d4d1b57d19b25c8e2374d95fb7373b56fad9ddb0fdf0bdea17c7e3ff514",
+    "src/planning/planning/planning_manager.py": "5d7986fbe57182ceeb2d7e970aa264a23ec540196b7027abdaa5dc146155facb",
+    "src/planning/planning/path_planner.py": "9b0e6209109adc07b5727035e685fcbf222ebd1b3e47f96dd9aa84e73bfe6b3a",
+    "src/cra/config/robot.yaml": "7245665d18707dc90f6dd9db092d0cf70b6384f9b3f69ca85189209af3e15292"
+  }
+}

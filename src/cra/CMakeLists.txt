@@ -23,4 +23,11 @@ install(
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
+install(
+  PROGRAMS scripts/demo
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(FILES DEMO.md DESTINATION share/${PROJECT_NAME})
+
 ament_package()

@@ -1,9 +1,9 @@
 {
   "metadata": {
     "document_name": "CRA_PROJECT_CONTEXT.json",
-    "version": "1.4",
+    "version": "1.25",
     "created_date": "2026-11-12",
-    "last_updated": "2026-11-14",
+    "last_updated": "2026-11-17",
     "project_name": "Cognitive Robotic Arm",
     "purpose": "Maintain shared project context for ChatGPT and Codex development.",
     "source_of_truth": "Actual repository source code, configuration, and reproducible test results.",
@@ -21,6 +21,14 @@
       "discussion": "Indonesian",
       "technical_documentation": "English",
       "code_comments": "English"
+    },
+    "learning_preferences": {
+      "default_role": "Technical mentor and lecturer; build understanding automatically in every CRA conversation.",
+      "explanation_order": "Purpose and reasons -> problem and evidence -> fundamentals -> theory or algorithm -> actual CRA implementation and robot behavior -> concrete example -> choices and verification.",
+      "style": "Natural Indonesian, intuition before equations, defined terminology, practical examples, concise but substantive. Scale depth to the question; do not force a long lecture for a brief status.",
+      "when_unclear": "Use a smaller example, different analogy or explain a missing prerequisite rather than repeating jargon.",
+      "collaboration": "Explain mechanisms and trade-offs and involve the user before significant algorithm or architecture decisions.",
+      "instruction_file": "AGENTS.md, section 15"
     }
   },
 
@@ -109,6 +117,15 @@
   },
 
   "architecture": {
+    "demo_mode_2026_11_17": {
+      "status": "IMPLEMENTED_BUILT_NATIVE_LOGGING_TESTED_FULL_DISPLAY_PENDING",
+      "entry_point": "ros2 run cra demo [name:=value ...]",
+      "behavior": "Includes existing cra.launch.py with RViz on by default; all ten saved RViz displays enabled. Launch log handlers use /dev/null before LaunchService initialization. Global exec prefix adds --ros-args --disable-external-lib-logs to existing ROS processes; console and rosout retained. Normal diagnostic launch unchanged.",
+      "verification": "cra build passes. Native isolated localhost ROS domain 217 comparison uses real C++ tf2_ros and Python rclpy nodes: normal creates launch/C++/Python files, demo creates no log files or log directory, both retain console messages and clean shutdown. Installed ros2 run help, Python style, installed RViz YAML and CRLF-aware diff checks pass.",
+      "scope": "No full CRA launch, camera/robot or graphical display tested. No motion/planning/camera settings changed. No rosbag or old-log deletion; explicit application recordings and temporary parameter files are outside ROS logging control.",
+      "files": "src/cra/scripts/demo; src/cra/config/cra.rviz; src/cra/CMakeLists.txt; src/cra/DEMO.md; src/cra/test/test_demo_console.py"
+    },
+
     "overview": [
       "Vision detects humans and reconstructs human geometry.",
       "Human geometry is published through ROS 2.",
@@ -160,6 +177,19 @@
         ]
       },
 
+      "capture_recovery_2026_11_17": {
+        "status": "USER_AUTHORIZED_IMPLEMENTED_BUILT_TESTED_LIVE_CAMERA_PENDING",
+        "driver": "src/azure_kinect_ros_driver/",
+        "evidence": "08:19 run starts K4A successfully then fails polling about 19 s later. Installed SDK returns false for capture TIMEOUT and throws for FAILED; old code stopped immediately on false. Later full-queue errors do not establish the original physical cause.",
+        "behavior": "Startup capture_max_consecutive_timeouts=5: tolerate four consecutive misses, stop on fifth, reset on real capture. Timeout clears capture and skips publication. SDK failures stop through caught worker exceptions. Stop camera/IMU/tracker resources before joining only started workers; atomic running state. Refuse tracker startup without an open device/recording.",
+        "preserved": "Camera FPS/resolution/topics and Planning 2 s timeout/0.05 m human margin/execution flags unchanged. Motion and planning algorithms unchanged by this driver patch.",
+        "verification": "Driver build with Body Tracking enabled, 12 C++ unit tests and 4 native startup cases pass. Native cases also pass against installed binary with a test-only SDK shim denying all device opens; shim is not installed. Python style and diff checks pass.",
+        "limits": "No physical capture recovery, live tracker shutdown or complete CRA execution tested. Missing-capture physical cause remains unknown. Persistent failures still stop and use existing launch respawn; no device reset performed.",
+        "documentation": "src/azure_kinect_ros_driver/test/STREAM_RECOVERY.md",
+        "artifacts": "src/azure_kinect_ros_driver/test/results/startup_installed_20261117.json; src/azure_kinect_ros_driver/test/results/stream_recovery_20261117.json",
+        "next_step": "Relaunch CRA, observe retry/recovery logs, image/skeleton continuity and completed worker cleanup; discuss a separate 15 FPS comparison only if failures persist."
+      },
+
       "known_limitations": [
         "Capsule radius may be excessively large.",
         "Radius estimates may fluctuate between frames.",
@@ -174,6 +204,29 @@
       "status": "ACTIVE",
 
       "role": "Generate and validate robot-arm paths using GNG and A*.",
+
+      "human_margin_5cm_and_stuck_2026_11_17": {
+        "status": "USER_REQUESTED_5CM_SIMULATION_MARGIN_BUILT_VERIFIED_LIVE_TRIAL_PENDING",
+        "active_settings": "robot.yaml human safety_margin=0.05 m; timeout=2.0 s, cache=256, static margin=0.005 m, execute_path=True and simulation_only_ignore_unknown=True preserved. Startup now logs human_safety_margin=0.050m. This supersedes the earlier 0.10 m experimental human margin.",
+        "latest_run_diagnosis": "07:49:20 Asia/Jakarta run used 2 s/cache with the original 0.10 m margin. Fifteen profiled main searches: ten true, five expiry failures. Retreat block profiles include two HUMAN_OVERLAP, fourteen NO_MONOTONIC_STEP and one SEARCH_BUDGET_EXHAUSTED. Three STALLED faults occur at 07:51:13.675, 07:51:47.260 and 07:51:54.340; final status MOTION_ERROR/CONTROL_ERROR/STALLED with fault=True. Camera also fails polling, restarts and later cannot reopen K4A. Simulation real-time factor averages 0.68971 over 38 complete windows.",
+        "margin_effect_and_limits": "Five failed path samples have clearances 0.080306-0.099472 m; their threshold comparison changes at 5 cm, but full paths still need revalidation. Proxy overlaps as low as -0.044946 m and some 0.022-0.044 m clearances remain blocked at 5 cm. Negative proxy clearance is not proof of physical contact. Margin cannot clear a Motion fault or repair camera invalidity.",
+        "stall_probe": "Offline C++ probe compiles unchanged ExecutionMonitor: synthetic reversing movement travels 0.24 rad, returns near its initial position and triggers STALLED at 2 s; stationary and monotonic controls respectively return STALLED/NORMAL. Confirms a possible net-displacement false-positive class, not the cause of the three live faults. Logged joint index is maximum tracking error, not necessarily the stall-triggering joint. Latest all-joint/path/command recording is missing; no Motion guard/retreat/camera algorithm changed.",
+        "verification": "Real-model fixed-scene controls: 4.9 cm rejected, 5.1 and 7.5 cm accepted, overlap -0.5 cm rejected with HUMAN_OVERLAP. Eleven mesh and thirteen cache tests pass; cra/planning build and changed Python style pass. Native installed constructor on isolated localhost domain 223 verifies settings/flags without spin or motion commands. Earlier 19-21% performance benchmarks remain historical 10 cm synthetic trials.",
+        "artifacts": "src/simulation/test/diagnostics/stuck_20261117_074920_margin_diagnosis.json; test/results/human_margin_5cm_20261117_boundary.json; src/motion/test/diagnostics/stall_monitor_probe_20261117.json",
+        "next_step": "Relaunch the 5 cm trial and record all joint feedback, trajectory and velocity command before changing stall logic. src/motion/test/STALL_MONITOR_PROBE.md gives reproduction scope and a uniquely named rosbag command. Native constructor smoke logs are startup-only, not live trials."
+      },
+
+      "human_timeout_and_memoization_2026_11_17": {
+        "status": "USER_AUTHORIZED_IMPLEMENTED_BUILT_TESTED_LIVE_TRIAL_PENDING",
+        "active_settings": "robot.yaml planning.human_avoidance.data_timeout=2.0 s and planning.collision_checks.human_report_cache_size=256. Human margin is now 0.05 m per the later approved trial. This supersedes earlier 1 s trial settings. Native installed PlanningNode verifies timeout at both HumanCapsuleMonitor and CollisionFilter.",
+        "algorithm": "Bounded per-snapshot LRU memoization of exact human geometry inputs beneath existing A* caches. Key includes raw FK poses/radii, frame, mesh-box shapes/values, capsules, margin, report/all-pair mode and revision without rounding. Hits skip repeated transform/distance work, preserving FK/static contact/path/edge checks. Freshness/revision checked before and after, UNKNOWN not cached, mutable diagnostic maps copied. Every snapshot update clears reports even if capsule values match; obstacle/enablement changes clear too. Size zero disables.",
+        "observability": "Startup includes human_data_timeout=2.000s and human_geometry_cache=256; Planning profile human_geometry_cache reports capacity, entries, hits_total and misses_total (cumulative per checker).",
+        "verification": "All 149 Planning tests including 13 new cache isolation/freshness/contact/equivalence tests pass; Flake8 and cra/planning builds pass. Native constructor in isolated localhost ROS domain 223 verifies installed source hashes, both timeout layers, 0.10/0.005 m margins and execute_path/simulation_only_ignore_unknown True without spin or motion commands. Its startup-only log is not a live trial.",
+        "offline_comparison": "Seven interleaved cold repeats per variant on stationary frozen snapshots: detour 102.063 to 82.526 ms, synthetic eight-capsule detour 108.177 to 85.909 ms, margin retreat 139.145 to 125.309 ms. Paths/failures match exactly and are recertified without cache. Actual human geometry calculations 517 to 241 for detours. Separate stationary real-elapsed timeout trials accept age 1.5 s under 2 s but reject under 1 s; age 2.1 s remains rejected.",
+        "limits_and_next_step": "19-21% lower planning time and about 10% lower retreat time describe tested synthetic CPU workloads, not universal live performance or moving-human safety. Relaunch CRA and compare same-scene path_search, freshness, STOP reasons and cache totals. Upstream invalid frames, simulation scheduling and global retreat completeness remain separate work.",
+        "documentation": "test/COLLISION_MEMOIZATION.md",
+        "artifacts": "test/results/collision_memoization_20261117.json and test/results/human_timeout_2s_memoized_20261117.json"
+      },
 
       "pipeline": [
         "Workspace sampling",
@@ -213,12 +266,25 @@
 
         "planning_manager": {
           "role": "Manage planning decisions, environment changes, path validity, and execution coordination.",
-          "status": "Implemented in the repository snapshot."
+          "status": "Implemented with ordered measured waypoint progress, remaining-route human validation, and route retention across expired human data. A previously observed human requires fresh OBSERVED or validated EMPTY before normal motion resumes. Reuse retains STOP/feedback/RELEASE/IDLE/EXECUTE checks; headless tests pass, live ROS behavior remains unverified.",
+          "progress_tolerance": "Direct waypoint/chord passage retains motion.joint.tolerance=0.02 rad. User-approved segment evidence now separately uses planning.execution_progress.corridor_tolerance=0.04 rad, two confirmations, incoming handoff fraction 0.9 and max new-evidence feedback step 0.05 rad. These angular progress settings do not change collision margins or final Motion accuracy.",
+          "near_human_followup_2026_11_17": "Latest 00:57:02 live log confirms the segment tracker and four accepted progress profiles, but 39/54 profiled main path searches expire; 40 launch NO_PATH messages all concern expiry. Fourteen of 20 STOP actions follow VISION_INVALID. The wider log also reports five TRACKING_ERROR and one STALLED. Nine-topic 00:58:56 bag spans 20.173 s with 3011 messages, including 77 observed/seven invalid human frames, and captures joint5 TRACKING_ERROR at 8.191 s (error 0.212 rad, raw command 0.724 versus filtered 0.5 rad/s). Saturation is verified, full controller/plant cause is not; source already reserves reference speed at 0.6 of the configured cap. Diagnose Motion with recorded trajectory, upstream Vision validity and collision computation separately before further changes. A 2 s comparison addresses only deadline sensitivity. Evidence and scope limits: test/results/close_human_20261117_005702_diagnosis.json and stages.csv. No runtime change is authorized by this inspection alone.",
+          "ordered_segment_progress_2026_11_17": "Planning-side OrderedSegmentProgress supplements direct passage using only active/adjacent segment projections and ordered approach history. Moving outgoing samples must leave the old corridor and confirm twice; ambiguous overlap remains conservative. Manager treats estimates as candidates and accepts only after fresh existing state/path/scene/feedback/obstacle checks in the human guard, even if the geometry revision is unchanged. Joint callbacks perform no collision queries. Invalid/gapped/jumping feedback discards unvalidated candidates. enabled=false restores direct passage only. All 136 unit tests pass; offline actual-manager controls reproduce old cursor5+STOP versus new cursor13+EXECUTING on recorded feedback and the final failure geometry. Traversal uses synthetic FAR humans and frozen time, so this is not live moving-human verification. Evidence: test/results/segment_progress_replay_2026-11-17.json and joint-only test fixture. GNG/A*, Motion, ROS interfaces, 1 s human timeout and 0.10/0.005 m margins remain unchanged.",
+          "recorded_progress_proof_2026_11_17": "Nine-topic bag cra_path_diag_1s_20261116_235941 spans 27.780 s and 6249 messages. Failure 6/cycle 375 at 00:00:07.590 Asia/Jakarta checks current_q back to commanded waypoint 5 while measured movement has reached near segment 12. Original progress-method replay on 1226 joint samples stays at cursor 5 because closest waypoint-5 error is 0.020875 rad above the 0.02 rad passage tolerance; later samples approach waypoints 9-12 in order. Exact same-frame offline geometry reproduces current clearance 0.167574 m and backward-connector rejection at 0.099853 m; the geometric forward tail passes with minimum sampled clearance 0.132378 m. No alternate tail is sent. Earlier failures include ahead-of-progress and planned-path rejections, so not all STOPs share this cause. Evidence is test/results/path_progress_20261116_235941_diagnosis.json and waypoint_passage.csv. Discuss ordered segment progress or Motion segment acknowledgements before implementing; timeout/margins/algorithms remain unchanged.",
+          "path_failure_diagnostics_2026_11_16": "User authorized failed-path location and progress diagnostics. CollisionFilter/PathPlanner retain existing waypoint-then-edge check failures, including failed q, sampled edge fraction, contact pair or human link/body/segment/clearance, without another geometry query. Manager freezes evidence before invalidation and maps remaining-route indices to the commanded path, marking the measured-to-ordered connector. Diagnostic EXECUTE IDs and read-only nearest waypoint/segment projections compare the ordered cursor; proximity never advances it. PlanningNode logs Path validation failure JSON after Motion dispatch, once per event, independent of profiling. Add /motion/joint_path and /planning/joint_path_preview to future bags. Synthetic actual-model example is test/results/path_failure_diagnostics_offline_example_2026-11-16.json. Runtime failure localization remains unverified. No memoization, progress rule, algorithm, margin or 1 s timeout change is included.",
+          "timing_profiling_2026_11_16": "User approved passive stage timing at the existing 1.0 s human timeout. PlanningProfiler keeps bounded inclusive timings and original remaining capture/receipt budgets, including negative expiry. Manager records search, retreat, validation and acknowledgement intervals; Node records capture/callback ages, trajectory/visualization times and emits structured Planning profile JSON after command dispatch. Startup ROS parameter profile_planning defaults True in PlanningNode; library manager defaults False. Identical fast idle cycles are sampled every 5 s, while slow cycles, commands, status changes, exceptions and acknowledgements are logged. No collision rule, scheduling architecture, timeout or motion decision is intentionally changed. Live normal-path profiling is now observed in the 19:37:16 run; retreat stages remain unobserved in that run. Record launch output as well as bags.",
+          "live_profile_193716_2026_11_16": "Read-only inspection of 106 sampled profiles over 93.200 s confirms four graph-search expiry aborts: cycle 230 has 718.456 ms remaining, spends 719.538 ms and ends at -1.101 ms. Seven of eight STOP decisions instead reject a stored remainder with PATH_COLLISION while 606-725 ms remain; the other STOP is VISION_INVALID. Cycle 276 spends 81.676+88.179+196.364 ms in sequential validation/preparation stages. Observed RELEASE response median 8.004 ms and visualization median 0.017 ms are smaller. Planning eventually completes within 0.12 m tolerance; no new bag is found, so exact failed-segment geometry/progress is unproven. No retreat occurs. visual_node separately exits -5. Evidence is test/results/planning_profile_20261116_193716_diagnosis.json and stages.csv. Discuss repeated collision work and failed-segment/progress diagnostics before new behavior; no optimization or 2 s change is yet authorized.",
+          "validation_diagnostics": "Planning snapshots include human_validation_pending, path_validation and next_waypoint. Expiry and query errors are distinguished from PATH_COLLISION.",
+          "remaining_limitations": "Progress is inferred from measured feedback; unrecognized waypoints retain older segments conservatively. Vision expiry can still stop motion. No cooldown, capsule smoothing or executor changes are included.",
+          "stuck_diagnosis_2026_11_16": "The user chose diagnosis before algorithm selection. All 50 PathPlanner NO_PATH events in the latest log are data-expiry aborts. Stationary synthetic controls with the actual model/graph find a longer valid detour (4.542672 to 6.293658 rad), reject identical geometry on expiry and accept it again when fresh. Exact live NO_MONOTONIC_STEP replay is not possible without complete capsule endpoints; obtain a stationary ROS recording before choosing another retreat method. No runtime behavior was changed by this diagnostic task.",
+          "approved_timeout_trial_2026_11_16": "Current Planning human_avoidance.data_timeout in robot.yaml is 1.0 s, shared by HumanCapsuleMonitor and CollisionFilter. The user-approved live trial confirms 1.000s in startup logs; human/static margins remain 0.10/0.005 m and upstream Vision timeout is 0.5 s. Bag cra_stuck_1s_20261116_174406 spans 24.404 s with 201 valid observed human frames. Two retreats are accepted by Motion and one completes; recurring expiry, near-margin and route-blocked decisions remain. A uniquely matched frame ages from 0.259 s at recorder receipt to 0.970 s at a retreat-ready diagnostic. Target and initial joints differ from baseline, so no controlled stop-rate improvement is established. Evidence and coverage limits are in test/results/recorded_stuck_1s_20261116_174406_diagnosis.json. Profile synchronous search and revalidation before selecting further behavioral changes; no new algorithm is authorized by this inspection.",
+          "timeout_comparison_2026_11_16": "User-approved offline comparison of 0.5, 1.0 and 2.0 s budgets: 45 cold-planner detour trials at five controlled capture ages, plus three fresh near-scene controls. All accepted paths are identical. The 2.0 s budget accepts the selected 1.5 s-old stationary input; all budgets reject the selected 2.1 s age. Fresh-data computation remains about 0.13 s. Results are in src/planning/test/results/human_timeout_comparison_2026-11-16.json and .csv; script is test/compare_human_timeouts.py. The live configuration remains 0.5 s, and no moving-human or Motion-execution conclusion is established.",
+          "latest_recorded_scene_2026_11_16": "Complete bag cra_stuck_static_20261116_170942 has 308 human-geometry messages over 23.161 s. Observed receipt age median is 0.242 s, while a pose/clearance-matched live frame ages from 0.265 s at OBSERVED to 0.502 s at diagnostic output. Eight frozen recorded snapshots admit existing-algorithm candidates. Four selected offline manager checks fail the 0.5 s gate but prepare retreats/release decisions at 1 and 2 s. No decisions are published, runtime remains 0.5 s, and actual moving-human execution remains unverified. Evidence and limits are stored in test/results/recorded_stuck_20261116_170942_diagnosis.json and the deadlines CSV."
         },
 
         "planning_node": {
           "role": "Provide ROS 2 interfaces for Planning.",
-          "status": "Implemented in the repository snapshot."
+          "status": "Implemented. A 2026-11-16 installed-package startup failure was traced to missing visualization/__init__.py, which caused setuptools.find_packages() to omit planning.visualization. The initializer is added and an isolated package-build regression passes; rebuild planning in the ROS container and verify live startup."
         },
 
         "human_capsule_monitor": {
@@ -251,6 +317,18 @@
 
       "role": "Generate and execute robot trajectories.",
 
+      "tracking_replay_2026_11_17": {
+        "status": "OFFLINE_DIAGNOSIS_VERIFIED_NO_RUNTIME_CHANGE",
+        "fixture": "test/fixtures/tracking_20261117_005856.json",
+        "method": "Compile current production C++ JointController, TrajectoryGenerator, MotionGuard and ExecutionMonitor in a temporary offline bridge. Feed recorded joint feedback, then compare the same path with real RobotSimulation control methods and MuJoCo at real-time, half-speed and interpolated recorded cadence. ROS imports alone are stubbed; no nodes or commands are published.",
+        "results": "Recorded feedback reproduces joint5 TRACKING_ERROR at 2.245 s versus live approximately 2.248 s. Real-time physics completes at 13.860 s with peak error 0.03067 rad. Half-speed physics faults joint5 at 3.245 s; recorded cadence faults at 2.585 s. All physics cases have zero contacts. Seven comparison checks, six existing simulation tests and Flake8 pass.",
+        "timing_evidence": "106 feedback intervals span 2.222912 wall seconds; publishing every five 0.002 s physics steps implies 1.06 physics seconds, ratio 0.47685. Independent angle-change/velocity estimates give median 0.010002 physics seconds per interval. Physics time was not directly recorded, so these remain cross-checked inferences.",
+        "mechanism": "Motion uses steady_clock and a 5 ms wall timer, while Simulation integrates velocity using fixed physics dt and one step per loop. At physics/wall ratio 0.477, a 0.5 rad/physics-second cap gives about 0.2385 rad/wall-second against a 0.3 rad/wall-second reference. Slow physics is sufficient to cause the tracking fault without changing safety guards.",
+        "limits_and_next_step": "This does not localize live loop overhead or explain every Motion fault. Exact initial actuator state, callback schedule and steady-clock start were not recorded; interpolated cadence is not an exact live reconstruction. Measure live physics/wall ratio and timings for callbacks, physics, publications and viewer before discussing a scheduling correction. Vision invalidity and planner expiry remain separate. No runtime changes authorized or made by this diagnostic experiment.",
+        "report": "test/TRACKING_REPLAY.md",
+        "artifacts": "test/results/tracking_20261117_005856/diagnosis.json and four CSV traces"
+      },
+
       "components": [
         "MotionComponent",
         "JointController",
@@ -277,6 +355,25 @@
       "engine": "MuJoCo",
 
       "role": "Simulate the robotic arm, obstacles, and trajectory execution.",
+
+      "live_profile_070713_2026_11_17": {
+        "status": "READ_ONLY_LIVE_DIAGNOSIS_COMPLETE_NO_BEHAVIOR_CHANGE",
+        "evidence": "27 complete Simulation profile windows span 135.0469 wall seconds / 95.416 physics seconds, weighted factor 0.70654 (range 0.64917-0.78478). Physics uses 2.413% wall time, viewer_sync 16.639%, feedback+markers 12.432%, callbacks 13.466%, actual sleep 49.608%. Mean feedback+viewer event costs 4.1148 ms against a 2 ms step budget. Source still uses one step per loop and relative sleep without absolute-deadline catch-up.",
+        "planning_and_motion": "19 profiled main path searches: ten succeed and nine fail, all failures cross human expiry. Separately nine SEARCH_BUDGET_EXHAUSTED retreat states reach the 32-iteration greedy local bound with fresh human data; this is not the capture-age timeout. Three waypoint collision traces are below 0.1 m margin. Motion has 13 accepted trajectories, ten cancellations and no logged TRACKING_ERROR/STALLED; final snapshot COMPLETED at 0.047438 m target error. Vision invalidity warnings remain.",
+        "next_discussion": "Compare bounded absolute-deadline simulation scheduling versus decoupling viewer work. Neither directly fixes A* collision cost or local retreat completeness. Preserve guards, experimental flags, margins and freshness; further behavioral changes require discussion. No new bag was decoded for this inspection.",
+        "report": "test/diagnostics/live_loop_20261117_070713_diagnosis.json and adjacent stages.csv"
+      },
+
+      "loop_profiling_2026_11_17": {
+        "status": "PASSIVE_INSTRUMENTATION_BUILT_TESTED_LIVE_MEASUREMENTS_PENDING",
+        "implementation": "simulation/loop_profiling.py and RobotSimulation.run directly measure actual MjData.time against monotonic wall time, with bounded count/sum/max per eight exclusive stages. Simulation profile JSON logs default to one per five wall seconds after the existing sleep/outside viewer lock. No new ROS topic or scheduling/controller change.",
+        "configuration": "Initial ROS parameters profile_simulation=True and simulation_profile_interval=5.0; no dynamic reconfiguration callback. Startup reports settings, physics_dt and feedback_stride=5.",
+        "fields": "real_time_factor, physics start/end/advanced seconds, wall elapsed seconds, step/feedback Hz, work-over-budget loops, work/loop mean/max, requested sleep, unattributed wall time; stage count/total/mean/max/share for ros_callbacks, viewer_lock_wait, control, physics, feedback_and_markers, viewer_sync, sleep, profile_output. Output cost appears in the next window; parent loop/work statistics are inclusive.",
+        "verification": "Six existing hold/tracking and eight profiling tests pass, including real MuJoCo/production-loop enabled-versus-disabled equivalence and controlled viewer-delay attribution with fake ROS spin/viewer/wall clock. Flake8 and simulation build pass. Installed hashes and native ROS constructor parameters verified on isolated localhost domain 223 without running the viewer/loop or publishing motion commands.",
+        "limits_and_next_step": "Instrumentation has observer overhead. Synthetic test timings are not live performance results. Restart existing launch, collect idle, target-motion and near-human phases, then inspect new profile logs to identify actual dominant stages before choosing a scheduling correction. Preserve Motion guards, human margins, execute_path=True and simulation_only_ignore_unknown=True.",
+        "documentation": "test/SIMULATION_PROFILING.md",
+        "controlled_artifact": "test/results/loop_profiling_20261117_verification.json"
+      },
 
       "tracking_correction_2026_11_14": {
         "status": "IMPLEMENTED_AND_TESTED_HEADLESSLY",

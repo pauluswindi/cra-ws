@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="12" failures="0" disabled="0" errors="0" time="0.001" timestamp="2026-11-17T08:48:01" name="AllTests">
+  <testsuite name="CaptureTimeout" tests="5" failures="0" disabled="0" errors="0" time="0" timestamp="2026-11-17T08:48:01">
+    <testcase name="TemporaryMissingCaptureDoesNotExhaustBudget" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.CaptureTimeout" />
+    <testcase name="OnlyConsecutiveTimeoutsExhaustBudget" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.CaptureTimeout" />
+    <testcase name="RecoveredCaptureResetsConsecutiveFailures" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.CaptureTimeout" />
+    <testcase name="SingleAttemptConfigurationIsSupported" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.CaptureTimeout" />
+    <testcase name="InvalidBudgetIsRejected" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.CaptureTimeout" />
+  </testsuite>
+  <testsuite name="StreamShutdown" tests="3" failures="0" disabled="0" errors="0" time="0.001" timestamp="2026-11-17T08:48:01">
+    <testcase name="UnstartedWorkersCanBeDestroyed" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.StreamShutdown" />
+    <testcase name="InterruptReleasesBlockedWorkerBeforeJoin" status="run" result="completed" time="0.001" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.StreamShutdown" />
+    <testcase name="AllStartedWorkersAreJoined" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.StreamShutdown" />
+  </testsuite>
+  <testsuite name="StreamWorker" tests="4" failures="0" disabled="0" errors="0" time="0" timestamp="2026-11-17T08:48:01">
+    <testcase name="StandardExceptionStopsStreamAndReportsCause" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.StreamWorker" />
+    <testcase name="DeliberateStopDoesNotReportAnExpectedSDKException" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.StreamWorker" />
+    <testcase name="UnknownExceptionIsContained" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.StreamWorker" />
+    <testcase name="NormalReturnDoesNotDeclareADeviceFailure" status="run" result="completed" time="0" timestamp="2026-11-17T08:48:01" classname="azure_kinect_ros_driver.StreamWorker" />
+  </testsuite>
+</testsuites>

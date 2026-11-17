@@ -1,0 +1,43 @@
+{
+  "scope": "Offline synthetic reference/feedback/commands passed to unchanged production ExecutionMonitor. No ROS/controller/MuJoCo execution; demonstrates a possible net-displacement false-positive class, not the cause of the three latest live faults.",
+  "cases": [
+    {
+      "case": "moving_then_reversing",
+      "state": "STALLED",
+      "elapsed_s": 2,
+      "travelled_rad": 0.24,
+      "net_displacement_rad": 1.46957615898e-17,
+      "commanded_absolute_rad": 0.239995065178,
+      "final_error_rad": 0.0272394299844,
+      "max_error_rad": 0.0280134436627,
+      "expected_observation_verified": true
+    },
+    {
+      "case": "truly_stationary_control",
+      "state": "STALLED",
+      "elapsed_s": 2,
+      "travelled_rad": 0,
+      "net_displacement_rad": 0,
+      "commanded_absolute_rad": 0.3,
+      "final_error_rad": 0.08,
+      "max_error_rad": 0.08,
+      "expected_observation_verified": true
+    },
+    {
+      "case": "monotonic_motion_control",
+      "state": "NORMAL",
+      "elapsed_s": 2,
+      "travelled_rad": 0.3,
+      "net_displacement_rad": 0.3,
+      "commanded_absolute_rad": 0.3,
+      "final_error_rad": 0.03,
+      "max_error_rad": 0.03,
+      "expected_observation_verified": true
+    }
+  ],
+  "source_sha256": {
+    "src/motion/test/probe_stall_monitor.cpp": "8a8538289f302f76522a47aad8cc1dab8b8ad14feefe1b88d1bf93720159584b",
+    "src/motion/src/controllers/execution_monitor.cpp": "c54d5a06b62db90150d9f7e8067cb2a310354e8010564ed29b6beb0e8f3cc2fe",
+    "src/motion/include/controllers/execution_monitor.hpp": "3bfac2391df92574d2b39e3302e014c8f4eae5a940094802c96e634f109ee1bf"
+  }
+}

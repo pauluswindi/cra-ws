@@ -1,118 +1,313 @@
 Panels:
-- Class: rviz_common/Displays
-  Name: Displays
-- Class: rviz_common/Views
-  Name: Views
+  - Class: rviz_common/Displays
+    Help Height: 70
+    Name: Displays
+    Property Tree Widget:
+      Expanded: ~
+      Splitter Ratio: 0.5
+    Tree Height: 430
+  - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
 Visualization Manager:
-  Class: ''
+  Class: ""
   Displays:
-  - Class: rviz_default_plugins/Grid
-    Enabled: true
-    Name: Grid
-    Cell Size: 0.1
-    Plane Cell Count: 10
-    Plane: XY
-    Alpha: 0.25
-    Value: true
-  - Class: rviz_default_plugins/MarkerArray
-    Enabled: true
-    Name: CRA Robot - measured joints
-    Namespaces: {}
-    Topic:
-      Depth: 1
-      Durability Policy: Transient Local
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /planning/robot_model
-    Value: true
-  - Class: rviz_default_plugins/MarkerArray
-    Enabled: false
-    Name: Robot collision bounds - spheres and mesh boxes
-    Namespaces: {}
-    Topic:
-      Depth: 1
-      Durability Policy: Transient Local
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /planning/robot_collision_bounds
-    Value: false
-  - Class: rviz_default_plugins/MarkerArray
-    Enabled: true
-    Name: Human capsules
-    Namespaces: {}
-    Topic:
-      Depth: 5
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /vision/human/capsules
-    Value: true
-  - Class: rviz_default_plugins/MarkerArray
-    Enabled: false
-    Name: Human skeleton
-    Namespaces: {}
-    Topic:
-      Depth: 5
-      Durability Policy: Volatile
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /vision/skeleton/base_frame
-    Value: false
-  - Class: rviz_default_plugins/MarkerArray
-    Enabled: true
-    Name: Simulation obstacles
-    Namespaces: {}
-    Topic:
-      Depth: 1
-      Durability Policy: Transient Local
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /simulation/obstacles
-    Value: true
-  - Class: rviz_default_plugins/Marker
-    Enabled: true
-    Name: Target
-    Namespaces: {}
-    Topic:
-      Depth: 1
-      Durability Policy: Transient Local
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /simulation/target_marker
-    Value: true
-  - Class: rviz_default_plugins/Marker
-    Enabled: true
-    Name: Planned path
-    Namespaces: {}
-    Topic:
-      Depth: 1
-      Durability Policy: Transient Local
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /planning/initial_path
-    Value: true
-  - Class: rviz_default_plugins/Marker
-    Enabled: false
-    Name: GNG nodes
-    Namespaces: {}
-    Topic:
-      Depth: 1
-      Durability Policy: Transient Local
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /planning/gng_nodes
-    Value: false
-  - Class: rviz_default_plugins/Marker
-    Enabled: false
-    Name: GNG edges
-    Namespaces: {}
-    Topic:
-      Depth: 1
-      Durability Policy: Transient Local
-      History Policy: Keep Last
-      Reliability Policy: Reliable
-      Value: /planning/gng_edges
-    Value: false
+    - Alpha: 0.25
+      Cell Size: 0.10000000149011612
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: CRA Robot - measured joints
+      Namespaces:
+        robot_mesh: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/robot_model
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Robot collision bounds - spheres and mesh boxes
+      Namespaces:
+        collision_mesh_boxes: true
+        collision_spheres: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/robot_collision_bounds
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Human capsules
+      Namespaces:
+        human_capsule_1: true
+        human_capsule_100: true
+        human_capsule_102: true
+        human_capsule_103: true
+        human_capsule_104: true
+        human_capsule_105: true
+        human_capsule_106: true
+        human_capsule_107: true
+        human_capsule_108: true
+        human_capsule_109: true
+        human_capsule_111: true
+        human_capsule_115: true
+        human_capsule_116: true
+        human_capsule_119: true
+        human_capsule_127: true
+        human_capsule_128: true
+        human_capsule_13: true
+        human_capsule_130: true
+        human_capsule_133: true
+        human_capsule_138: true
+        human_capsule_14: true
+        human_capsule_142: true
+        human_capsule_143: true
+        human_capsule_153: true
+        human_capsule_156: true
+        human_capsule_161: true
+        human_capsule_163: true
+        human_capsule_164: true
+        human_capsule_168: true
+        human_capsule_17: true
+        human_capsule_170: true
+        human_capsule_172: true
+        human_capsule_173: true
+        human_capsule_174: true
+        human_capsule_175: true
+        human_capsule_176: true
+        human_capsule_177: true
+        human_capsule_178: true
+        human_capsule_19: true
+        human_capsule_193: true
+        human_capsule_196: true
+        human_capsule_199: true
+        human_capsule_2: true
+        human_capsule_201: true
+        human_capsule_203: true
+        human_capsule_205: true
+        human_capsule_209: true
+        human_capsule_21: true
+        human_capsule_210: true
+        human_capsule_211: true
+        human_capsule_212: true
+        human_capsule_213: true
+        human_capsule_215: true
+        human_capsule_217: true
+        human_capsule_218: true
+        human_capsule_22: true
+        human_capsule_220: true
+        human_capsule_222: true
+        human_capsule_223: true
+        human_capsule_225: true
+        human_capsule_227: true
+        human_capsule_228: true
+        human_capsule_229: true
+        human_capsule_23: true
+        human_capsule_230: true
+        human_capsule_231: true
+        human_capsule_232: true
+        human_capsule_233: true
+        human_capsule_234: true
+        human_capsule_235: true
+        human_capsule_240: true
+        human_capsule_249: true
+        human_capsule_25: true
+        human_capsule_250: true
+        human_capsule_252: true
+        human_capsule_253: true
+        human_capsule_255: true
+        human_capsule_26: true
+        human_capsule_260: true
+        human_capsule_263: true
+        human_capsule_267: true
+        human_capsule_269: true
+        human_capsule_271: true
+        human_capsule_273: true
+        human_capsule_276: true
+        human_capsule_280: true
+        human_capsule_282: true
+        human_capsule_289: true
+        human_capsule_296: true
+        human_capsule_3: true
+        human_capsule_30: true
+        human_capsule_302: true
+        human_capsule_303: true
+        human_capsule_308: true
+        human_capsule_312: true
+        human_capsule_320: true
+        human_capsule_321: true
+        human_capsule_322: true
+        human_capsule_325: true
+        human_capsule_326: true
+        human_capsule_341: true
+        human_capsule_348: true
+        human_capsule_35: true
+        human_capsule_352: true
+        human_capsule_354: true
+        human_capsule_36: true
+        human_capsule_362: true
+        human_capsule_368: true
+        human_capsule_369: true
+        human_capsule_37: true
+        human_capsule_370: true
+        human_capsule_373: true
+        human_capsule_374: true
+        human_capsule_375: true
+        human_capsule_377: true
+        human_capsule_378: true
+        human_capsule_380: true
+        human_capsule_386: true
+        human_capsule_39: true
+        human_capsule_393: true
+        human_capsule_399: true
+        human_capsule_4: true
+        human_capsule_401: true
+        human_capsule_407: true
+        human_capsule_410: true
+        human_capsule_420: true
+        human_capsule_422: true
+        human_capsule_423: true
+        human_capsule_424: true
+        human_capsule_43: true
+        human_capsule_451: true
+        human_capsule_453: true
+        human_capsule_456: true
+        human_capsule_486: true
+        human_capsule_488: true
+        human_capsule_491: true
+        human_capsule_5: true
+        human_capsule_500: true
+        human_capsule_515: true
+        human_capsule_55: true
+        human_capsule_56: true
+        human_capsule_57: true
+        human_capsule_58: true
+        human_capsule_59: true
+        human_capsule_6: true
+        human_capsule_60: true
+        human_capsule_61: true
+        human_capsule_67: true
+        human_capsule_7: true
+        human_capsule_74: true
+        human_capsule_75: true
+        human_capsule_77: true
+        human_capsule_79: true
+        human_capsule_80: true
+        human_capsule_81: true
+        human_capsule_82: true
+        human_capsule_84: true
+        human_capsule_86: true
+        human_capsule_9: true
+        human_capsule_94: true
+        human_capsule_95: true
+        human_capsule_96: true
+        human_capsule_97: true
+        human_capsule_98: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /vision/human/capsules
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Human skeleton
+      Namespaces:
+        "": true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /vision/skeleton/base_frame
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Simulation obstacles
+      Namespaces:
+        {}
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /simulation/obstacles
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Target
+      Namespaces:
+        target: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /simulation/target_marker
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Planned path
+      Namespaces:
+        initial_path: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/initial_path
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: GNG nodes
+      Namespaces:
+        gng_nodes: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/gng_nodes
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: GNG edges
+      Namespaces:
+        gng_edges: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/gng_edges
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -120,23 +315,47 @@ Visualization Manager:
     Frame Rate: 30
   Name: root
   Tools:
-  - Class: rviz_default_plugins/Interact
-  - Class: rviz_default_plugins/MoveCamera
-  - Class: rviz_default_plugins/Select
-  - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Interact
+      Hide Inactive Objects: true
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+  Transformation:
+    Current:
+      Class: rviz_default_plugins/TF
+  Value: true
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Name: Current View
-      Distance: 1.8
-      Pitch: 0.5
-      Yaw: 3.0
-      Near Clip Distance: 0.01
+      Distance: 1.7999999523162842
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
       Focal Point:
         X: 0.25
-        Y: -0.1
-        Z: -0.1
+        Y: -0.10000000149011612
+        Z: -0.10000000149011612
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.7700001001358032
       Target Frame: <Fixed Frame>
+      Value: Orbit (rviz_default_plugins)
+      Yaw: 6.258181571960449
+    Saved: ~
 Window Geometry:
-  Width: 1200
-  Height: 800
+  Displays:
+    collapsed: true
+  Height: 1011
+  Hide Left Dock: true
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd00000001000000000000019b0000039dfc0200000002fb000000100044006900730070006c006100790073000000003b0000022f000000c700fffffffb0000000a00560069006500770073000000027000000168000000a000ffffff000007800000039d00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Views:
+    collapsed: true
+  Width: 1920
+  X: 0
+  Y: 32

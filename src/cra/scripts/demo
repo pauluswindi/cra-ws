@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Start the normal CRA launch with RViz and console-only ROS logging."""
+
+import os
+from pathlib import Path
+import shlex
+import sys
+
+
+def configure_console_logging():
+    # Configure before LaunchService creates its first logger. A launch-file
+    # argument alone is too late to prevent ros2 launch's initial launch.log.
+    import launch.logging
+
+    config = launch.logging.launch_config
+    config.log_dir = '/tmp'
+    config.log_handler_factory = lambda _path, **kwargs: (
+        launch.logging.handlers.FileHandler(os.devnull, **kwargs)
+    )
+    os.environ['OVERRIDE_LAUNCH_PROCESS_OUTPUT'] = 'screen'
+
+
+def console_actions():
+    from launch.actions import SetLaunchConfiguration
+
+    # Every current CRA process is a ROS executable, including the component
+    # container. exec preserves its PID, signals and existing respawn behavior.
+    prefix = shlex.join([sys.executable, str(Path(__file__).resolve()), '--node'])
+    return [SetLaunchConfiguration('launch-prefix', prefix)]
+
+
+def main():
+    arguments = sys.argv[1:]
+    if arguments[:1] == ['--node']:
+        command = arguments[1:]
+        if not command:
+            raise SystemExit('Missing ROS executable after --node')
+        os.execvp(command[0], command + ['--ros-args', '--disable-external-lib-logs'])
+
+    if '--help' in arguments or '-h' in arguments:
+        print('Usage: ros2 run cra demo [name:=value ...]')
+        print('Starts cra.launch.py with rviz:=true by default.')
+        print('ROS/launch logs stay on the terminal; no log files are saved.')
+        print('Stop with Ctrl+C. Use normal ros2 launch for recorded diagnostics.')
+        return 0
+    for argument in arguments:
+        if ':=' not in argument or argument.startswith(('launch-prefix', '-')):
+            raise SystemExit('Expected a launch argument such as rviz:=false: ' + argument)
+
+    configure_console_logging()
+    from ament_index_python.packages import get_package_share_directory
+    from launch import LaunchDescription, LaunchService
+    from launch.actions import IncludeLaunchDescription
+    from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+    launch_file = Path(get_package_share_directory('cra')) / 'launch/cra.launch.py'
+    launch_arguments = dict(argument.split(':=', 1) for argument in arguments)
+    launch_arguments.setdefault('rviz', 'true')
+    description = LaunchDescription([
+        *console_actions(),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(launch_file)),
+            launch_arguments=launch_arguments.items(),
+        ),
+    ])
+    print('CRA demo: RViz enabled by default; ROS and launch file logging disabled.', flush=True)
+    service = LaunchService()
+    service.include_launch_description(description)
+    return service.run()
+
+
+if __name__ == '__main__':
+    sys.exit(main())

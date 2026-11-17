@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import time
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from std_msgs.msg import Float64MultiArray
 from visualization_msgs.msg import Marker, MarkerArray
 
 from simulation.frame_transform import FrameTransform
+from simulation.loop_profiling import SimulationLoopProfiler
 
 
 class RobotSimulation(Node):
@@ -219,6 +221,16 @@ class RobotSimulation(Node):
         self.pending_target = None
         self.pending_obstacles = {}
 
+        self.loop_profiler = SimulationLoopProfiler(
+            timestep=self.dt,
+            enabled=self.declare_parameter(
+                "profile_simulation", True,
+            ).value,
+            interval=self.declare_parameter(
+                "simulation_profile_interval", 5.0,
+            ).value,
+        )
+
         self.joint_pub = self.create_publisher(
             JointState,
             "/joint_states",
@@ -290,6 +302,12 @@ class RobotSimulation(Node):
 
         self.get_logger().info(
             f"Obstacle names: {self.obstacle_names}"
+        )
+
+        self.get_logger().info(
+            f"Simulation profiling: enabled={self.loop_profiler.enabled}, "
+            f"interval={self.loop_profiler.interval:.3f}s, "
+            f"physics_dt={self.dt:.6f}s, feedback_stride=5"
         )
 
     def joint_positions(self):
@@ -699,35 +717,66 @@ class RobotSimulation(Node):
                 "MuJoCo viewer started"
             )
 
+            profiler = self.loop_profiler
+            profiler.reset(float(self.data.time))
+
             while rclpy.ok() and viewer.is_running():
                 start = time.monotonic()
+                profiler.begin_loop()
 
+                began = profiler.start_stage()
                 rclpy.spin_once(
                     self,
                     timeout_sec=0.0,
                 )
+                profiler.finish_stage("ros_callbacks", began)
 
+                began = profiler.start_stage()
                 with viewer.lock():
+                    profiler.finish_stage("viewer_lock_wait", began)
+                    began = profiler.start_stage()
                     self.update_control()
+                    profiler.finish_stage("control", began)
 
+                    began = profiler.start_stage()
                     mujoco.mj_step(
                         self.model,
                         self.data,
                     )
+                    profiler.finish_stage("physics", began)
 
                     step += 1
 
                     if step % 5 == 0:
+                        began = profiler.start_stage()
                         self.publish_feedback()
+                        profiler.finish_stage("feedback_and_markers", began)
 
                 if step % 5 == 0:
+                    began = profiler.start_stage()
                     viewer.sync()
+                    profiler.finish_stage("viewer_sync", began)
 
                 elapsed = time.monotonic() - start
+                requested_sleep = max(0.0, self.dt - elapsed)
 
-                time.sleep(
-                    max(0.0, self.dt - elapsed)
+                began = profiler.start_stage()
+                time.sleep(requested_sleep)
+                profiler.finish_stage("sleep", began)
+
+                report = profiler.finish_loop(
+                    physics_time=float(self.data.time),
+                    work_elapsed=elapsed,
+                    requested_sleep=requested_sleep,
                 )
+                if report is not None:
+                    began = profiler.start_stage()
+                    self.get_logger().info(
+                        "Simulation profile: " + json.dumps(
+                            report, separators=(",", ":"), allow_nan=False,
+                        )
+                    )
+                    profiler.finish_stage("profile_output", began)
 
 
 def main():

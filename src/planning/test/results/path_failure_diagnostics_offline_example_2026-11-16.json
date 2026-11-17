@@ -1,0 +1,128 @@
+{
+  "scope": "Offline DETOUR fixture, real MuJoCo model/checker, frozen clock; no ROS or Motion publications.",
+  "decision": {
+    "action": "STOP",
+    "status": "HUMAN_PATH_BLOCKED"
+  },
+  "failure_event": {
+    "id": 1,
+    "cycle": 1,
+    "stage": "human_guard",
+    "path_source": "remaining_execution",
+    "motion": "EXECUTING",
+    "pending": null,
+    "revision": 4,
+    "human_status": "OBSERVED",
+    "human_reason": "CAPSULES_PRESENT",
+    "remaining_human_ms": 1000.0,
+    "input_path_points": 10,
+    "checked_path_points": 10,
+    "checked_path_start_q": [
+      0.023162707686424255,
+      -1.3472504615783691,
+      1.1848934888839722,
+      -0.5477003455162048,
+      0.6865991950035095
+    ],
+    "checked_path_goal_q": [
+      1.699122667312622,
+      -1.0410857200622559,
+      0.6139736175537109,
+      -1.2174338102340698,
+      0.8341435790061951
+    ],
+    "current_state_report": {
+      "clearance": 0.1412854513800895,
+      "robot_geom": "link2_visual",
+      "body_id": 0,
+      "segment_id": 0,
+      "center_distance": 0.37045685709743403,
+      "robot_radius": 0.19917140571734454,
+      "human_radius": 0.03,
+      "safety_margin": 0.1,
+      "geometry_model": "SPHERE",
+      "sphere_clearance": 0.1412854513800895,
+      "box_clearance": null,
+      "status": "FAR",
+      "detection_status": "OBSERVED",
+      "revision": 4,
+      "joints": [
+        0.023162707686424255,
+        -1.3472504615783691,
+        1.1848934888839722,
+        -0.5477003455162048,
+        0.6865991950035095
+      ]
+    },
+    "failure": {
+      "check": "WAYPOINT",
+      "failure": {
+        "reason": "HUMAN_COLLISION",
+        "q": [
+          0.41144219040870667,
+          -0.8419626951217651,
+          1.3844572305679321,
+          -0.20631061494350433,
+          0.7493561506271362
+        ],
+        "revision": 4,
+        "human": {
+          "clearance": -0.03,
+          "robot_geom": "link3_visual",
+          "body_id": 0,
+          "segment_id": 0,
+          "center_distance": 0.13527876373580303,
+          "robot_radius": 0.16226254521185388,
+          "human_radius": 0.03,
+          "safety_margin": 0.1,
+          "geometry_model": "SPHERE_AND_MESH_BOX",
+          "sphere_clearance": -0.05698378147605085,
+          "box_clearance": -0.03,
+          "status": "NEAR"
+        }
+      },
+      "traversal": "WAYPOINTS_THEN_EDGES",
+      "path_points": 10,
+      "revision_before": 4,
+      "revision_after": 4,
+      "point_index": 1,
+      "edge_index": null,
+      "point_q": [
+        0.41144219040870667,
+        -0.8419626951217651,
+        1.3844572305679321,
+        -0.20631061494350433,
+        0.7493561506271362
+      ]
+    },
+    "progress": {
+      "ordered_next_waypoint": 1,
+      "waypoint_tolerance_rad": 0.02,
+      "nearest_is_progress_evidence": false,
+      "commanded_path_points": 10,
+      "current_q": [
+        0.023162707686424255,
+        -1.3472504615783691,
+        1.1848934888839722,
+        -0.5477003455162048,
+        0.6865991950035095
+      ],
+      "ordered_next_q": [
+        0.41144219040870667,
+        -0.8419626951217651,
+        1.3844572305679321,
+        -0.20631061494350433,
+        0.7493561506271362
+      ],
+      "ordered_next_max_error_rad": 0.505287766456604,
+      "nearest_waypoint_index": 0,
+      "nearest_waypoint_l2_error_rad": 0.0,
+      "nearest_segment_index": 0,
+      "nearest_segment_fraction": 0.0,
+      "nearest_segment_l2_error_rad": 0.0,
+      "last_update_reason": "COMMAND_SENT",
+      "commanded_path_id": 1
+    },
+    "failed_commanded_waypoint": 1
+  }
+}

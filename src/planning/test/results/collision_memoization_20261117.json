@@ -1,0 +1,620 @@
+{
+  "scope": "Compare exact geometry memoization on cold, frozen-snapshot CRA searches.\n\nThis is an offline geometry/CPU comparison, not a live human or Motion trial.\nFreshness is deliberately frozen for equal work; timeout behavior is tested\nseparately. Each trial creates a new planner, without warm A* or geometry caches.\n",
+  "repeats_per_variant": 7,
+  "source_sha256": {
+    "src/cra/config/robot.yaml": "c04f0ccd49fce87cafb4ede1701cc83374f787444acde653ae02ef1ac4bc5683",
+    "src/planning/data/workspace_graph.npz": "14b2644bd41bd19dae21f736f358d314bbeaab7e06b06341b8ce84c1c5c0f967",
+    "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+    "src/planning/planning/algorithms/collision_filter.py": "6127fe5937b66276e530104c387850354a653001425d8b934e7b5efc18cec2d0",
+    "src/planning/planning/algorithms/human_collision.py": "acc02047150a975daa942f1029da84268ed187d4cb0a472a7910cf5d7dd3fdde",
+    "src/planning/planning/algorithms/a_star.py": "ee34281e385c3d6482b58a96b8f42d5321a7112a260ddd422cf6ddcc3bdc7d25",
+    "src/planning/planning/path_planner.py": "63515ced4cbbd5080810d9a299b39a9696e0afb7ea931ca89eebcf198bc81c48",
+    "src/planning/test/benchmark_collision_memoization.py": "0f66656ad41fe84cda362d19bdec8e7b7ec570fbbfc0d8348f9ba9d245fe2dbb"
+  },
+  "same_path_and_failure_in_all_variants": true,
+  "all_returned_paths_recertified_without_cache": true,
+  "summary": [
+    {
+      "scene": "detour",
+      "variants": {
+        "0": {
+          "median_wall_seconds": 0.10206327100058843,
+          "geometry_computations": [
+            517
+          ],
+          "geometry_hits": [
+            0
+          ],
+          "path_found": true,
+          "failure": [
+            "NONE"
+          ]
+        },
+        "256": {
+          "median_wall_seconds": 0.08252577099938208,
+          "geometry_computations": [
+            241
+          ],
+          "geometry_hits": [
+            276
+          ],
+          "path_found": true,
+          "failure": [
+            "NONE"
+          ]
+        }
+      },
+      "median_speedup": 1.236744228676793
+    },
+    {
+      "scene": "eight_capsules",
+      "variants": {
+        "0": {
+          "median_wall_seconds": 0.1081767329997092,
+          "geometry_computations": [
+            517
+          ],
+          "geometry_hits": [
+            0
+          ],
+          "path_found": true,
+          "failure": [
+            "NONE"
+          ]
+        },
+        "256": {
+          "median_wall_seconds": 0.08590909899976396,
+          "geometry_computations": [
+            241
+          ],
+          "geometry_hits": [
+            276
+          ],
+          "path_found": true,
+          "failure": [
+            "NONE"
+          ]
+        }
+      },
+      "median_speedup": 1.2591999480754237
+    },
+    {
+      "scene": "margin_retreat",
+      "variants": {
+        "0": {
+          "median_wall_seconds": 0.13914472200031014,
+          "geometry_computations": [
+            424
+          ],
+          "geometry_hits": [
+            0
+          ],
+          "path_found": true,
+          "failure": [
+            "NONE"
+          ]
+        },
+        "256": {
+          "median_wall_seconds": 0.125309426000058,
+          "geometry_computations": [
+            319
+          ],
+          "geometry_hits": [
+            105
+          ],
+          "path_found": true,
+          "failure": [
+            "NONE"
+          ]
+        }
+      },
+      "median_speedup": 1.1104090605302568
+    }
+  ],
+  "trials": [
+    {
+      "scene": "detour",
+      "cache_capacity": 256,
+      "wall_seconds": 0.0842354679998607,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08278924300066137,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10206261100029224,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10897508400012157,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 256,
+      "wall_seconds": 0.13482604499949957,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 105,
+      "geometry_computations": 319,
+      "cache_entries": 256,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10755811899980472,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 256,
+      "wall_seconds": 0.1245224029999008,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 105,
+      "geometry_computations": 319,
+      "cache_entries": 256,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08579512399956002,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10161195199998474,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 256,
+      "wall_seconds": 0.12553920000027574,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 105,
+      "geometry_computations": 319,
+      "cache_entries": 256,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10879553599988867,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08246409500043228,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 256,
+      "wall_seconds": 0.1251703460002318,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 105,
+      "geometry_computations": 319,
+      "cache_entries": 256,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08548290399994585,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10141952599951765,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10757116600052541,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 256,
+      "wall_seconds": 0.125309426000058,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 105,
+      "geometry_computations": 319,
+      "cache_entries": 256,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 0,
+      "wall_seconds": 0.13954979500067566,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 424,
+      "cache_entries": 0,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 0,
+      "wall_seconds": 0.1393854250000004,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 424,
+      "cache_entries": 0,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08250077699995018,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08615053900030034,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10708398499991745,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 0,
+      "wall_seconds": 0.13871337000000494,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 424,
+      "cache_entries": 0,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 0,
+      "wall_seconds": 0.13914472200031014,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 424,
+      "cache_entries": 0,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 0,
+      "wall_seconds": 0.14078135900035704,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 424,
+      "cache_entries": 0,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 256,
+      "wall_seconds": 0.0855722930000411,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 0,
+      "wall_seconds": 0.1081767329997092,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 256,
+      "wall_seconds": 0.12436782800068613,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 105,
+      "geometry_computations": 319,
+      "cache_entries": 256,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 0,
+      "wall_seconds": 0.13862362899999425,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 424,
+      "cache_entries": 0,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 256,
+      "wall_seconds": 0.1262040759993397,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 105,
+      "geometry_computations": 319,
+      "cache_entries": 256,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10260721099984949,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10352962799970555,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08590909899976396,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08245845300007204,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10255422400041425,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10206327100058843,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 0,
+      "wall_seconds": 0.10942730599981587,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 517,
+      "cache_entries": 0,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08624901900020632,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "eight_capsules",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08695834799982549,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08252577099938208,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "detour",
+      "cache_capacity": 256,
+      "wall_seconds": 0.08280431099956331,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 276,
+      "geometry_computations": 241,
+      "cache_entries": 241,
+      "path_sha256": "3088520ed05acfffc0d8315804f6ef3f141f417a0644153110ebd0c1ee473dad",
+      "waypoints": 11
+    },
+    {
+      "scene": "margin_retreat",
+      "cache_capacity": 0,
+      "wall_seconds": 0.1384690690001662,
+      "path_found": true,
+      "failure": "NONE",
+      "geometry_hits": 0,
+      "geometry_computations": 424,
+      "cache_entries": 0,
+      "path_sha256": "9343871f1c8f71823b3d08c4589e531dae336d88480d7f5c673b21ff399b4fcf",
+      "waypoints": 2
+    }
+  ]
+}

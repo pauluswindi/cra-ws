@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import json
 from pathlib import Path
+import time
 
 import mujoco
 import numpy as np
@@ -39,6 +41,7 @@ class PlanningNode(Node):
             "publish_filtered_joint_graph": False,
             "execute_path": True,
             "simulation_only_ignore_unknown": True,
+            "profile_planning": True,
         }
 
         for name, value in defaults.items():
@@ -126,6 +129,7 @@ class PlanningNode(Node):
             human_avoidance_enabled=self.human_enabled,
             simulation_only_ignore_unknown=bool(get("simulation_only_ignore_unknown")),
             human_margin_recovery_enabled=robot.get("mode") == "simulation",
+            profiling_enabled=bool(get("profile_planning")),
         )
 
         self.human_monitor = HumanCapsuleMonitor(
@@ -138,6 +142,10 @@ class PlanningNode(Node):
         self.last_collision_report = None
         self.last_manager_error = None
         self.last_runtime_report_time = None
+        self.last_profile_report_time = None
+        self.last_profile_decision = None
+        self.last_human_callback_profile = None
+        self.last_path_failure_id = 0
 
         self.visualizer = PlanningVisualizer(
             node=self,
@@ -243,6 +251,13 @@ class PlanningNode(Node):
             "PlanningNode initialized; "
             f"execute_path={self.manager.execute_path}, "
             f"human_avoidance={self.human_enabled}, "
+            f"human_data_timeout={human_timeout:.3f}s, "
+            f"human_safety_margin={human_safety_margin:.3f}m, "
+            f"human_geometry_cache={checker.human_report_cache_size}, "
+            f"profile_planning={self.manager.profiler.enabled}, "
+            f"segment_progress={self.planner.segment_progress_enabled}, "
+            f"progress_corridor="
+            f"{self.planner.execution_progress_config['corridor_tolerance']}rad, "
             f"simulation_only_ignore_unknown="
             f"{self.manager.simulation_only_ignore_unknown}, "
             f"human_margin_recovery={self.manager.human_margin_recovery_enabled}"
@@ -335,6 +350,9 @@ class PlanningNode(Node):
             message,
             now_ros_ns,
         )
+
+        if accepted:
+            self.last_human_callback_profile = (stamp_ns, age_ms)
 
         if not accepted:
             self.get_logger().warning(
@@ -449,6 +467,9 @@ class PlanningNode(Node):
             f"obstacles_ready={manager.obstacle_data_ready()}, "
             f"human={manager.human_status}/{manager.human_reason}, "
             f"human_checks={checker.human_obstacles_enabled}, "
+            f"human_validation_pending={manager.human_validation_pending}, "
+            f"path_validation={manager.human_path_validation_reason}, "
+            f"next_waypoint={manager.execution_next_waypoint}, "
             f"plan_failure={self.planner.last_plan_failure}, "
             f"target={None if target is None else target.tolist()}, "
             f"eof={None if actual is None else actual.tolist()}, "
@@ -676,7 +697,82 @@ class PlanningNode(Node):
                 f"Graph visualization failed: {error}"
             )
 
+    def report_path_failure(self):
+        """Report frozen failed-check evidence after dispatch, without geometry work."""
+        report = self.manager.last_path_failure
+        if report is None or report["id"] == self.last_path_failure_id:
+            return
+        self.last_path_failure_id = report["id"]
+        self.get_logger().info(
+            "Path validation failure: " + json.dumps(
+                report, separators=(",", ":"), allow_nan=False))
+
+    def report_planning_profile(self, decision, began, observation):
+        """Emit after command dispatch; nested stage durations are inclusive."""
+        profiler = self.manager.profiler
+        if not profiler.enabled:
+            return
+        now = time.monotonic()
+        work_ms = (time.perf_counter() - began) * 1000.
+        key = (decision.action, decision.status)
+        acknowledgement = any('origin_cycle' in row for row in profiler.records)
+        failed_stage = any(row['outcome'] == 'ERROR' for row in profiler.records)
+        if (
+            key == self.last_profile_decision and decision.action == "NONE"
+            and work_ms < 100. and not acknowledgement and not failed_stage
+            and self.last_profile_report_time is not None
+            and now - self.last_profile_report_time < 5.
+        ):
+            return
+        self.last_profile_decision = key
+        self.last_profile_report_time = now
+        checker = self.planner.collision_filter
+        payload = {
+            "cycle": profiler.cycle,
+            "status": decision.status,
+            "action": decision.action,
+            "cycle_work_ms": round(work_ms, 3),
+            "human_status": self.manager.human_status,
+            "human_reason": self.manager.human_reason,
+            "human_timeout_ms": checker.human_data_timeout * 1000.,
+            "human_geometry_cache": {
+                "capacity": getattr(checker, "human_report_cache_size", 0),
+                "entries": len(getattr(checker, "_human_report_cache", {})),
+                "hits_total": getattr(checker, "human_report_cache_hits", 0),
+                "misses_total": getattr(checker, "human_report_cache_misses", 0),
+            },
+            "path_validation": self.manager.human_path_validation_reason,
+            "path_failure_id": self.manager.path_failure_sequence,
+            "commanded_path_id": self.manager.execution_path_id,
+            "next_waypoint": self.manager.execution_next_waypoint,
+            "candidate_next_waypoint": self.manager._candidate_next_waypoint(),
+            "progress_reason": self.manager.execution_progress_reason,
+            "segment_evidence_reason": (
+                None if self.manager.segment_progress is None
+                else self.manager.segment_progress.reason),
+            "retreat_reason": (
+                self.manager.human_margin_block_reason
+                if decision.status == "HUMAN_RETREAT_BLOCKED" else None),
+            **observation,
+            "stages": list(profiler.records),
+        }
+        self.get_logger().info(
+            "Planning profile: " + json.dumps(payload, separators=(",", ":"), allow_nan=False))
+
     def planning_cycle(self):
+        began = time.perf_counter()
+        stamp_ns = self.human_monitor.stamp_ns
+        previous_callback = self.last_human_callback_profile
+        observation = {
+            "human_capture_stamp_ns": stamp_ns,
+            "capture_age_start_ms": (
+                round((self.get_clock().now().nanoseconds - stamp_ns) / 1e6, 3)
+                if stamp_ns is not None else None),
+            "capture_to_callback_ms": (
+                round(previous_callback[1], 3)
+                if previous_callback is not None and previous_callback[0] == stamp_ns
+                else None),
+        }
         self.monitor_humans()
 
         decision = self.manager.step()
@@ -699,18 +795,21 @@ class PlanningNode(Node):
                     "Execution decision has no path"
                 )
                 self.stop_pub.publish(Bool(data=True))
+                self.report_path_failure()
+                self.report_planning_profile(decision, began, observation)
                 return
 
             try:
-                trajectory = self.build_trajectory(
-                    decision.path
-                )
+                trajectory = self.manager.profiler.call(
+                    "trajectory_build", self.build_trajectory, decision.path)
 
             except ValueError as error:
                 self.get_logger().error(
                     f"Trajectory rejected: {error}"
                 )
                 self.stop_pub.publish(Bool(data=True))
+                self.report_path_failure()
+                self.report_planning_profile(decision, began, observation)
                 return
 
             self.motion_pub.publish(trajectory)
@@ -721,9 +820,11 @@ class PlanningNode(Node):
             )
 
         # Dispatch Motion commands before potentially expensive visualization.
+        self.report_path_failure()
         self.report_runtime_diagnostics()
-        self.update_visualization()
-        self.update_graph_visualization()
+        self.manager.profiler.call("visualization", self.update_visualization)
+        self.manager.profiler.call("graph_visualization", self.update_graph_visualization)
+        self.report_planning_profile(decision, began, observation)
 
 
 def main():

@@ -1,0 +1,870 @@
+{
+  "sources": {
+    "simulation": {
+      "path": "/home/lvinz/.ros/log/python3_198_1794874033862.log",
+      "sha256": "4d6f47bcb1a5374faa0d3c61563b91377b6d5960291ebf8d39a6864abe4223b9",
+      "bytes": 70509
+    },
+    "planning": {
+      "path": "/home/lvinz/.ros/log/python3_204_1794874033888.log",
+      "sha256": "fd6eb42b33db9116f1654073720dace222ace743abbc410fa54495fa78cd974c",
+      "bytes": 295508
+    },
+    "motion": {
+      "path": "/home/lvinz/.ros/log/component_container_202_1794874033085.log",
+      "sha256": "49c55339ef79ddac9e909f6ae9851fadbaf5baa4775c6619869d499734afacac",
+      "bytes": 4055
+    }
+  },
+  "simulation": {
+    "profiles": 27,
+    "wall_s": 135.04691313700005,
+    "physics_s": 95.41599999995903,
+    "rtf_weighted": 0.7065396593194475,
+    "rtf_min_median_max": [
+      0.6491702826725125,
+      0.7090350960216233,
+      0.784775248513052
+    ],
+    "loops": 47708,
+    "work_over_budget": 10163,
+    "requested_sleep_ms": 56275.085060939484,
+    "unattributed_ms": 3497.4112369345676,
+    "stages": {
+      "ros_callbacks": {
+        "count": 47708,
+        "total_ms": 18185.844822986382,
+        "mean_ms": 0.38119067709789517,
+        "max_ms": 12.699886000063998,
+        "wall_percent": 13.4663165566306
+      },
+      "viewer_lock_wait": {
+        "count": 47708,
+        "total_ms": 670.145067975227,
+        "mean_ms": 0.014046806992018676,
+        "max_ms": 6.074912999793014,
+        "wall_percent": 0.49623131133355847
+      },
+      "control": {
+        "count": 47708,
+        "total_ms": 3159.4411130190565,
+        "mean_ms": 0.06622455590297344,
+        "max_ms": 11.600995000208059,
+        "wall_percent": 2.3395137583144323
+      },
+      "physics": {
+        "count": 47708,
+        "total_ms": 3258.684432029895,
+        "mean_ms": 0.06830477974406589,
+        "max_ms": 10.092650999922625,
+        "wall_percent": 2.4130017905141465
+      },
+      "feedback_and_markers": {
+        "count": 9541,
+        "total_ms": 16788.97243204665,
+        "mean_ms": 1.7596659084002357,
+        "max_ms": 16.85838399998829,
+        "wall_percent": 12.431955712319661
+      },
+      "viewer_sync": {
+        "count": 9541,
+        "total_ms": 22470.225811020555,
+        "mean_ms": 2.3551227136590036,
+        "max_ms": 33.190374999776395,
+        "wall_percent": 16.638829640056528
+      },
+      "sleep": {
+        "count": 47708,
+        "total_ms": 66994.49100898755,
+        "mean_ms": 1.4042611513580017,
+        "max_ms": 16.469658999994863,
+        "wall_percent": 49.608309773822185
+      },
+      "profile_output": {
+        "count": 26,
+        "total_ms": 21.697212000162835,
+        "mean_ms": 0.8345081538524167,
+        "max_ms": 2.394809999714198,
+        "wall_percent": 0.01606642573025851
+      }
+    }
+  },
+  "planning": {
+    "profiles": 118,
+    "status_counts": {
+      "PATH_READY": 10,
+      "TRAJECTORY_SENT": 11,
+      "EXECUTING": 20,
+      "COMPLETED": 13,
+      "HUMAN_TOO_CLOSE": 5,
+      "HUMAN_RETREAT_READY": 5,
+      "WAITING_FOR_RELEASE": 15,
+      "HUMAN_RETREAT_SENT": 4,
+      "HUMAN_RETREAT_BLOCKED": 14,
+      "HUMAN_VISION_UNKNOWN": 9,
+      "GOAL_UNREACHABLE": 5,
+      "HUMAN_PATH_BLOCKED": 3,
+      "HUMAN_RETREAT_UNSAFE": 3,
+      "HUMAN_RETREAT_CLEAR": 1
+    },
+    "action_counts": {
+      "NONE": 85,
+      "EXECUTE": 13,
+      "STOP": 10,
+      "RELEASE": 10
+    },
+    "searches": [
+      {
+        "cycle": 1,
+        "stamp": 1794874035.0313683,
+        "stage": "path_search",
+        "wall_ms": 23.504,
+        "remaining_before_ms": null,
+        "remaining_after_ms": null,
+        "revision_before": 5,
+        "revision_after": 5,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 156,
+        "stamp": 1794874066.2433684,
+        "stage": "path_search",
+        "wall_ms": 42.514,
+        "remaining_before_ms": null,
+        "remaining_after_ms": null,
+        "revision_before": 6,
+        "revision_after": 6,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 240,
+        "stamp": 1794874083.080641,
+        "stage": "path_search",
+        "wall_ms": 72.619,
+        "remaining_before_ms": null,
+        "remaining_after_ms": null,
+        "revision_before": 7,
+        "revision_after": 7,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 273,
+        "stamp": 1794874090.5404835,
+        "stage": "path_search",
+        "wall_ms": 740.311,
+        "remaining_before_ms": 737.187,
+        "remaining_after_ms": -3.134,
+        "revision_before": 29,
+        "revision_after": 29,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 281,
+        "stamp": 1794874092.4378793,
+        "stage": "path_search",
+        "wall_ms": 633.228,
+        "remaining_before_ms": 633.054,
+        "remaining_after_ms": -0.183,
+        "revision_before": 35,
+        "revision_after": 35,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 285,
+        "stamp": 1794874093.6387584,
+        "stage": "path_search",
+        "wall_ms": 635.124,
+        "remaining_before_ms": 634.769,
+        "remaining_after_ms": -0.367,
+        "revision_before": 38,
+        "revision_after": 38,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 287,
+        "stamp": 1794874094.4044662,
+        "stage": "path_search",
+        "wall_ms": 598.948,
+        "remaining_before_ms": 597.946,
+        "remaining_after_ms": -1.011,
+        "revision_before": 40,
+        "revision_after": 40,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 289,
+        "stamp": 1794874095.3047085,
+        "stage": "path_search",
+        "wall_ms": 673.129,
+        "remaining_before_ms": 672.701,
+        "remaining_after_ms": -0.443,
+        "revision_before": 42,
+        "revision_after": 42,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 291,
+        "stamp": 1794874096.0708966,
+        "stage": "path_search",
+        "wall_ms": 666.803,
+        "remaining_before_ms": 666.372,
+        "remaining_after_ms": -0.442,
+        "revision_before": 44,
+        "revision_after": 44,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 295,
+        "stamp": 1794874097.3061354,
+        "stage": "path_search",
+        "wall_ms": 669.783,
+        "remaining_before_ms": 669.521,
+        "remaining_after_ms": -0.288,
+        "revision_before": 48,
+        "revision_after": 48,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 297,
+        "stamp": 1794874098.138622,
+        "stage": "path_search",
+        "wall_ms": 737.579,
+        "remaining_before_ms": 737.263,
+        "remaining_after_ms": -0.335,
+        "revision_before": 50,
+        "revision_after": 50,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 299,
+        "stamp": 1794874098.9047499,
+        "stage": "path_search",
+        "wall_ms": 693.058,
+        "remaining_before_ms": 692.827,
+        "remaining_after_ms": -0.242,
+        "revision_before": 52,
+        "revision_after": 52,
+        "outcome": "FALSE"
+      },
+      {
+        "cycle": 301,
+        "stamp": 1794874099.113348,
+        "stage": "path_search",
+        "wall_ms": 109.259,
+        "remaining_before_ms": 706.145,
+        "remaining_after_ms": 596.873,
+        "revision_before": 54,
+        "revision_after": 54,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 461,
+        "stamp": 1794874131.02903,
+        "stage": "path_search",
+        "wall_ms": 26.975,
+        "remaining_before_ms": null,
+        "remaining_after_ms": null,
+        "revision_before": 61,
+        "revision_after": 61,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 472,
+        "stamp": 1794874133.3421412,
+        "stage": "path_search",
+        "wall_ms": 141.033,
+        "remaining_before_ms": 640.832,
+        "remaining_after_ms": 499.786,
+        "revision_before": 68,
+        "revision_after": 68,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 535,
+        "stamp": 1794874146.1536343,
+        "stage": "path_search",
+        "wall_ms": 150.251,
+        "remaining_before_ms": 639.273,
+        "remaining_after_ms": 489.008,
+        "revision_before": 118,
+        "revision_after": 118,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 539,
+        "stamp": 1794874147.228958,
+        "stage": "path_search",
+        "wall_ms": 424.809,
+        "remaining_before_ms": 705.814,
+        "remaining_after_ms": 280.99,
+        "revision_before": 121,
+        "revision_after": 121,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 544,
+        "stamp": 1794874148.3992066,
+        "stage": "path_search",
+        "wall_ms": 397.035,
+        "remaining_before_ms": 707.468,
+        "remaining_after_ms": 310.422,
+        "revision_before": 124,
+        "revision_after": 124,
+        "outcome": "TRUE"
+      },
+      {
+        "cycle": 579,
+        "stamp": 1794874155.449676,
+        "stage": "path_search",
+        "wall_ms": 48.267,
+        "remaining_before_ms": 708.53,
+        "remaining_after_ms": 660.252,
+        "revision_before": 155,
+        "revision_after": 155,
+        "outcome": "TRUE"
+      }
+    ],
+    "path_failures": [
+      {
+        "stamp": 1794874133.0054,
+        "payload": {
+          "id": 1,
+          "cycle": 471,
+          "stage": "human_guard",
+          "path_source": "remaining_execution",
+          "checked_next_waypoint": 1,
+          "motion": "EXECUTING",
+          "pending": null,
+          "revision": 67,
+          "human_status": "OBSERVED",
+          "human_reason": "CAPSULES_PRESENT",
+          "remaining_human_ms": 699.984,
+          "input_path_points": 11,
+          "checked_path_points": 11,
+          "checked_path_start_q": [
+            0.563059083598775,
+            -1.2306399369308363,
+            1.7149033172916883,
+            -0.7596597245752991,
+            0.6745203270538157
+          ],
+          "checked_path_goal_q": [
+            2.9531540870666504,
+            -1.1394816637039185,
+            2.2262425422668457,
+            -0.13664725422859192,
+            1.107082724571228
+          ],
+          "current_state_report": {
+            "clearance": 0.18550144371625615,
+            "robot_geom": "link2_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.3646669803007425,
+            "robot_radius": 0.19917140571734454,
+            "human_radius": 0.07776111537227341,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.08773445921112456,
+            "box_clearance": 0.18550144371625615,
+            "status": "FAR",
+            "detection_status": "OBSERVED",
+            "revision": 67,
+            "joints": [
+              0.563059083598775,
+              -1.2306399369308363,
+              1.7149033172916883,
+              -0.7596597245752991,
+              0.6745203270538157
+            ]
+          },
+          "failure": {
+            "check": "WAYPOINT",
+            "failure": {
+              "reason": "HUMAN_COLLISION",
+              "q": [
+                1.6413124799728394,
+                -1.5238620042800903,
+                2.5250778198242188,
+                -0.215640127658844,
+                1.004451036453247
+              ],
+              "revision": 67,
+              "human": {
+                "clearance": 0.05792843517815634,
+                "robot_geom": "link5_visual",
+                "body_id": 1,
+                "segment_id": 6,
+                "center_distance": 0.1825708921122981,
+                "robot_radius": 0.06770139687365663,
+                "human_radius": 0.07776111537227341,
+                "safety_margin": 0.1,
+                "geometry_model": "SPHERE_AND_MESH_BOX",
+                "sphere_clearance": 0.03710837986636806,
+                "box_clearance": 0.05792843517815634,
+                "status": "NEAR"
+              }
+            },
+            "traversal": "WAYPOINTS_THEN_EDGES",
+            "path_points": 11,
+            "revision_before": 67,
+            "revision_after": 67,
+            "point_index": 6,
+            "edge_index": null,
+            "point_q": [
+              1.6413124799728394,
+              -1.5238620042800903,
+              2.5250778198242188,
+              -0.215640127658844,
+              1.004451036453247
+            ]
+          },
+          "progress": {
+            "ordered_next_waypoint": 1,
+            "waypoint_tolerance_rad": 0.02,
+            "nearest_is_progress_evidence": false,
+            "commanded_path_points": 11,
+            "current_q": [
+              0.563059083598775,
+              -1.2306399369308363,
+              1.7149033172916883,
+              -0.7596597245752991,
+              0.6745203270538157
+            ],
+            "ordered_next_q": [
+              0.5973329544067383,
+              -1.2598021030426025,
+              1.7021944522857666,
+              -0.7535853981971741,
+              0.6475685238838196
+            ],
+            "ordered_next_max_error_rad": 0.03427387080796329,
+            "nearest_waypoint_index": 1,
+            "nearest_waypoint_l2_error_rad": 0.05431337346632178,
+            "nearest_segment_index": 0,
+            "nearest_segment_fraction": 0.9317811262993584,
+            "nearest_segment_l2_error_rad": 0.01175877066567651,
+            "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+            "commanded_path_id": 6,
+            "candidate_next_waypoint": 1,
+            "segment_evidence_reason": "WAITING_TO_LEAVE_INCOMING_CORRIDOR",
+            "segment_corridor_tolerance_rad": 0.04
+          },
+          "failed_commanded_waypoint": 6
+        }
+      },
+      {
+        "stamp": 1794874146.6104724,
+        "payload": {
+          "id": 2,
+          "cycle": 538,
+          "stage": "human_guard",
+          "path_source": "planned_path",
+          "checked_next_waypoint": 1,
+          "motion": "IDLE",
+          "pending": null,
+          "revision": 120,
+          "human_status": "OBSERVED",
+          "human_reason": "CAPSULES_PRESENT",
+          "remaining_human_ms": 630.019,
+          "input_path_points": 6,
+          "checked_path_points": 6,
+          "checked_path_start_q": [
+            1.128578459653561,
+            -1.640224487356981,
+            2.142204500050153,
+            0.23749149284814752,
+            0.9754542933625046
+          ],
+          "checked_path_goal_q": [
+            2.9531540870666504,
+            -1.1394816637039185,
+            2.2262425422668457,
+            -0.13664725422859192,
+            1.107082724571228
+          ],
+          "current_state_report": {
+            "clearance": 0.12540677356335794,
+            "robot_geom": "link2_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.3279912927656661,
+            "robot_radius": 0.19917140571734454,
+            "human_radius": 0.06992219583836012,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.05889769120996141,
+            "box_clearance": 0.12540677356335794,
+            "status": "FAR",
+            "detection_status": "OBSERVED",
+            "revision": 120,
+            "joints": [
+              1.1285772900729059,
+              -1.6401823023443545,
+              2.1422156999751802,
+              0.2374916359618855,
+              0.9754540793703241
+            ]
+          },
+          "failure": {
+            "check": "WAYPOINT",
+            "failure": {
+              "reason": "HUMAN_COLLISION",
+              "q": [
+                1.6361918449401855,
+                -1.9302033185958862,
+                2.281043767929077,
+                0.4134029150009155,
+                0.9172882437705994
+              ],
+              "revision": 120,
+              "human": {
+                "clearance": 0.09972096166805067,
+                "robot_geom": "link2_visual",
+                "body_id": 1,
+                "segment_id": 6,
+                "center_distance": 0.3489893644300102,
+                "robot_radius": 0.19917140571734454,
+                "human_radius": 0.06992219583836012,
+                "safety_margin": 0.1,
+                "geometry_model": "SPHERE_AND_MESH_BOX",
+                "sphere_clearance": 0.07989576287430555,
+                "box_clearance": 0.09972096166805067,
+                "status": "NEAR"
+              }
+            },
+            "traversal": "WAYPOINTS_THEN_EDGES",
+            "path_points": 6,
+            "revision_before": 120,
+            "revision_after": 120,
+            "point_index": 1,
+            "edge_index": null,
+            "point_q": [
+              1.6361918449401855,
+              -1.9302033185958862,
+              2.281043767929077,
+              0.4134029150009155,
+              0.9172882437705994
+            ]
+          },
+          "progress": {
+            "ordered_next_waypoint": 1,
+            "waypoint_tolerance_rad": 0.02,
+            "nearest_is_progress_evidence": false,
+            "commanded_path_points": 2,
+            "current_q": [
+              1.1285772900729059,
+              -1.6401823023443545,
+              2.1422156999751802,
+              0.2374916359618855,
+              0.9754540793703241
+            ],
+            "ordered_next_q": [
+              0.9792405633164727,
+              -1.4988112115917516,
+              2.143844051409931,
+              0.2374785973594862,
+              0.9754127086383372
+            ],
+            "ordered_next_max_error_rad": 0.14933672675643317,
+            "nearest_waypoint_index": 0,
+            "nearest_waypoint_l2_error_rad": 0.022457185002611603,
+            "nearest_segment_index": 0,
+            "nearest_segment_fraction": 0.0935662573574397,
+            "nearest_segment_l2_error_rad": 0.007368268548842073,
+            "last_update_reason": "NO_EXECUTION",
+            "commanded_path_id": 9,
+            "candidate_next_waypoint": 1,
+            "segment_evidence_reason": null,
+            "segment_corridor_tolerance_rad": 0.04
+          }
+        }
+      },
+      {
+        "stamp": 1794874147.448198,
+        "payload": {
+          "id": 3,
+          "cycle": 541,
+          "stage": "human_guard",
+          "path_source": "remaining_execution",
+          "checked_next_waypoint": 1,
+          "motion": "IDLE",
+          "pending": "EXECUTE",
+          "revision": 122,
+          "human_status": "OBSERVED",
+          "human_reason": "CAPSULES_PRESENT",
+          "remaining_human_ms": 490.786,
+          "input_path_points": 9,
+          "checked_path_points": 9,
+          "checked_path_start_q": [
+            1.1285773187817847,
+            -1.6401813147582731,
+            2.1422160107383483,
+            0.23749164006795975,
+            0.9754540740983276
+          ],
+          "checked_path_goal_q": [
+            2.885451078414917,
+            -1.078222632408142,
+            2.249490737915039,
+            -0.508751392364502,
+            1.3646398782730103
+          ],
+          "current_state_report": {
+            "clearance": 0.10790782112112712,
+            "robot_geom": "link2_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.3185788377723502,
+            "robot_radius": 0.19917140571734454,
+            "human_radius": 0.07047842730775972,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.04892900474724593,
+            "box_clearance": 0.10790782112112712,
+            "status": "FAR",
+            "detection_status": "OBSERVED",
+            "revision": 122,
+            "joints": [
+              1.1285773187817847,
+              -1.6401813147582731,
+              2.1422160107383483,
+              0.23749164006795975,
+              0.9754540740983276
+            ]
+          },
+          "failure": {
+            "check": "WAYPOINT",
+            "failure": {
+              "reason": "HUMAN_COLLISION",
+              "q": [
+                1.3968394994735718,
+                -2.1075499057769775,
+                2.4988794326782227,
+                0.1659979224205017,
+                0.7313395142555237
+              ],
+              "revision": 122,
+              "human": {
+                "clearance": 0.09257548791760903,
+                "robot_geom": "link2_visual",
+                "body_id": 1,
+                "segment_id": 6,
+                "center_distance": 0.35375147931409145,
+                "robot_radius": 0.19917140571734454,
+                "human_radius": 0.07047842730775972,
+                "safety_margin": 0.1,
+                "geometry_model": "SPHERE_AND_MESH_BOX",
+                "sphere_clearance": 0.0841016462889872,
+                "box_clearance": 0.09257548791760903,
+                "status": "NEAR"
+              }
+            },
+            "traversal": "WAYPOINTS_THEN_EDGES",
+            "path_points": 9,
+            "revision_before": 122,
+            "revision_after": 122,
+            "point_index": 1,
+            "edge_index": null,
+            "point_q": [
+              1.3968394994735718,
+              -2.1075499057769775,
+              2.4988794326782227,
+              0.1659979224205017,
+              0.7313395142555237
+            ]
+          },
+          "progress": {
+            "ordered_next_waypoint": 1,
+            "waypoint_tolerance_rad": 0.02,
+            "nearest_is_progress_evidence": false,
+            "commanded_path_points": 9,
+            "current_q": [
+              1.1285773187817847,
+              -1.6401813147582731,
+              2.1422160107383483,
+              0.23749164006795975,
+              0.9754540740983276
+            ],
+            "ordered_next_q": [
+              1.3968394994735718,
+              -2.1075499057769775,
+              2.4988794326782227,
+              0.1659979224205017,
+              0.7313395142555237
+            ],
+            "ordered_next_max_error_rad": 0.4673685910187044,
+            "nearest_waypoint_index": 0,
+            "nearest_waypoint_l2_error_rad": 5.783965500044241e-07,
+            "nearest_segment_index": 0,
+            "nearest_segment_fraction": 0.0,
+            "nearest_segment_l2_error_rad": 5.783965500044241e-07,
+            "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+            "commanded_path_id": 10,
+            "candidate_next_waypoint": 1,
+            "segment_evidence_reason": "WAITING_FOR_ORDERED_APPROACH",
+            "segment_corridor_tolerance_rad": 0.04
+          },
+          "failed_commanded_waypoint": 1
+        }
+      }
+    ],
+    "vision_invalid_rejections": 171
+  },
+  "motion": {
+    "faults": [],
+    "accepted_trajectories": 13,
+    "cancelled": 10
+  },
+  "stop_actions": [
+    {
+      "cycle": 248,
+      "status": "HUMAN_TOO_CLOSE",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    },
+    {
+      "cycle": 258,
+      "status": "HUMAN_TOO_CLOSE",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    },
+    {
+      "cycle": 471,
+      "status": "HUMAN_PATH_BLOCKED",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "PATH_COLLISION"
+    },
+    {
+      "cycle": 502,
+      "status": "HUMAN_TOO_CLOSE",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    },
+    {
+      "cycle": 512,
+      "status": "HUMAN_TOO_CLOSE",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    },
+    {
+      "cycle": 522,
+      "status": "HUMAN_RETREAT_UNSAFE",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    },
+    {
+      "cycle": 529,
+      "status": "HUMAN_RETREAT_CLEAR",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    },
+    {
+      "cycle": 541,
+      "status": "HUMAN_PATH_BLOCKED",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "PATH_COLLISION"
+    },
+    {
+      "cycle": 554,
+      "status": "HUMAN_TOO_CLOSE",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    },
+    {
+      "cycle": 564,
+      "status": "HUMAN_RETREAT_UNSAFE",
+      "human_reason": "CAPSULES_PRESENT",
+      "path_validation": "CURRENT_CLEARANCE"
+    }
+  ],
+  "retreat_blocks": [
+    {
+      "cycle": 259,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 262,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 265,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 268,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 271,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 275,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 278,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 283,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 503,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "ROBOT_STILL_MOVING"
+    },
+    {
+      "cycle": 513,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 523,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 555,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "ROBOT_STILL_MOVING"
+    },
+    {
+      "cycle": 565,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "ROBOT_STILL_MOVING"
+    },
+    {
+      "cycle": 575,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    }
+  ],
+  "scope": "Read-only latest per-node log snapshot, 2026-11-17 07:07:13 Asia/Jakarta run. 27 complete simulation windows span 07:07:14.428 to 07:09:29.473. Planning profiles are sampled; nested stage times are inclusive. No bag decoded or runtime behavior changed.",
+  "verified_findings": [
+    "135.0469 wall seconds advance 95.416 physics seconds: weighted factor 0.70654, range 0.64917-0.78478.",
+    "Physics consumes 2.413% of wall time; viewer sync 16.639%, feedback+markers 12.432%, callbacks 13.466%, actual sleep 49.608%.",
+    "Mean feedback+viewer cost is 4.1148 ms per five-step event against the 2 ms single-step budget. Current source has one step per loop and relative sleep, without compensating a slow iteration against an absolute deadline.",
+    "Nine of 19 profiled main path searches fail, all crossing the human capture deadline; this is not proof that no geometric route exists.",
+    "Nine retreat SEARCH_BUDGET_EXHAUSTED states refer to the separate 32-iteration local greedy bound, with fresh human data remaining; they are not age-timeout failures.",
+    "13 accepted trajectories, 10 cancellations, no logged TRACKING_ERROR/STALLED. Last planning snapshot COMPLETED, target error 0.047438 m.",
+    "Three failed path diagnostics are waypoint collisions at clearances 0.057928, 0.099721, 0.092575 m against the 0.1 m margin.",
+    "171 VISION_INVALID warnings remain, but none of the ten new STOP actions is labeled VISION_INVALID."
+  ],
+  "limits": [
+    "No proof that all Motion faults are resolved or all alternate routes are absent.",
+    "Stage measurements do not isolate CPU contention versus viewer/driver internal work.",
+    "Normal path freshness expiry and local retreat search bound are separate failures.",
+    "No simulation scheduling or retreat algorithm modification is authorized by inspection alone."
+  ]
+}

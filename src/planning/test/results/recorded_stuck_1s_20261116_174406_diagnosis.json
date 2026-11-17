@@ -1,0 +1,1595 @@
+{
+  "trial_1s": {
+    "bag": "/tmp/cra_stuck_1s_20261116_174406",
+    "file_sha256": {
+      "cra_stuck_1s_20261116_174406_0.db3": "3d26f14907a9eaae83c3dc1ff0bcbad9e293b0759fd95ccbcb1c15b2deb01a0a"
+    },
+    "start_ns": 1794825847199329128,
+    "end_ns": 1794825871603054933,
+    "duration_s": 24.403725805,
+    "topic_counts": {
+      "/planning/status": 57,
+      "/motion/execution_status": 23,
+      "/motion/failure_reason": 1,
+      "/vision/human/geometry": 201,
+      "/joint_states": 1445,
+      "/simulation/obstacles": 1445,
+      "/simulation/target_marker": 1445
+    },
+    "human_counts": {
+      "OBSERVED": 201
+    },
+    "observed_age_s": {
+      "min": 0.229091956,
+      "median": 0.254336531,
+      "p95": 0.276215724,
+      "max": 0.286261498,
+      "over_0_5": 0,
+      "over_1": 0
+    },
+    "geometry_receipt_gap_s": {
+      "median": 0.0835469135,
+      "p95": 0.262014459,
+      "max": 0.429982196
+    },
+    "empty_times_s": [],
+    "invalid_times_s": [],
+    "target_first": [
+      0.11040103394419896,
+      -0.09999816339340062,
+      0.38350075208574486
+    ],
+    "target_unique_count": 1,
+    "joint_first": [
+      0.48037207015847605,
+      -1.0325891778248488,
+      1.8645261222830958,
+      -0.8349141966657354,
+      -1.3881094414095767
+    ],
+    "joint_last": [
+      1.7840663497327136,
+      -1.6743817265952523,
+      2.215820571195433,
+      0.03448587477761087,
+      -1.0051731630826404
+    ],
+    "first_move_over_0_01_rad_s": 5.486713,
+    "joint_ranges_rad": [
+      1.4586782821726318,
+      0.7624969079476933,
+      0.4382794285701006,
+      1.0158424687672036,
+      0.5028903683501098
+    ],
+    "motion_timeline": [
+      [
+        2.535708,
+        "STOPPED"
+      ],
+      [
+        4.993031,
+        "IDLE"
+      ],
+      [
+        5.318182,
+        "EXECUTING"
+      ],
+      [
+        6.761864,
+        "COMPLETED"
+      ],
+      [
+        6.891086,
+        "STOPPED"
+      ],
+      [
+        8.531633,
+        "IDLE"
+      ],
+      [
+        8.543672,
+        "STOPPED"
+      ],
+      [
+        9.156182,
+        "IDLE"
+      ],
+      [
+        9.665725,
+        "EXECUTING"
+      ],
+      [
+        10.902229,
+        "STOPPED"
+      ],
+      [
+        11.682829,
+        "IDLE"
+      ],
+      [
+        12.12373,
+        "EXECUTING"
+      ],
+      [
+        12.291703,
+        "STOPPED"
+      ],
+      [
+        13.37268,
+        "IDLE"
+      ],
+      [
+        13.647731,
+        "EXECUTING"
+      ],
+      [
+        13.691718,
+        "STOPPED"
+      ],
+      [
+        14.542088,
+        "IDLE"
+      ],
+      [
+        14.550853,
+        "STOPPED"
+      ],
+      [
+        15.067665,
+        "IDLE"
+      ],
+      [
+        15.211692,
+        "EXECUTING"
+      ],
+      [
+        18.294092,
+        "STOPPED"
+      ],
+      [
+        20.791714,
+        "IDLE"
+      ],
+      [
+        21.175806,
+        "EXECUTING"
+      ]
+    ],
+    "motion_dwell_s": {
+      "STOPPED": 10.436761411,
+      "IDLE": 2.099568176,
+      "EXECUTING": 9.202466637,
+      "COMPLETED": 0.129221771
+    },
+    "failure_values": {
+      "NONE": 1
+    },
+    "planning_status_counts": {
+      "HUMAN_RETREAT_DATA_UNKNOWN": 6,
+      "HUMAN_RETREAT_BLOCKED": 2,
+      "HUMAN_RETREAT_READY": 10,
+      "HUMAN_RETREAT_UNSAFE": 2,
+      "WAITING_FOR_RELEASE": 8,
+      "HUMAN_RETREAT_SENT": 2,
+      "TRAJECTORY_SENT": 5,
+      "EXECUTING": 4,
+      "HUMAN_TOO_CLOSE": 2,
+      "HUMAN_RETREAT_CLEAR": 3,
+      "PATH_READY": 5,
+      "HUMAN_PATH_BLOCKED": 3,
+      "GOAL_UNREACHABLE": 3,
+      "HUMAN_VISION_UNKNOWN": 2
+    },
+    "planning_timeline": [
+      [
+        0.0,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        0.347732,
+        "HUMAN_RETREAT_BLOCKED"
+      ],
+      [
+        0.357274,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        1.033619,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        1.213923,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        1.770194,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        1.78006,
+        "HUMAN_RETREAT_UNSAFE"
+      ],
+      [
+        2.526336,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        2.614733,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        3.284804,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        3.313736,
+        "HUMAN_RETREAT_UNSAFE"
+      ],
+      [
+        4.09572,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        4.213634,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        4.804934,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        4.992121,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        5.316731,
+        "HUMAN_RETREAT_SENT"
+      ],
+      [
+        5.3887,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        5.5617,
+        "EXECUTING"
+      ],
+      [
+        6.891071,
+        "HUMAN_TOO_CLOSE"
+      ],
+      [
+        7.63834,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        7.812866,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        8.342847,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        8.528662,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        8.538671,
+        "HUMAN_RETREAT_CLEAR"
+      ],
+      [
+        8.940245,
+        "PATH_READY"
+      ],
+      [
+        9.155356,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        9.659658,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        9.774755,
+        "EXECUTING"
+      ],
+      [
+        10.90119,
+        "HUMAN_PATH_BLOCKED"
+      ],
+      [
+        11.124944,
+        "GOAL_UNREACHABLE"
+      ],
+      [
+        11.417859,
+        "PATH_READY"
+      ],
+      [
+        11.681844,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        12.122142,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        12.290476,
+        "HUMAN_TOO_CLOSE"
+      ],
+      [
+        12.489875,
+        "HUMAN_RETREAT_BLOCKED"
+      ],
+      [
+        13.24654,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        13.371071,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        13.646068,
+        "HUMAN_RETREAT_SENT"
+      ],
+      [
+        13.691689,
+        "HUMAN_RETREAT_CLEAR"
+      ],
+      [
+        13.908354,
+        "GOAL_UNREACHABLE"
+      ],
+      [
+        14.438781,
+        "HUMAN_RETREAT_READY"
+      ],
+      [
+        14.541315,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        14.549953,
+        "HUMAN_RETREAT_CLEAR"
+      ],
+      [
+        14.817557,
+        "PATH_READY"
+      ],
+      [
+        15.067645,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        15.21166,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        15.418249,
+        "EXECUTING"
+      ],
+      [
+        18.291408,
+        "HUMAN_PATH_BLOCKED"
+      ],
+      [
+        18.822228,
+        "PATH_READY"
+      ],
+      [
+        19.017654,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        19.038077,
+        "HUMAN_PATH_BLOCKED"
+      ],
+      [
+        19.101566,
+        "GOAL_UNREACHABLE"
+      ],
+      [
+        20.283091,
+        "PATH_READY"
+      ],
+      [
+        20.579867,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        20.79168,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        21.169641,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        21.436913,
+        "EXECUTING"
+      ]
+    ],
+    "log_status_counts": {
+      "HUMAN_RETREAT_BLOCKED": 2,
+      "HUMAN_RETREAT_DATA_UNKNOWN": 5,
+      "HUMAN_RETREAT_READY": 10,
+      "HUMAN_RETREAT_UNSAFE": 2,
+      "WAITING_FOR_RELEASE": 8,
+      "HUMAN_RETREAT_SENT": 2,
+      "TRAJECTORY_SENT": 5,
+      "EXECUTING": 4,
+      "HUMAN_TOO_CLOSE": 2,
+      "HUMAN_RETREAT_CLEAR": 3,
+      "PATH_READY": 5,
+      "HUMAN_PATH_BLOCKED": 3,
+      "GOAL_UNREACHABLE": 3,
+      "HUMAN_VISION_UNKNOWN": 2
+    },
+    "log_retreat_reason_counts": {
+      "HUMAN_DATA_UNKNOWN": 1,
+      "None": 11,
+      "ROBOT_STILL_MOVING": 1
+    },
+    "log_errors": [
+      {
+        "rel_s": 1.77981,
+        "line": 410,
+        "text": "human margin retreat validation: ValueError: Retreat is no longer safe in the latest geometry"
+      },
+      {
+        "rel_s": 2.613514,
+        "line": 415,
+        "text": "execution path preparation: ValueError: Human margin retreat has no current safety certificate"
+      },
+      {
+        "rel_s": 3.313352,
+        "line": 419,
+        "text": "human margin retreat validation: ValueError: Retreat is no longer safe in the latest geometry"
+      },
+      {
+        "rel_s": 4.213139,
+        "line": 422,
+        "text": "execution path preparation: ValueError: Human margin retreat has no current safety certificate"
+      }
+    ],
+    "log_clearance_range_m": [
+      0.028902692813932124,
+      0.11138295099104964
+    ],
+    "log_events": [
+      {
+        "rel_s": 0.348653,
+        "line": 401,
+        "text": "Planning status: HUMAN_RETREAT_BLOCKED"
+      },
+      {
+        "rel_s": 0.357994,
+        "line": 404,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 1.034501,
+        "line": 407,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 1.214318,
+        "line": 408,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 1.770578,
+        "line": 409,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 1.77981,
+        "line": 410,
+        "text": "human margin retreat validation: ValueError: Retreat is no longer safe in the latest geometry"
+      },
+      {
+        "rel_s": 1.780381,
+        "line": 411,
+        "text": "Planning status: HUMAN_RETREAT_UNSAFE"
+      },
+      {
+        "rel_s": 2.527784,
+        "line": 413,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 2.52976,
+        "line": 414,
+        "text": "Planning snapshot: status=HUMAN_RETREAT_READY, motion=STOPPED, failure_reason=NONE, fault=False, stop_owned=True, pending=None, planning_required=False, path_points=2, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=True, path_validation=CURRENT_CLEARANCE, next_waypoint=3, plan_failure=NONE, target=[0.11040103394419896, -0.09999816339340062, 0.38350075208574486], eof=[0.19156532679622576, -0.09381434394942281, -0.30423495759361224], target_error_m=0.6925361278844984, selected_goal_error_m=0.6339226403450581, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 2.613514,
+        "line": 415,
+        "text": "execution path preparation: ValueError: Human margin retreat has no current safety certificate"
+      },
+      {
+        "rel_s": 2.614835,
+        "line": 416,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 3.284095,
+        "line": 418,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 3.313352,
+        "line": 419,
+        "text": "human margin retreat validation: ValueError: Retreat is no longer safe in the latest geometry"
+      },
+      {
+        "rel_s": 3.313982,
+        "line": 420,
+        "text": "Planning status: HUMAN_RETREAT_UNSAFE"
+      },
+      {
+        "rel_s": 4.091475,
+        "line": 421,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 4.213139,
+        "line": 422,
+        "text": "execution path preparation: ValueError: Human margin retreat has no current safety certificate"
+      },
+      {
+        "rel_s": 4.213937,
+        "line": 423,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 4.805317,
+        "line": 424,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 4.992485,
+        "line": 425,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 5.317185,
+        "line": 426,
+        "text": "Planning status: HUMAN_RETREAT_SENT"
+      },
+      {
+        "rel_s": 5.387809,
+        "line": 428,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 5.562273,
+        "line": 429,
+        "text": "Planning status: EXECUTING"
+      },
+      {
+        "rel_s": 6.890208,
+        "line": 431,
+        "text": "Planning status: HUMAN_TOO_CLOSE"
+      },
+      {
+        "rel_s": 7.638669,
+        "line": 432,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 7.639331,
+        "line": 433,
+        "text": "Planning snapshot: status=HUMAN_RETREAT_READY, motion=STOPPED, failure_reason=NONE, fault=False, stop_owned=True, pending=None, planning_required=False, path_points=2, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=True, path_validation=CURRENT_CLEARANCE, next_waypoint=1, plan_failure=NONE, target=[0.11040103394419896, -0.09999816339340062, 0.38350075208574486], eof=[0.2676636398574366, -0.09592562896534859, -0.23386977116436264], target_error_m=0.6370984819738635, selected_goal_error_m=0.5635390934668444, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 7.813278,
+        "line": 434,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 8.343079,
+        "line": 435,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 8.527366,
+        "line": 436,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 8.539079,
+        "line": 438,
+        "text": "Planning status: HUMAN_RETREAT_CLEAR"
+      },
+      {
+        "rel_s": 8.940671,
+        "line": 439,
+        "text": "Planning status: PATH_READY"
+      },
+      {
+        "rel_s": 9.155713,
+        "line": 440,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 9.659274,
+        "line": 441,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 9.77507,
+        "line": 443,
+        "text": "Planning status: EXECUTING"
+      },
+      {
+        "rel_s": 10.901848,
+        "line": 444,
+        "text": "Planning status: HUMAN_PATH_BLOCKED"
+      },
+      {
+        "rel_s": 11.125418,
+        "line": 445,
+        "text": "Planning status: GOAL_UNREACHABLE"
+      },
+      {
+        "rel_s": 11.416286,
+        "line": 446,
+        "text": "Planning status: PATH_READY"
+      },
+      {
+        "rel_s": 11.682252,
+        "line": 447,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 12.12245,
+        "line": 448,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 12.291154,
+        "line": 451,
+        "text": "Planning status: HUMAN_TOO_CLOSE"
+      },
+      {
+        "rel_s": 12.490066,
+        "line": 453,
+        "text": "Planning status: HUMAN_RETREAT_BLOCKED"
+      },
+      {
+        "rel_s": 12.68945,
+        "line": 454,
+        "text": "Planning snapshot: status=HUMAN_RETREAT_BLOCKED, motion=STOPPED, failure_reason=NONE, fault=False, stop_owned=True, pending=None, planning_required=True, path_points=0, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=False, path_validation=CURRENT_CLEARANCE, next_waypoint=1, plan_failure=NONE, target=[0.11040103394419896, -0.09999816339340062, 0.38350075208574486], eof=[0.2710544084302451, -0.1632541811801719, -0.121590728677175], target_error_m=0.5337866937825194, selected_goal_error_m=None, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 13.24639,
+        "line": 456,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 13.369984,
+        "line": 457,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 13.646885,
+        "line": 458,
+        "text": "Planning status: HUMAN_RETREAT_SENT"
+      },
+      {
+        "rel_s": 13.690774,
+        "line": 461,
+        "text": "Planning status: HUMAN_RETREAT_CLEAR"
+      },
+      {
+        "rel_s": 13.909085,
+        "line": 462,
+        "text": "Planning status: GOAL_UNREACHABLE"
+      },
+      {
+        "rel_s": 14.439086,
+        "line": 464,
+        "text": "Planning status: HUMAN_RETREAT_READY"
+      },
+      {
+        "rel_s": 14.541667,
+        "line": 465,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 14.550219,
+        "line": 467,
+        "text": "Planning status: HUMAN_RETREAT_CLEAR"
+      },
+      {
+        "rel_s": 14.818045,
+        "line": 468,
+        "text": "Planning status: PATH_READY"
+      },
+      {
+        "rel_s": 15.066901,
+        "line": 469,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 15.208406,
+        "line": 470,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 15.418365,
+        "line": 472,
+        "text": "Planning status: EXECUTING"
+      },
+      {
+        "rel_s": 17.782986,
+        "line": 473,
+        "text": "Planning snapshot: status=EXECUTING, motion=EXECUTING, failure_reason=NONE, fault=False, stop_owned=False, pending=None, planning_required=False, path_points=6, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=False, path_validation=CLEAR, next_waypoint=1, plan_failure=NONE, target=[0.11040103394419896, -0.09999816339340062, 0.38350075208574486], eof=[0.24816077720900723, -0.2516658870512209, 0.06095311170746027], target_error_m=0.3821227886132022, selected_goal_error_m=0.05417216318307103, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 18.291741,
+        "line": 474,
+        "text": "Planning status: HUMAN_PATH_BLOCKED"
+      },
+      {
+        "rel_s": 18.822731,
+        "line": 475,
+        "text": "Planning status: PATH_READY"
+      },
+      {
+        "rel_s": 19.014454,
+        "line": 476,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 19.037704,
+        "line": 477,
+        "text": "Planning status: HUMAN_PATH_BLOCKED"
+      },
+      {
+        "rel_s": 19.101848,
+        "line": 478,
+        "text": "Planning status: GOAL_UNREACHABLE"
+      },
+      {
+        "rel_s": 20.283308,
+        "line": 479,
+        "text": "Planning status: PATH_READY"
+      },
+      {
+        "rel_s": 20.580296,
+        "line": 480,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 20.786148,
+        "line": 481,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 21.170263,
+        "line": 482,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 21.436638,
+        "line": 484,
+        "text": "Planning status: EXECUTING"
+      },
+      {
+        "rel_s": 22.957216,
+        "line": 485,
+        "text": "Planning snapshot: status=EXECUTING, motion=EXECUTING, failure_reason=NONE, fault=False, stop_owned=False, pending=None, planning_required=False, path_points=9, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=False, path_validation=CLEAR, next_waypoint=1, plan_failure=NONE, target=[0.11040103394419896, -0.09999816339340062, 0.38350075208574486], eof=[0.19155515313440247, -0.20299810454565073, 0.05659109767090305], target_error_m=0.35222847853138745, selected_goal_error_m=0.07667767067403763, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      }
+    ],
+    "last_planning_event_before_bag": "[INFO] [1794825846.986279248] [planning_node]: Planning status: HUMAN_RETREAT_DATA_UNKNOWN",
+    "topic_first_receipt_relative_s": {
+      "/planning/status": 0.0,
+      "/motion/execution_status": 2.535708,
+      "/motion/failure_reason": 2.538412,
+      "/vision/human/geometry": 2.571447,
+      "/joint_states": 2.850721,
+      "/simulation/obstacles": 2.851648,
+      "/simulation/target_marker": 2.851839
+    },
+    "unobserved_initial_motion_s": 2.535708,
+    "motion_component_events": [
+      {
+        "relative_s": 4.992912225,
+        "line": 26,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 5.318088237,
+        "line": 27,
+        "text": "Joint trajectory accepted: 2 waypoints, 1.067 s"
+      },
+      {
+        "relative_s": 6.890901649,
+        "line": 28,
+        "text": "Motion stopped and trajectory cancelled"
+      },
+      {
+        "relative_s": 8.529948705,
+        "line": 29,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 8.543161727,
+        "line": 30,
+        "text": "Motion stopped and trajectory cancelled"
+      },
+      {
+        "relative_s": 9.156107173,
+        "line": 31,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 9.665130034,
+        "line": 32,
+        "text": "Joint trajectory accepted: 9 waypoints, 9.001 s"
+      },
+      {
+        "relative_s": 10.902164888,
+        "line": 33,
+        "text": "Motion stopped and trajectory cancelled"
+      },
+      {
+        "relative_s": 11.682711495,
+        "line": 34,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 12.123635331,
+        "line": 35,
+        "text": "Joint trajectory accepted: 7 waypoints, 7.714 s"
+      },
+      {
+        "relative_s": 12.291614894,
+        "line": 36,
+        "text": "Motion stopped and trajectory cancelled"
+      },
+      {
+        "relative_s": 13.371863243,
+        "line": 37,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 13.647661731,
+        "line": 38,
+        "text": "Joint trajectory accepted: 2 waypoints, 0.667 s"
+      },
+      {
+        "relative_s": 13.691330357,
+        "line": 39,
+        "text": "Motion stopped and trajectory cancelled"
+      },
+      {
+        "relative_s": 14.541986029,
+        "line": 40,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 14.550736615,
+        "line": 41,
+        "text": "Motion stopped and trajectory cancelled"
+      },
+      {
+        "relative_s": 15.067323029,
+        "line": 42,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 15.209897745,
+        "line": 43,
+        "text": "Joint trajectory accepted: 7 waypoints, 7.632 s"
+      },
+      {
+        "relative_s": 18.292185859,
+        "line": 44,
+        "text": "Motion stopped and trajectory cancelled"
+      },
+      {
+        "relative_s": 20.788488953,
+        "line": 45,
+        "text": "Stop released; waiting for a new command"
+      },
+      {
+        "relative_s": 21.174808537,
+        "line": 46,
+        "text": "Joint trajectory accepted: 10 waypoints, 13.917 s"
+      }
+    ],
+    "startup_timeout_confirmation": {
+      "file": "/home/lvinz/.ros/log/python3_1970_1794825699480.log",
+      "line": 4,
+      "value_s": 1.0
+    },
+    "post_recording_log_completion": {
+      "stamp_ns": 1794825882487269796,
+      "seconds_after_bag_end": 10.884214863,
+      "planning_status": "COMPLETED",
+      "line": 525,
+      "limit": "Outside bag coverage; later live log also shows EMPTY human detections. Not completion under continuously observed close-human geometry."
+    }
+  },
+  "baseline_0_5s": {
+    "bag": "/tmp/cra_stuck_static_20261116_170942",
+    "file_sha256": {
+      "cra_stuck_static_20261116_170942_0.db3": "a29bfba50e3e827ed73e88b8d6aca7d7524c25a1a947839521639e88d97a1bfe"
+    },
+    "start_ns": 1794823783010025384,
+    "end_ns": 1794823806171202826,
+    "duration_s": 23.161177442,
+    "topic_counts": {
+      "/simulation/target_marker": 1495,
+      "/joint_states": 1494,
+      "/simulation/obstacles": 1494,
+      "/vision/human/geometry": 308,
+      "/planning/status": 26,
+      "/motion/execution_status": 9,
+      "/motion/failure_reason": 1
+    },
+    "human_counts": {
+      "OBSERVED": 243,
+      "INVALID": 3,
+      "EMPTY": 62
+    },
+    "observed_age_s": {
+      "min": 0.19840383,
+      "median": 0.241696538,
+      "p95": 0.26145865,
+      "max": 0.294601811,
+      "over_0_5": 0,
+      "over_1": 0
+    },
+    "geometry_receipt_gap_s": {
+      "median": 0.064711632,
+      "p95": 0.166904446,
+      "max": 0.574325551
+    },
+    "empty_times_s": [
+      18.474001,
+      18.483017,
+      18.588966,
+      18.648829,
+      18.749189,
+      18.822591,
+      18.916323,
+      18.9509,
+      19.015612,
+      19.149196,
+      19.215678,
+      19.283051,
+      19.315927,
+      19.605933,
+      19.682481,
+      19.7161,
+      19.783535,
+      19.882186,
+      19.987931,
+      20.087009,
+      20.149115,
+      20.23,
+      20.250982,
+      20.415872,
+      20.552645,
+      20.653936,
+      20.682398,
+      20.784548,
+      20.856243,
+      20.882219,
+      20.963745,
+      21.142066,
+      21.182367,
+      21.286994,
+      21.321707,
+      21.383932,
+      21.448988,
+      21.484875,
+      21.523539,
+      21.623103,
+      21.650071,
+      21.685063,
+      21.727237,
+      21.750976,
+      21.829961,
+      21.850992,
+      22.015766,
+      22.049955,
+      22.116016,
+      22.216675,
+      22.251966,
+      22.382579,
+      22.482359,
+      22.583177,
+      22.660046,
+      22.683023,
+      22.716204,
+      22.749198,
+      22.849292,
+      22.949232,
+      23.048867,
+      23.115746
+    ],
+    "invalid_times_s": [
+      8.12501,
+      11.422109,
+      21.121075
+    ],
+    "target_first": [
+      0.11040103394419906,
+      -0.09999816339340062,
+      0.3406957412415661
+    ],
+    "target_unique_count": 1,
+    "joint_first": [
+      0.7704495803182084,
+      -1.8500421138226477,
+      2.345412442795437,
+      0.3746056677094836,
+      -0.5998806794614637
+    ],
+    "joint_last": [
+      2.26847205979431,
+      -2.4547464755443498,
+      2.647348453493026,
+      0.6933658461533382,
+      -0.0735668017870073
+    ],
+    "first_move_over_0_01_rad_s": 9.758086,
+    "joint_ranges_rad": [
+      1.4980224794761017,
+      0.6359914346100914,
+      0.3169579086587109,
+      0.36114238308643737,
+      0.5263138776744565
+    ],
+    "motion_timeline": [
+      [
+        0.427712,
+        "STOPPED"
+      ],
+      [
+        8.985991,
+        "IDLE"
+      ],
+      [
+        9.558734,
+        "EXECUTING"
+      ],
+      [
+        11.177106,
+        "STOPPED"
+      ],
+      [
+        11.921481,
+        "IDLE"
+      ],
+      [
+        12.324988,
+        "EXECUTING"
+      ],
+      [
+        14.781259,
+        "STOPPED"
+      ],
+      [
+        15.181426,
+        "IDLE"
+      ],
+      [
+        16.599042,
+        "EXECUTING"
+      ]
+    ],
+    "motion_dwell_s": {
+      "STOPPED": 9.702820931000002,
+      "IDLE": 2.393866364,
+      "EXECUTING": 10.636778293
+    },
+    "failure_values": {
+      "NONE": 1
+    },
+    "planning_status_counts": {
+      "HUMAN_VISION_UNKNOWN": 7,
+      "HUMAN_RETREAT_BLOCKED": 5,
+      "HUMAN_RETREAT_DATA_UNKNOWN": 4,
+      "PATH_READY": 1,
+      "WAITING_FOR_RELEASE": 3,
+      "TRAJECTORY_SENT": 3,
+      "EXECUTING": 3
+    },
+    "planning_timeline": [
+      [
+        0.117517,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        0.412981,
+        "HUMAN_RETREAT_BLOCKED"
+      ],
+      [
+        0.423341,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        0.588733,
+        "HUMAN_RETREAT_BLOCKED"
+      ],
+      [
+        1.048206,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        1.180308,
+        "HUMAN_RETREAT_BLOCKED"
+      ],
+      [
+        2.825021,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        2.981966,
+        "HUMAN_RETREAT_BLOCKED"
+      ],
+      [
+        3.413769,
+        "HUMAN_RETREAT_DATA_UNKNOWN"
+      ],
+      [
+        3.578387,
+        "HUMAN_RETREAT_BLOCKED"
+      ],
+      [
+        4.19242,
+        "PATH_READY"
+      ],
+      [
+        4.210972,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        8.985987,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        9.311215,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        9.557726,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        9.644338,
+        "EXECUTING"
+      ],
+      [
+        11.177077,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        11.920775,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        12.07797,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        12.320719,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        12.464179,
+        "EXECUTING"
+      ],
+      [
+        14.779511,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        15.181146,
+        "WAITING_FOR_RELEASE"
+      ],
+      [
+        15.616021,
+        "HUMAN_VISION_UNKNOWN"
+      ],
+      [
+        16.596114,
+        "TRAJECTORY_SENT"
+      ],
+      [
+        16.84227,
+        "EXECUTING"
+      ]
+    ],
+    "log_status_counts": {
+      "HUMAN_RETREAT_BLOCKED": 5,
+      "HUMAN_RETREAT_DATA_UNKNOWN": 4,
+      "PATH_READY": 1,
+      "HUMAN_VISION_UNKNOWN": 6,
+      "WAITING_FOR_RELEASE": 3,
+      "TRAJECTORY_SENT": 3,
+      "EXECUTING": 3
+    },
+    "log_retreat_reason_counts": {
+      "None": 37,
+      "HUMAN_DATA_UNKNOWN": 5
+    },
+    "log_errors": [
+      {
+        "rel_s": 4.210498,
+        "line": 1044,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 4.980063,
+        "line": 1050,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 5.412427,
+        "line": 1055,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 5.778273,
+        "line": 1060,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 6.178548,
+        "line": 1065,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 6.979871,
+        "line": 1075,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 7.418661,
+        "line": 1080,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 9.310946,
+        "line": 1093,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 15.612835,
+        "line": 1118,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 15.8779,
+        "line": 1124,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      }
+    ],
+    "log_clearance_range_m": [
+      0.09652610380527935,
+      0.6903370200395748
+    ],
+    "log_events": [
+      {
+        "rel_s": 0.413475,
+        "line": 1016,
+        "text": "Planning status: HUMAN_RETREAT_BLOCKED"
+      },
+      {
+        "rel_s": 0.423965,
+        "line": 1019,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 0.588518,
+        "line": 1022,
+        "text": "Planning status: HUMAN_RETREAT_BLOCKED"
+      },
+      {
+        "rel_s": 1.044886,
+        "line": 1023,
+        "text": "Planning snapshot: status=HUMAN_RETREAT_BLOCKED, motion=STOPPED, failure_reason=NONE, fault=False, stop_owned=True, pending=None, planning_required=True, path_points=0, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=True, path_validation=CURRENT_CLEARANCE, next_waypoint=1, plan_failure=HUMAN_VISION_UNKNOWN, target=[0.11040103394419906, -0.09999816339340062, 0.3406957412415661], eof=[0.1508254030367908, -0.20579955404975733, -0.1858231933160322], target_error_m=0.5385631368085098, selected_goal_error_m=None, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 1.048383,
+        "line": 1026,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 1.185045,
+        "line": 1029,
+        "text": "Planning status: HUMAN_RETREAT_BLOCKED"
+      },
+      {
+        "rel_s": 2.814983,
+        "line": 1032,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 2.984119,
+        "line": 1035,
+        "text": "Planning status: HUMAN_RETREAT_BLOCKED"
+      },
+      {
+        "rel_s": 3.413967,
+        "line": 1038,
+        "text": "Planning status: HUMAN_RETREAT_DATA_UNKNOWN"
+      },
+      {
+        "rel_s": 3.57861,
+        "line": 1041,
+        "text": "Planning status: HUMAN_RETREAT_BLOCKED"
+      },
+      {
+        "rel_s": 4.191731,
+        "line": 1043,
+        "text": "Planning status: PATH_READY"
+      },
+      {
+        "rel_s": 4.210498,
+        "line": 1044,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 4.211296,
+        "line": 1045,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 4.980063,
+        "line": 1050,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 5.412427,
+        "line": 1055,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 5.778273,
+        "line": 1060,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 6.178548,
+        "line": 1065,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 6.179608,
+        "line": 1066,
+        "text": "Planning snapshot: status=HUMAN_VISION_UNKNOWN, motion=STOPPED, failure_reason=NONE, fault=False, stop_owned=True, pending=None, planning_required=False, path_points=9, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=True, path_validation=DATA_EXPIRED, next_waypoint=1, plan_failure=NONE, target=[0.11040103394419906, -0.09999816339340062, 0.3406957412415661], eof=[0.1508254030367908, -0.20579955404975733, -0.1858231933160322], target_error_m=0.5385631368085098, selected_goal_error_m=0.05091839833690481, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 6.979871,
+        "line": 1075,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 7.418661,
+        "line": 1080,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 8.980243,
+        "line": 1092,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 9.310946,
+        "line": 1093,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 9.31165,
+        "line": 1094,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 9.557691,
+        "line": 1095,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 9.643813,
+        "line": 1097,
+        "text": "Planning status: EXECUTING"
+      },
+      {
+        "rel_s": 11.176342,
+        "line": 1100,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 11.376372,
+        "line": 1101,
+        "text": "Planning snapshot: status=HUMAN_VISION_UNKNOWN, motion=STOPPED, failure_reason=NONE, fault=False, stop_owned=True, pending=None, planning_required=False, path_points=9, feedback_ready=True, obstacles_ready=True, human=UNKNOWN/STALE_MESSAGE, human_checks=True, human_validation_pending=True, path_validation=STALE_MESSAGE, next_waypoint=1, plan_failure=NONE, target=[0.11040103394419906, -0.09999816339340062, 0.3406957412415661], eof=[0.14333595025154638, -0.1847378806372956, -0.10726402045772118], target_error_m=0.45709241570215264, selected_goal_error_m=0.05091839833690481, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 11.920638,
+        "line": 1107,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 12.078166,
+        "line": 1108,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 12.320568,
+        "line": 1109,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 12.464873,
+        "line": 1111,
+        "text": "Planning status: EXECUTING"
+      },
+      {
+        "rel_s": 14.78018,
+        "line": 1114,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 15.180346,
+        "line": 1117,
+        "text": "Planning status: WAITING_FOR_RELEASE"
+      },
+      {
+        "rel_s": 15.612835,
+        "line": 1118,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 15.614998,
+        "line": 1119,
+        "text": "Planning status: HUMAN_VISION_UNKNOWN"
+      },
+      {
+        "rel_s": 15.8779,
+        "line": 1124,
+        "text": "execution path preparation: ValueError: Execution path failed collision validation"
+      },
+      {
+        "rel_s": 16.595864,
+        "line": 1129,
+        "text": "Planning status: TRAJECTORY_SENT"
+      },
+      {
+        "rel_s": 16.598694,
+        "line": 1131,
+        "text": "Planning snapshot: status=TRAJECTORY_SENT, motion=IDLE, failure_reason=NONE, fault=False, stop_owned=False, pending=EXECUTE, planning_required=False, path_points=8, feedback_ready=True, obstacles_ready=True, human=OBSERVED/CAPSULES_PRESENT, human_checks=True, human_validation_pending=False, path_validation=CLEAR, next_waypoint=1, plan_failure=NONE, target=[0.11040103394419906, -0.09999816339340062, 0.3406957412415661], eof=[0.1346943053998109, -0.258851794637139, -0.015904547194395782], target_error_m=0.3911373223178132, selected_goal_error_m=0.05091839833690481, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      },
+      {
+        "rel_s": 16.84256,
+        "line": 1132,
+        "text": "Planning status: EXECUTING"
+      },
+      {
+        "rel_s": 21.77669,
+        "line": 1140,
+        "text": "Planning snapshot: status=EXECUTING, motion=EXECUTING, failure_reason=NONE, fault=False, stop_owned=False, pending=None, planning_required=False, path_points=8, feedback_ready=True, obstacles_ready=True, human=EMPTY/NO_ACTIVE_CAPSULES, human_checks=False, human_validation_pending=False, path_validation=CLEAR, next_waypoint=2, plan_failure=NONE, target=[0.11040103394419906, -0.09999816339340062, 0.3406957412415661], eof=[0.13407434107472302, -0.2676223133941808, 0.014577692635979975], target_error_m=0.36743878777327743, selected_goal_error_m=0.05091839833690481, goal_tolerance_m=0.12, target_clearance_m=0.04"
+      }
+    ],
+    "last_planning_event_before_bag": "[INFO] [1794823780.589246808] [planning_node]: Planning status: HUMAN_VISION_UNKNOWN"
+  },
+  "limits": [
+    "Different initial robot joints and target Z; not a paired controlled comparison.",
+    "ROS status topics report state transitions, not every planning computation.",
+    "Recorder receipt age does not include waiting and processing inside Planning.",
+    "Retreat status CLEAR alone does not establish the endpoint was reached due to robot motion.",
+    "Human topic starts 2.571447 s after bag start; joint/marker topics start later. Initial motion dwell of 2.535708 s is unobserved on the Motion topic.",
+    "Only 198 of 201 observed frames have preceding joint and marker samples; frozen-lifetime clearance reconstruction is offline geometry evidence only.",
+    "HUMAN_RETREAT_UNSAFE is a conservative validation result that can include expiry inside the checker; it does not by itself prove human motion or a geometric collision.",
+    "201 observed messages are all valid with eight capsules and base_link; observed does not prove the person held a perfectly stationary pose."
+  ],
+  "geometry_inspection": {
+    "method": "Frozen lifetime only offline; latest preceding recorded joint/target/obstacle samples; no Motion commands. First human frame skipped because no preceding joint/marker samples.",
+    "frame_count": 198,
+    "status_counts": {
+      "NEAR": 64,
+      "FAR": 134
+    },
+    "clearance_range_m": [
+      0.04268000312609526,
+      0.13915876002893895
+    ],
+    "initial_stationary_interval_s": [
+      0,
+      5.3
+    ],
+    "stationary_frame_count": 24,
+    "stationary_status_counts": {
+      "NEAR": 24
+    },
+    "stationary_clearance_range_m": [
+      0.04268000312609526,
+      0.09412379238408394
+    ],
+    "skipped_initial_geometry_frames": 3,
+    "timing_matches_using_logged_joint_pose": [
+      {
+        "frame_receipt_relative_s": 2.571447203,
+        "age_at_receipt_s": 0.259428518,
+        "age_at_diagnostic_s": 0.970399016,
+        "clearance_m": 0.04496734496063449,
+        "line": 417,
+        "diagnostic_relative_s": 3.282417701,
+        "reason": "None"
+      },
+      {
+        "frame_receipt_relative_s": 6.735811059,
+        "age_at_receipt_s": 0.256997775,
+        "age_at_diagnostic_s": 0.41090829,
+        "clearance_m": 0.07457176077733557,
+        "line": 430,
+        "diagnostic_relative_s": 6.889721574,
+        "reason": "None"
+      },
+      {
+        "frame_receipt_relative_s": 8.496152321,
+        "age_at_receipt_s": 0.250513104,
+        "age_at_diagnostic_s": 0.292109817,
+        "clearance_m": 0.11138295099104964,
+        "line": 437,
+        "diagnostic_relative_s": 8.537749034,
+        "reason": "None"
+      },
+      {
+        "frame_receipt_relative_s": 12.260689228,
+        "age_at_receipt_s": 0.247894827,
+        "age_at_diagnostic_s": 0.277383681,
+        "clearance_m": 0.09700429136571645,
+        "line": 450,
+        "diagnostic_relative_s": 12.290178082,
+        "reason": "None"
+      },
+      {
+        "frame_receipt_relative_s": 12.404503072,
+        "age_at_receipt_s": 0.258412416,
+        "age_at_diagnostic_s": 0.343369367,
+        "clearance_m": 0.09751353744038,
+        "line": 452,
+        "diagnostic_relative_s": 12.489460023,
+        "reason": "ROBOT_STILL_MOVING"
+      },
+      {
+        "frame_receipt_relative_s": 12.791865339,
+        "age_at_receipt_s": 0.246008,
+        "age_at_diagnostic_s": 0.699903946,
+        "clearance_m": 0.0988059196804699,
+        "line": 455,
+        "diagnostic_relative_s": 13.245761285,
+        "reason": "None"
+      },
+      {
+        "frame_receipt_relative_s": 13.581650124,
+        "age_at_receipt_s": 0.268921224,
+        "age_at_diagnostic_s": 0.377276275,
+        "clearance_m": 0.10009296973915785,
+        "line": 460,
+        "diagnostic_relative_s": 13.690005175,
+        "reason": "None"
+      },
+      {
+        "frame_receipt_relative_s": 14.059242693,
+        "age_at_receipt_s": 0.246776329,
+        "age_at_diagnostic_s": 0.625930715,
+        "clearance_m": 0.09972343626786839,
+        "line": 463,
+        "diagnostic_relative_s": 14.438397079,
+        "reason": "None"
+      }
+    ],
+    "timing_match_method": "Match raw capsule body/segment/radius and recompute clearance at the joint pose printed in the live diagnostic. Require a unique match with clearance difference below 1e-9 m. Both recorded static obstacles are DELETE and the target marker is constant; for geometry frames before marker/joint subscription use the first recorded environment plus the logged joint pose. Output time includes search/validation, not just callback wait."
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "scope": "Offline real MuJoCo geometry, fixed synthetic capsules and frozen clock. State boundary only, not ROS execution or a full path replay.",
+  "rows": [
+    {
+      "fixture_requested_clearance_m": 0.049,
+      "measured_clearance_m": 0.04900000000016275,
+      "status": "NEAR",
+      "ordinary_state_valid": false,
+      "margin_m": 0.05
+    },
+    {
+      "fixture_requested_clearance_m": 0.051,
+      "measured_clearance_m": 0.05099999999987907,
+      "status": "FAR",
+      "ordinary_state_valid": true,
+      "margin_m": 0.05
+    },
+    {
+      "fixture_requested_clearance_m": 0.075,
+      "measured_clearance_m": 0.07500000000013694,
+      "status": "FAR",
+      "ordinary_state_valid": true,
+      "margin_m": 0.05
+    },
+    {
+      "fixture_requested_clearance_m": -0.005,
+      "measured_clearance_m": -0.004999999999686089,
+      "status": "NEAR",
+      "ordinary_state_valid": false,
+      "margin_m": 0.05,
+      "retreat_failure": "HUMAN_OVERLAP"
+    }
+  ]
+}

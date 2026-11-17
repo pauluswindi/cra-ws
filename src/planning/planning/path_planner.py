@@ -9,6 +9,7 @@ import yaml
 
 from planning.algorithms.a_star import AStarPlanner
 from planning.algorithms.collision_filter import CollisionFilter
+from planning.execution_progress import OrderedSegmentProgress
 
 
 class PathPlanner:
@@ -77,12 +78,24 @@ class PathPlanner:
         self.max_segment_delta = float(
             config["motion"]["joint"]["max_segment_delta"]
         )
+        self.joint_goal_tolerance = float(config["motion"]["joint"]["tolerance"])
+        progress = planning_config.get("execution_progress", {})
+        self.segment_progress_enabled = progress.get("enabled", True)
+        if not isinstance(self.segment_progress_enabled, bool):
+            raise ValueError("execution_progress.enabled must be boolean")
+        self.execution_progress_config = {
+            "corridor_tolerance": progress.get("corridor_tolerance", .04),
+            "confirmation_samples": progress.get("confirmation_samples", 2),
+            "handoff_fraction": progress.get("handoff_fraction", .9),
+            "max_feedback_step": progress.get("max_feedback_step", .05),
+        }
+        # Validate settings at startup, without running any robot queries.
+        OrderedSegmentProgress(np.zeros((2, 5)), **self.execution_progress_config)
 
-        if (
-            not np.isfinite(self.max_segment_delta)
-            or self.max_segment_delta <= 0.0
-        ):
-            raise ValueError("Invalid maximum joint segment delta")
+        if any(not np.isfinite(value) or value <= 0. for value in (
+            self.max_segment_delta, self.joint_goal_tolerance,
+        )):
+            raise ValueError("Invalid joint segment delta or tolerance")
 
         self.collision_filter = CollisionFilter(
             model_path=self.model_path,
@@ -90,6 +103,9 @@ class PathPlanner:
             safety_margin=float(
                 planning_config["obstacle_safety_margin"]
             ),
+            human_report_cache_size=planning_config.get(
+                "collision_checks", {},
+            ).get("human_report_cache_size", 256),
         )
 
         self.planner = AStarPlanner(
@@ -322,6 +338,8 @@ class PathPlanner:
         }
 
     def is_path_valid(self, path):
+        checker = self.collision_filter
+        checker.last_path_validation_failure = None
         if not self.human_data_ready():
             return False
 
@@ -335,16 +353,19 @@ class PathPlanner:
         ):
             return False
 
-        checker = self.collision_filter
         revision = checker.environment_revision
 
-        for joints in path:
+        for index, joints in enumerate(path):
             if not checker.is_state_valid(joints):
-                return False
+                return checker.record_path_validation_failure(
+                    path, revision, "WAYPOINT", checker.last_state_validation_failure,
+                    point_index=index)
 
-        for start, goal in zip(path[:-1], path[1:]):
+        for index, (start, goal) in enumerate(zip(path[:-1], path[1:])):
             if not checker.is_edge_valid(start, goal):
-                return False
+                return checker.record_path_validation_failure(
+                    path, revision, "EDGE_SAMPLE", checker.last_edge_validation_failure,
+                    edge_index=index)
 
         return checker.environment_revision == revision
 

@@ -33,6 +33,7 @@
 //
 #include "azure_kinect_ros_driver/k4a_calibration_transform_data.h"
 #include "azure_kinect_ros_driver/k4a_ros_device_params.h"
+#include "azure_kinect_ros_driver/stream_control.h"
 
 class K4AROSDevice : public rclcpp::Node
 {
@@ -86,6 +87,7 @@ class K4AROSDevice : public rclcpp::Node
                                    std::shared_ptr<sensor_msgs::msg::PointCloud2>& point_cloud);
 
   void framePublisherThread();
+  void workerMain(const char* name, void (K4AROSDevice::*work)());
 #if defined(K4A_BODY_TRACKING)
   void bodyPublisherThread();
 #endif
@@ -162,7 +164,13 @@ class K4AROSDevice : public rclcpp::Node
   std::chrono::nanoseconds device_to_realtime_offset_{0};
 
   // Thread control
-  volatile bool running_;
+  std::atomic_bool running_{false};
+  bool cameras_started_{false};
+  bool imu_started_{false};
+#if defined(K4A_BODY_TRACKING)
+  bool tracker_started_{false};
+#endif
+  int capture_timeout_limit_{5};
 
   // Last capture timestamp for synchronizing playback capture and imu thread
   std::atomic_int64_t last_capture_time_usec_;

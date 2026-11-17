@@ -148,4 +148,28 @@ install(
   DESTINATION share/${PROJECT_NAME}/
 )
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(Threads REQUIRED)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+  ament_add_gtest(test_stream_control test/test_stream_control.cpp)
+  target_include_directories(test_stream_control PRIVATE include)
+  target_link_libraries(test_stream_control Threads::Threads)
+
+  # Hardware access is denied by this shim; it is never installed.
+  add_library(fake_k4a_device SHARED test/fake_k4a_device.cpp)
+  target_link_libraries(fake_k4a_device PRIVATE k4a::k4a)
+  if(TARGET k4abt::k4abt)
+    target_compile_definitions(fake_k4a_device PRIVATE K4A_BODY_TRACKING)
+    target_include_directories(fake_k4a_device PRIVATE
+      $<TARGET_PROPERTY:k4abt::k4abt,INTERFACE_INCLUDE_DIRECTORIES>)
+  endif()
+  add_test(NAME test_startup_without_device
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_startup_without_device.py
+      --driver $<TARGET_FILE:${PROJECT_NAME}_node>
+      --shim $<TARGET_FILE:fake_k4a_device>
+      --output ${CMAKE_CURRENT_BINARY_DIR}/startup_probe.json)
+endif()
+
 ament_package()

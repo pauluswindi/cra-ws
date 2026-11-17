@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from collections import OrderedDict
 import time
 
 import mujoco
@@ -11,6 +12,7 @@ from planning.algorithms.human_collision import (
     parse_human_snapshot,
     point_segment_distance,
 )
+from simulation.frame_transform import FrameTransform
 
 
 class CollisionFilter:
@@ -22,7 +24,14 @@ class CollisionFilter:
         max_joint_step=0.02,
         human_safety_margin=0.10,
         human_data_timeout=0.5,
+        human_report_cache_size=256,
     ):
+        if (
+            isinstance(human_report_cache_size, bool)
+            or not isinstance(human_report_cache_size, int)
+            or human_report_cache_size < 0
+        ):
+            raise ValueError("human_report_cache_size must be a non-negative integer")
         for name, value, minimum in (
             ("safety_margin", safety_margin, 0.0),
             ("max_joint_step", max_joint_step, 0.0),
@@ -43,6 +52,13 @@ class CollisionFilter:
         self.human_safety_margin = float(human_safety_margin)
         self.human_data_timeout = float(human_data_timeout)
         self.environment_revision = 0
+        self.last_state_validation_failure = None
+        self.last_edge_validation_failure = None
+        self.last_path_validation_failure = None
+        self.human_report_cache_size = human_report_cache_size
+        self._human_report_cache = OrderedDict()
+        self.human_report_cache_hits = 0
+        self.human_report_cache_misses = 0
 
         self.human_obstacles_enabled = False
         self.human_status = "UNKNOWN"
@@ -201,10 +217,14 @@ class CollisionFilter:
         if enabled != self.human_obstacles_enabled:
             self.human_obstacles_enabled = enabled
             self.environment_revision += 1
+            self._human_report_cache.clear()
 
     def set_human_capsules(self, snapshot):
         """Store a validated HumanSnapshot, not a raw ROS message."""
 
+        # A new observation boundary never inherits geometric results, even
+        # when a stationary human produces exactly the same capsule values.
+        self._human_report_cache.clear()
         status, capsules = parse_human_snapshot(snapshot)
 
         changed = (
@@ -246,12 +266,61 @@ class CollisionFilter:
         return point_segment_distance(point, start, end)
 
     def _human_collision_after_forward(self, include_pairs=False):
+        if not self.human_data_ready():
+            return {"status": "UNKNOWN", "clearance": None, "reason": "HUMAN_DATA_UNKNOWN"}
+        revision = self.environment_revision
+        geom_ids = sorted(self.robot_geoms)
+        key = None
+        cached = None
+        if self.human_report_cache_size:
+            # Key the raw FK geometry before preparing frame transforms. Model
+            # geom names are constant for this loaded checker. Numeric inputs
+            # use exact bytes and shapes; joint angles are never rounded.
+            key = (
+                revision, self.human_capsules, self.human_safety_margin, include_pairs,
+                FrameTransform.ROBOT_FROM_MUJOCO_BASE.tobytes(), tuple(geom_ids),
+                self.data.xpos[self.base_id].tobytes(),
+                self.data.xmat[self.base_id].tobytes(),
+                self.data.geom_xpos[geom_ids].tobytes(),
+                self.data.geom_xmat[geom_ids].tobytes(),
+                self.model.geom_rbound[geom_ids].tobytes(),
+                tuple(None if geom not in self.robot_human_boxes else tuple(
+                    (array.shape, array.tobytes())
+                    for array in (np.asarray(v, dtype=float)
+                                  for v in self.robot_human_boxes[geom])
+                ) for geom in geom_ids),
+            )
+            cached = self._human_report_cache.get(key)
+            if cached is not None:
+                self._human_report_cache.move_to_end(key)
+                self.human_report_cache_hits += 1
+        if cached is not None:
+            report = self._copy_human_report(cached)
+        else:
+            self.human_report_cache_misses += 1
+            geoms, boxes = self._human_geometry_after_forward(geom_ids)
+            report = nearest_human_collision(
+                geoms, self.human_capsules, self.human_safety_margin,
+                include_pairs=include_pairs, robot_boxes=boxes,
+            )
+        if not self.human_data_ready():
+            return {"status": "UNKNOWN", "clearance": None, "reason": "HUMAN_DATA_UNKNOWN"}
+        if self.environment_revision != revision:
+            return {"status": "UNKNOWN", "clearance": None, "reason": "ENVIRONMENT_CHANGED"}
+        if key is not None and cached is None and report["status"] in ("FAR", "NEAR"):
+            self._human_report_cache[key] = self._copy_human_report(report)
+            while len(self._human_report_cache) > self.human_report_cache_size:
+                self._human_report_cache.popitem(last=False)
+        return report
+
+    def _human_geometry_after_forward(self, geom_ids):
+        """Prepare the same sphere/mesh-box inputs only on a cache miss."""
         base_position = self.data.xpos[self.base_id]
         base_rotation = self.data.xmat[self.base_id].reshape(3, 3)
 
         # MuJoCo positions are converted to the local MuJoCo base frame here.
         # human_collision.py then converts them to the CRA robot base_link frame.
-        geoms = (
+        geoms = [
             (
                 mujoco.mj_id2name(
                     self.model, mujoco.mjtObj.mjOBJ_GEOM, geom_id
@@ -261,11 +330,11 @@ class CollisionFilter:
                 ),
                 self.model.geom_rbound[geom_id],
             )
-            for geom_id in sorted(self.robot_geoms)
-        )
+            for geom_id in geom_ids
+        ]
 
         boxes = []
-        for geom in sorted(self.robot_geoms):
+        for geom in geom_ids:
             if geom not in self.robot_human_boxes:
                 boxes.append(None)
                 continue
@@ -276,10 +345,15 @@ class CollisionFilter:
                 base_rotation.T @ rotation, half,
             ))
 
-        return nearest_human_collision(
-            geoms, self.human_capsules, self.human_safety_margin,
-            include_pairs=include_pairs, robot_boxes=boxes,
-        )
+        return geoms, boxes
+
+    @staticmethod
+    def _copy_human_report(report):
+        """Keep callers from mutating cached diagnostics or retreat pair data."""
+        copied = report.copy()
+        if "pairs" in copied:
+            copied["pairs"] = copied["pairs"].copy()
+        return copied
 
     def human_collision_report(self, joints):
         if not self.human_data_ready():
@@ -456,6 +530,7 @@ class CollisionFilter:
             self.model.geom_conaffinity[geom_id] = conaffinity
 
         self.environment_revision += 1
+        self._human_report_cache.clear()
 
         mujoco.mj_forward(self.model, self.data)
 
@@ -481,18 +556,55 @@ class CollisionFilter:
             self.model.geom_conaffinity[geom_id] = 0
 
         self.environment_revision += 1
+        self._human_report_cache.clear()
 
         mujoco.mj_forward(self.model, self.data)
 
+    @staticmethod
+    def _diagnostic_joints(joints):
+        try:
+            values = np.asarray(joints, dtype=float)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        return values.tolist() if values.shape == (5,) and np.isfinite(values).all() else None
+
+    def _state_validation_failed(self, joints, reason, **details):
+        """Retain the already computed rejection; do not run geometry again."""
+        self.last_state_validation_failure = {
+            "reason": reason, "q": self._diagnostic_joints(joints),
+            "revision": self.environment_revision, **details,
+        }
+        return False
+
+    def record_path_validation_failure(self, path, revision, check, failure,
+                                       point_index=None, edge_index=None):
+        """Describe the first rejected check in waypoint-then-edge traversal."""
+        shaped = path.ndim == 2 and path.shape[1] == 5
+        report = {
+            "check": check, "failure": failure,
+            "traversal": "WAYPOINTS_THEN_EDGES",
+            "path_points": len(path) if shaped else None,
+            "revision_before": revision, "revision_after": self.environment_revision,
+            "point_index": point_index, "edge_index": edge_index,
+        }
+        if point_index is not None:
+            report["point_q"] = self._diagnostic_joints(path[point_index])
+        if edge_index is not None:
+            report["edge_start_q"] = self._diagnostic_joints(path[edge_index])
+            report["edge_goal_q"] = self._diagnostic_joints(path[edge_index + 1])
+        self.last_path_validation_failure = report
+        return False
+
     def is_state_valid(self, joints):
+        self.last_state_validation_failure = None
         if (
             self.human_obstacles_enabled
             and not self.human_data_ready()
         ):
-            return False
+            return self._state_validation_failed(joints, "HUMAN_DATA_UNKNOWN")
 
         if not self._set_joint_configuration(joints):
-            return False
+            return self._state_validation_failed(joints, "INVALID_JOINTS")
 
         for contact in self.data.contact:
             geom1 = int(contact.geom1)
@@ -508,13 +620,22 @@ class CollisionFilter:
                 float(contact.dist)
                 <= self.safety_margin
             ):
-                return False
+                return self._state_validation_failed(
+                    joints, "MUJOCO_CONTACT", contact={
+                        "geom1": mujoco.mj_id2name(
+                            self.model, mujoco.mjtObj.mjOBJ_GEOM, geom1),
+                        "geom2": mujoco.mj_id2name(
+                            self.model, mujoco.mjtObj.mjOBJ_GEOM, geom2),
+                        "distance": float(contact.dist), "safety_margin": self.safety_margin,
+                    })
 
         if self.human_obstacles_enabled:
             report = self._human_collision_after_forward()
 
             if report["status"] != "FAR":
-                return False
+                return self._state_validation_failed(
+                    joints, "HUMAN_COLLISION" if report["status"] == "NEAR"
+                    else "HUMAN_GEOMETRY_UNKNOWN", human=report)
 
         return True
 
@@ -771,6 +892,7 @@ class CollisionFilter:
         return True
 
     def is_edge_valid(self, start, goal):
+        self.last_edge_validation_failure = None
         start = np.asarray(
             start,
             dtype=np.float64,
@@ -814,14 +936,21 @@ class CollisionFilter:
             )
 
             if not self.is_state_valid(joints):
+                self.last_edge_validation_failure = {
+                    "sample_index": index, "sample_count": steps + 1,
+                    "fraction": index / steps,
+                    "state": self.last_state_validation_failure,
+                }
                 return False
 
             if self.environment_revision != revision:
+                self.last_edge_validation_failure = {"reason": "ENVIRONMENT_CHANGED"}
                 return False
 
         return True
 
     def is_path_valid(self, joint_path):
+        self.last_path_validation_failure = None
         path = np.asarray(
             joint_path,
             dtype=np.float64,
@@ -836,19 +965,23 @@ class CollisionFilter:
 
         revision = self.environment_revision
 
-        for q in path:
+        for index, q in enumerate(path):
             if not self.is_state_valid(q):
-                return False
+                return self.record_path_validation_failure(
+                    path, revision, "WAYPOINT", self.last_state_validation_failure,
+                    point_index=index)
 
-        for start, goal in zip(
+        for index, (start, goal) in enumerate(zip(
             path[:-1],
             path[1:],
-        ):
+        )):
             if not self.is_edge_valid(
                 start,
                 goal,
             ):
-                return False
+                return self.record_path_validation_failure(
+                    path, revision, "EDGE_SAMPLE", self.last_edge_validation_failure,
+                    edge_index=index)
 
         return (
             self.environment_revision == revision

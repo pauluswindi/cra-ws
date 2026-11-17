@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
 import time
+from copy import deepcopy
 from dataclasses import dataclass
 
 import numpy as np
+
+from planning.profiling import PlanningProfiler, profiled
+from planning.path_diagnostics import execution_progress_report
+from planning.execution_progress import OrderedSegmentProgress
 
 
 @dataclass
@@ -28,8 +33,10 @@ class PlanningManager:
         human_avoidance_enabled=False,
         simulation_only_ignore_unknown=False,
         human_margin_recovery_enabled=False,
+        profiling_enabled=False,
     ):
         self.planner = path_planner
+        self.profiler = PlanningProfiler(path_planner.collision_filter, profiling_enabled)
 
         self.goal_tolerance = float(goal_tolerance)
         self.target_clearance = float(target_clearance)
@@ -48,7 +55,17 @@ class PlanningManager:
         self.human_empty_until = None
         self.human_report = {"status": "UNKNOWN", "clearance": None}
         self.last_error = None
+        self.last_path_failure = None
+        self.path_failure_sequence = 0
+        self.execution_path_id = 0
+        self.execution_progress_reason = "NO_EXECUTION"
+        self.segment_progress = None
+        self.segment_progress_path = None
         self.human_revision = None
+        self.human_observed_since_empty = False
+        self.human_validation_pending = False
+        self.human_paused_execution = False
+        self.human_path_validation_reason = "NONE"
         self.simulation_only_ignore_unknown = bool(
             simulation_only_ignore_unknown
         )
@@ -120,6 +137,7 @@ class PlanningManager:
 
         self.failed_execution_path = None
         self.last_execution_path = None
+        self.execution_next_waypoint = 1
         self.resume_after_fault = False
 
         self.recovery_blocked = False
@@ -138,6 +156,8 @@ class PlanningManager:
         checker.set_human_capsules(snapshot)
         self.human_status = snapshot.status
         self.human_reason = snapshot.reason
+        if snapshot.status == "OBSERVED":
+            self.human_observed_since_empty = True
         self.human_empty_until = None
         if snapshot.status == "EMPTY" and not snapshot.capsules:
             deadline = time.monotonic() + checker.human_data_timeout
@@ -188,6 +208,154 @@ class PlanningManager:
             self.planning_required = True
             self.recovery_blocked = False
 
+    def _fresh_empty_human_scene(self):
+        return (
+            self.human_status == "EMPTY" and self.human_empty_until is not None
+            and time.monotonic() <= self.human_empty_until
+        )
+
+    def _wait_for_human_validation(self, reason, status="HUMAN_VISION_UNKNOWN"):
+        """Keep the route while STOP cancels motion with uncertain geometry."""
+        self.human_validation_pending = True
+        self.human_path_validation_reason = reason
+        if self.human_margin_recovery_active:
+            # Margin retreats need their dedicated fresh monotonic certificate.
+            self.human_margin_waiting_for_data = True
+            self.invalidate_path()
+            return "HUMAN_RETREAT_DATA_UNKNOWN"
+        if (
+            self._stop_required() and self.last_execution_path is not None
+            and self.current_path is not None and not self.planning_required
+        ):
+            self.human_paused_execution = True
+        return status
+
+    def _advance_execution_progress(self, previous, current):
+        """Retain direct passage and collect local candidates without geometry work."""
+        self._advance_direct_waypoints(previous, current)
+        path = self.last_execution_path
+        if not self.planner.segment_progress_enabled or path is None or not self._stop_required():
+            self.segment_progress = None
+            self.segment_progress_path = None
+            return
+        if previous is None or self.segment_progress_path is not path:
+            self.segment_progress = OrderedSegmentProgress(
+                path, next_waypoint=self.execution_next_waypoint,
+                **self.planner.execution_progress_config)
+            self.segment_progress_path = path
+        if previous is None:
+            return
+        self.segment_progress.synchronize(self.execution_next_waypoint)
+        self.segment_progress.observe(previous, current)
+        reason = self.segment_progress.reason
+        if reason in ("FEEDBACK_JUMP", "INVALID_FEEDBACK", "OUTSIDE_LOCAL_CORRIDOR",
+                      "FEEDBACK_CHORD_OUTSIDE_CORRIDOR", "BACKWARD_APPROACH"):
+            self.segment_progress = OrderedSegmentProgress(
+                path, next_waypoint=self.execution_next_waypoint,
+                **self.planner.execution_progress_config)
+            self.segment_progress.reason = reason
+            self.execution_progress_reason = "SEGMENT_" + reason
+        if self.segment_progress.next_waypoint > self.execution_next_waypoint:
+            self.execution_progress_reason = "SEGMENT_CANDIDATE_PENDING_VALIDATION"
+
+    def _advance_direct_waypoints(self, previous, current):
+        """Recognize the next waypoint only, using ordered measured passage.
+
+        A nearest waypoint over the whole path could skip a future loop. The
+        short feedback chord also recognizes a corner crossed between samples,
+        within Motion's existing joint goal tolerance (not a collision margin).
+        Unknown or discontinuous feedback leaves the old cursor in place.
+        """
+        path = self.last_execution_path
+        if path is None or not self._stop_required() or previous is None:
+            self.execution_progress_reason = (
+                "NO_CONTINUOUS_FEEDBACK" if path is not None and self._stop_required()
+                else "NO_EXECUTION")
+            return
+        movement = current - previous
+        length2 = float(movement @ movement)
+        if length2 <= 1e-18:
+            self.execution_progress_reason = "STATIONARY"
+            return
+        last_fraction = 0.
+        self.execution_progress_reason = "FINAL_WAYPOINT_PENDING"
+        while self.execution_next_waypoint < len(path) - 1:
+            goal = path[self.execution_next_waypoint]
+            fraction = float((goal - previous) @ movement) / length2
+            closest = previous + np.clip(fraction, 0., 1.) * movement
+            if (
+                fraction < last_fraction or not 0. <= fraction <= 1.
+                or np.max(np.abs(goal - closest)) > self.planner.joint_goal_tolerance
+            ):
+                self.execution_progress_reason = (
+                    "OUTSIDE_FEEDBACK_CHORD" if not 0. <= fraction <= 1.
+                    else "ORDER_MISMATCH" if fraction < last_fraction
+                    else "OUTSIDE_WAYPOINT_TOLERANCE")
+                break
+            last_fraction = fraction
+            self.execution_next_waypoint += 1
+            self.execution_progress_reason = "ADVANCED"
+
+    def _candidate_next_waypoint(self):
+        if (self.segment_progress_path is self.last_execution_path
+                and self.segment_progress is not None):
+            return max(self.execution_next_waypoint, self.segment_progress.next_waypoint)
+        return self.execution_next_waypoint
+
+    def _remaining_execution_path(self, next_waypoint=None):
+        path = self.last_execution_path
+        if path is None:
+            return None
+        index = self.execution_next_waypoint if next_waypoint is None else next_waypoint
+        return np.vstack((self.current_q, path[index:]))
+
+    def _capture_path_failure(self, stage, path, source, detail, checked_next_waypoint=None):
+        """Snapshot existing check evidence before invalidation; never recheck."""
+        self.path_failure_sequence += 1
+        checker = self.planner.collision_filter
+        detail = deepcopy(detail) if isinstance(detail, dict) else {
+            "check": "UNAVAILABLE", "reason": "CHECK_RETURNED_FALSE_WITHOUT_TRACE"}
+        progress = execution_progress_report(
+            self.last_execution_path, self.current_q,
+            self.execution_next_waypoint, self.planner.joint_goal_tolerance)
+        progress["last_update_reason"] = self.execution_progress_reason
+        progress["commanded_path_id"] = self.execution_path_id
+        progress["candidate_next_waypoint"] = self._candidate_next_waypoint()
+        progress["segment_evidence_reason"] = (
+            None if self.segment_progress is None else self.segment_progress.reason)
+        progress["segment_corridor_tolerance_rad"] = (
+            self.planner.execution_progress_config["corridor_tolerance"])
+        checked_cursor = (self.execution_next_waypoint if checked_next_waypoint is None
+                          else checked_next_waypoint)
+        mapped = {}
+        if source == "remaining_execution":
+            def command_index(index):
+                return None if index == 0 else checked_cursor + index - 1
+            point = detail.get("point_index")
+            edge = detail.get("edge_index")
+            if point is not None:
+                mapped["failed_commanded_waypoint"] = command_index(point)
+            if edge is not None:
+                mapped["failed_commanded_edge"] = [command_index(edge), command_index(edge + 1)]
+                mapped["measured_to_ordered_connector"] = edge == 0
+        self.last_path_failure = {
+            "id": self.path_failure_sequence,
+            "cycle": self.profiler.cycle if self.profiler.enabled else None,
+            "stage": stage, "path_source": source,
+            "checked_next_waypoint": checked_cursor,
+            "motion": self.motion_status, "pending": self.pending_action,
+            "revision": checker.environment_revision,
+            "human_status": self.human_status, "human_reason": self.human_reason,
+            "remaining_human_ms": self.profiler.budget_ms(),
+            "input_path_points": len(path),
+            "checked_path_points": detail.get("path_points", len(path)),
+            "checked_path_start_q": path[0].tolist(),
+            "checked_path_goal_q": path[-1].tolist(),
+            "current_state_report": deepcopy(self.human_report),
+            "failure": detail, "progress": progress, **mapped,
+        }
+
+    @profiled("human_guard")
     def _human_guard(self):
         """Validate human proximity and the currently commanded path."""
 
@@ -220,19 +388,26 @@ class PlanningManager:
             })
             if self.human_margin_waiting_for_data:
                 return "HUMAN_RETREAT_DATA_UNKNOWN"
+            fresh_empty = self._fresh_empty_human_scene()
+            if fresh_empty and self.simulation_only_ignore_unknown:
+                self.human_observed_since_empty = False
+            if (
+                self.human_observed_since_empty
+                or not self.simulation_only_ignore_unknown
+            ):
+                return self._wait_for_human_validation(
+                    "DATA_EXPIRED" if self.human_status == "OBSERVED" else self.human_reason)
             # Permitted only for an isolated MuJoCo experiment.
             # Physical deployments must keep this setting disabled.
             if self.simulation_only_ignore_unknown:
                 checker.enable_human_obstacles(False)
-                self.human_revision = checker.environment_revision
                 self._retry_human_plan()
-                return None
-
-            if self.current_path is not None or self.path_sent:
-                self.invalidate_path()
-            return "HUMAN_VISION_UNKNOWN"
-
-        if self.simulation_only_ignore_unknown:
+                if not self.human_validation_pending:
+                    self.human_revision = checker.environment_revision
+                    return None
+                if not fresh_empty:
+                    return self._wait_for_human_validation(self.human_reason)
+        elif self.simulation_only_ignore_unknown:
             checker.enable_human_obstacles(True)
         self.human_margin_waiting_for_data = False
 
@@ -241,17 +416,33 @@ class PlanningManager:
                 "status": "UNKNOWN", "clearance": None,
                 "reason": "WAITING_FOR_FEEDBACK",
             })
-            if self.current_path is not None or self.path_sent:
+            if (
+                not self.human_paused_execution and not self.human_validation_pending
+                and (self.current_path is not None or self.path_sent)
+            ):
                 self.invalidate_path()
             return "WAITING_FOR_FEEDBACK"
 
         try:
-            report = checker.human_collision_report(self.current_q)
+            report = self.profiler.call(
+                "current_clearance", checker.human_collision_report, self.current_q)
         except Exception as error:
             self._record_error("human_collision_report", error)
             report = {"status": "UNKNOWN", "reason": "COLLISION_CHECK_ERROR"}
 
         self._set_human_report(report)
+
+        if checker.human_obstacles_enabled and not checker.human_data_ready():
+            return self._wait_for_human_validation("DATA_EXPIRED")
+
+        if report["status"] == "UNKNOWN":
+            # Fresh EMPTY uses the configured simulation policy, but must still
+            # validate the retained route against the current static scene.
+            if not checker.human_obstacles_enabled:
+                report = {"status": "FAR"}
+            elif report.get("reason") != "INVALID_JOINTS":
+                return self._wait_for_human_validation(
+                    report.get("reason", "COLLISION_CHECK_ERROR"), "HUMAN_VALIDATION_ERROR")
 
         if report["status"] == "UNKNOWN":
             if self.current_path is not None or self.path_sent:
@@ -264,17 +455,31 @@ class PlanningManager:
         if report["status"] == "NEAR":
             # NEAR is itself an invalid start under the existing human margin.
             # Only the dedicated margin certificate can authorize a retreat.
+            self.human_path_validation_reason = "CURRENT_CLEARANCE"
             self.invalidate_path()
             self._remember_human_block()
             return "HUMAN_TOO_CLOSE"
 
         revision = checker.environment_revision
         self._retry_human_plan()
-        if revision == self.human_revision:
+        active = self._stop_required()
+        candidate_cursor = (self._candidate_next_waypoint()
+                            if active or self.human_paused_execution
+                            else self.execution_next_waypoint)
+        progress_pending = candidate_cursor > self.execution_next_waypoint
+        if (revision == self.human_revision and not self.human_validation_pending
+                and not progress_pending):
             return None
 
-        active = self._stop_required()
-        path = self.last_execution_path if active else self.current_path
+        path_source = (
+            "remaining_execution" if active or self.human_paused_execution else "planned_path")
+        path = (
+            self._remaining_execution_path(candidate_cursor)
+            if active or self.human_paused_execution else self.current_path
+        )
+        if self.path_sent and self.motion_status == "COMPLETED":
+            path = self.current_q[None, :]
+            path_source = "completed_measured_state"
 
         if path is None:
             # Replan a previously blocked target when human geometry changes.
@@ -284,27 +489,60 @@ class PlanningManager:
                 return "HUMAN_PATH_BLOCKED"
 
             self.human_revision = revision
+            self.human_validation_pending = False
+            self.human_path_validation_reason = "NO_PATH"
             return None
 
         try:
+            checker.last_path_validation_failure = None
+            state_valid = checker.is_state_valid(self.current_q)
             valid = (
-                checker.is_state_valid(self.current_q)
-                and checker.is_path_valid(path)
+                state_valid
+                and self.profiler.call("remaining_path_validation", checker.is_path_valid, path)
                 and checker.environment_revision == revision
-                and checker.human_data_ready()
+                and self.planner.human_data_ready()
             )
         except Exception as error:
             self._record_error("human path validation", error)
-            valid = False
+            return self._wait_for_human_validation("COLLISION_CHECK_ERROR",
+                                                   "HUMAN_VALIDATION_ERROR")
+
+        if checker.human_obstacles_enabled and not checker.human_data_ready():
+            return self._wait_for_human_validation("DATA_EXPIRED")
+        if checker.environment_revision != revision:
+            return self._wait_for_human_validation("ENVIRONMENT_CHANGED",
+                                                   "HUMAN_VALIDATION_PENDING")
 
         if not valid:
+            self._capture_path_failure(
+                "human_guard", path, path_source,
+                checker.last_path_validation_failure if state_valid else {
+                    "check": "CURRENT_STATE", "point_index": 0,
+                    "failure": checker.last_state_validation_failure},
+                checked_next_waypoint=candidate_cursor)
+            self.human_path_validation_reason = "PATH_COLLISION"
+            self.human_validation_pending = False
             self.invalidate_path()
             self._remember_human_block()
             return "HUMAN_PATH_BLOCKED"
 
+        if progress_pending:
+            if not self.feedback_ready() or not self.obstacle_data_ready():
+                return ("WAITING_FOR_FEEDBACK" if not self.feedback_ready()
+                        else "WAITING_FOR_OBSTACLES")
+            self.execution_next_waypoint = candidate_cursor
+            self.execution_progress_reason = "SEGMENT_PROGRESS_VALIDATED"
+        if self.human_paused_execution:
+            self.current_path = path.copy()
+            self.planning_required = False
+            self.path_sent = False
+            self.human_paused_execution = False
         self.human_revision = revision
+        self.human_validation_pending = False
+        self.human_path_validation_reason = "CLEAR"
         return None
 
+    @profiled("retreat_preparation")
     def _prepare_human_margin_retreat(self, now):
         """Plan only after an owned STOP and a fresh measured configuration."""
         if (
@@ -340,7 +578,8 @@ class PlanningManager:
         self.human_margin_attempt_q = self.current_q.copy()
         self.human_margin_attempt_time = now
         try:
-            path = self.planner.find_human_margin_retreat(self.current_q.copy())
+            path = self.profiler.call(
+                "retreat_search", self.planner.find_human_margin_retreat, self.current_q.copy())
             if path is None:
                 self.human_margin_block_reason = self.planner.last_human_retreat_failure
                 return False
@@ -353,7 +592,9 @@ class PlanningManager:
                 or np.max(np.abs(path[-1] - path[0])) > min(
                     self.planner.max_joint_delta, self.planner.max_segment_delta
                 )
-                or not checker.is_human_margin_transition_valid(path[0], path[1])
+                or not self.profiler.call(
+                    "retreat_candidate_validation",
+                    checker.is_human_margin_transition_valid, path[0], path[1])
                 or initial is None or endpoint is None
                 or (
                     endpoint["status"] == "NEAR"
@@ -380,6 +621,7 @@ class PlanningManager:
         self.human_replan_blocked = False
         return True
 
+    @profiled("retreat_guard")
     def _human_margin_guard(self):
         """Revalidate a straight retreat against each new observed snapshot."""
         checker = self.planner.collision_filter
@@ -426,7 +668,8 @@ class PlanningManager:
             if (
                 self.current_path is None
                 or checker.human_margin_state(self.current_path[-1]) is None
-                or not checker.is_human_margin_transition_valid(
+                or not self.profiler.call(
+                    "retreat_guard_validation", checker.is_human_margin_transition_valid,
                     self.current_q, self.current_path[-1]
                 )
             ):
@@ -458,6 +701,8 @@ class PlanningManager:
             if elapsed > 0:
                 velocities = (joints - self.current_q) / elapsed
 
+        previous = self.current_q if self.feedback_ready() else None
+        self._advance_execution_progress(previous, joints)
         self.current_q = joints.copy()
         self.current_velocity = None if velocities is None else velocities.copy()
         self.feedback_time = now
@@ -647,6 +892,7 @@ class PlanningManager:
             self.recovery_pending = False
 
     def update_motion_status(self, status):
+        self.profiler.command_response(self.pending_action, status)
         self.motion_status = status
 
         if status in (
@@ -986,6 +1232,8 @@ class PlanningManager:
         return False
 
     def invalidate_path(self):
+        self.segment_progress = None
+        self.segment_progress_path = None
         self.goal_q = None
         self.current_path = None
         self.planning_required = True
@@ -993,6 +1241,7 @@ class PlanningManager:
         self.human_margin_recovery_active = False
         self.human_margin_previous_q = None
         self.safe_position_active = False
+        self.human_paused_execution = False
 
     def feedback_ready(self):
         return (
@@ -1023,13 +1272,19 @@ class PlanningManager:
     def _send(self, action, status, path=None):
         self.pending_action = action
         self.pending_since = time.monotonic()
+        self.profiler.command_sent(action, self.pending_since)
 
         if action == "STOP":
             self.stop_owned = True
 
         elif action == "EXECUTE":
+            self.segment_progress = None
+            self.segment_progress_path = None
+            self.execution_path_id += 1
+            self.execution_progress_reason = "COMMAND_SENT"
             self.failure_reason = "NONE"
             self.path_sent = True
+            self.execution_next_waypoint = 1
 
         return self._decision(
             action=action,
@@ -1044,6 +1299,7 @@ class PlanningManager:
             or self.motion_status == "EXECUTING"
         )
 
+    @profiled("manager_step", new_cycle=True)
     def step(self):
         now = time.monotonic()
         self.last_error = None
@@ -1191,7 +1447,8 @@ class PlanningManager:
             self.planning_required = False
 
             try:
-                goal = self.planner.select_goal(
+                goal = self.profiler.call(
+                    "goal_selection", self.planner.select_goal,
                     self.target_base,
                     self.goal_tolerance,
                     self.target_clearance,
@@ -1206,9 +1463,11 @@ class PlanningManager:
                         )
                     )
 
-                planned = self.planner.plan(self.current_q.copy(), goal)
+                planned = self.profiler.call(
+                    "path_search", self.planner.plan, self.current_q.copy(), goal)
                 if not planned and self.planner.last_plan_failure == "NO_GRAPH_PATH":
-                    alternative = self.planner.find_alternative_goal_path(
+                    alternative = self.profiler.call(
+                        "alternative_goal_search", self.planner.find_alternative_goal_path,
                         self.current_q.copy(), self.target_base, goal,
                         self.goal_tolerance, self.target_clearance,
                     )
@@ -1327,6 +1586,12 @@ class PlanningManager:
             self.invalidate_path()
             return self._decision(status="REPLANNING")
 
+        if np.max(np.abs(self.current_path - self.current_q)) <= 1e-9:
+            # A STOP for expired data may arrive at the goal before COMPLETED.
+            # Keep STOP owned; a zero-length trajectory needs no release.
+            return self._decision(status="GOAL_REACHED")
+
+        self.planner.collision_filter.last_path_validation_failure = None
         try:
             path = self.current_path.copy()
             path[0] = self.current_q.copy()
@@ -1336,7 +1601,9 @@ class PlanningManager:
                 if (
                     path.shape != (2, 5)
                     or checker.human_margin_state(path[-1]) is None
-                    or not checker.is_human_margin_transition_valid(path[0], path[-1])
+                    or not self.profiler.call(
+                        "execution_prepare_retreat", checker.is_human_margin_transition_valid,
+                        path[0], path[-1])
                 ):
                     raise ValueError("Human margin retreat has no current safety certificate")
                 execution_path = path
@@ -1364,11 +1631,20 @@ class PlanningManager:
 
             else:
                 execution_path = (
-                    self.planner.prepare_execution_path(path)
+                    self.profiler.call(
+                        "execution_prepare_path", self.planner.prepare_execution_path, path)
                 )
 
         except Exception as error:
             self._record_error("execution path preparation", error)
+            checker = self.planner.collision_filter
+            if checker.human_obstacles_enabled and not checker.human_data_ready():
+                return self._decision(status=self._wait_for_human_validation("DATA_EXPIRED"))
+            if checker.last_path_validation_failure is not None:
+                self._capture_path_failure(
+                    "execution_preparation", path, "prepared_execution_path",
+                    checker.last_path_validation_failure)
+            self.human_path_validation_reason = "PREPARATION_ERROR"
             if self.human_margin_recovery_active:
                 self.human_margin_waiting_for_data = True
                 self.human_margin_recovery_active = False
@@ -1384,12 +1660,14 @@ class PlanningManager:
 
         if self.human_avoidance_enabled:
             checker = self.planner.collision_filter
+            checker.last_path_validation_failure = None
             try:
                 if self.human_margin_recovery_active:
                     safe = (
                         checker.human_data_ready()
                         and checker.human_margin_state(execution_path[-1]) is not None
-                        and checker.is_human_margin_transition_valid(
+                        and self.profiler.call(
+                            "execution_final_retreat", checker.is_human_margin_transition_valid,
                             execution_path[0], execution_path[-1]
                         )
                     )
@@ -1397,14 +1675,25 @@ class PlanningManager:
                     safe = not (
                         not checker.human_data_ready()
                         and not self.simulation_only_ignore_unknown
-                    ) and checker.is_path_valid(execution_path)
+                    ) and self.profiler.call(
+                        "execution_final_path", checker.is_path_valid, execution_path)
             except Exception as error:
                 self._record_error("execution path validation", error)
+                if not self.human_margin_recovery_active:
+                    return self._decision(status=self._wait_for_human_validation(
+                        "COLLISION_CHECK_ERROR", "HUMAN_VALIDATION_ERROR"))
                 safe = False
 
             if not safe:
+                if checker.human_obstacles_enabled and not checker.human_data_ready():
+                    return self._decision(status=self._wait_for_human_validation("DATA_EXPIRED"))
+                if not self.human_margin_recovery_active:
+                    self._capture_path_failure(
+                        "execution_final_validation", execution_path, "prepared_execution_path",
+                        checker.last_path_validation_failure)
                 if self.human_margin_recovery_active:
                     self.human_margin_waiting_for_data = True
+                self.human_path_validation_reason = "PATH_COLLISION"
                 self.invalidate_path()
                 self._remember_human_block()
 

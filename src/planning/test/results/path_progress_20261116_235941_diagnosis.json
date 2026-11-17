@@ -1,0 +1,1361 @@
+{
+  "date_of_analysis": "2026-11-17",
+  "timezone": "Asia/Jakarta",
+  "scope": "Read-only finalized nine-topic bag, live logs and offline geometry/progress replay; no motion commands or runtime changes.",
+  "log_sources": {
+    "/home/lvinz/.ros/log/python3_3186_1794848328050.log": "9330273fda45a58f407c9093ba5dc96699c58f1e64d2576611aa3296b98fbd61",
+    "/home/lvinz/.ros/log/component_container_3184_1794848327718.log": "27398373628c1b0bd792de0c869b53864c1e5b36e8f81aa0951bc31f3533488f"
+  },
+  "recording": {
+    "bag": "/tmp/cra_path_diag_1s_20261116_235941",
+    "file_sha256": {
+      "cra_path_diag_1s_20261116_235941_0.db3": "476ecb15aebbec3553a8de6f6205c1ed64959395cac0fd0a7b0c4162f9d2816e"
+    },
+    "start_ns": 1794848382626883895,
+    "end_ns": 1794848410406954309,
+    "topic_counts": {
+      "/joint_states": 2004,
+      "/simulation/obstacles": 2004,
+      "/simulation/target_marker": 2003,
+      "/planning/joint_path_preview": 10,
+      "/planning/status": 23,
+      "/motion/execution_status": 9,
+      "/motion/failure_reason": 1,
+      "/vision/human/geometry": 193,
+      "/motion/joint_path": 2
+    },
+    "human_counts": {
+      "OBSERVED": 193
+    },
+    "trajectory_timing_note": "All recorded time_from_start values are zero; Motion computes timing from joint limits/speed. Use receipt and acceptance logs for elapsed comparisons, not message point timestamps."
+  },
+  "recording_duration_s": 27.780070414,
+  "profile_scope": {
+    "rows": 140,
+    "cycle_range": [
+      1,
+      1881
+    ],
+    "span_s": 379.7897491455078,
+    "actions": {
+      "NONE": 124,
+      "EXECUTE": 6,
+      "STOP": 5,
+      "RELEASE": 5
+    },
+    "statuses": {
+      "PATH_READY": 10,
+      "TRAJECTORY_SENT": 8,
+      "EXECUTING": 29,
+      "COMPLETED": 67,
+      "HUMAN_PATH_BLOCKED": 6,
+      "WAITING_FOR_RELEASE": 7,
+      "HUMAN_TOO_CLOSE": 1,
+      "GOAL_UNREACHABLE": 1,
+      "HUMAN_VISION_UNKNOWN": 11
+    }
+  },
+  "failure_summary": [
+    {
+      "id": 1,
+      "cycle": 248,
+      "log_line": 209,
+      "local_time": "2026-11-16T23:59:38.455650+07:00",
+      "path_source": "remaining_execution",
+      "motion": "EXECUTING",
+      "commanded_path_id": 3,
+      "ordered_next_waypoint": 2,
+      "nearest_segment_index": 1,
+      "failed_commanded_waypoint": null,
+      "failed_commanded_edge": [
+        5,
+        6
+      ],
+      "failed_local_waypoint": null,
+      "failed_local_edge": 4,
+      "connector_to_old_cursor": false,
+      "clearance_m": 0.09992174933537455,
+      "robot_geom": "link2_visual",
+      "body_id": 1,
+      "segment_id": 6,
+      "remaining_human_ms": 606.649
+    },
+    {
+      "id": 2,
+      "cycle": 262,
+      "log_line": 238,
+      "local_time": "2026-11-16T23:59:41.794636+07:00",
+      "path_source": "remaining_execution",
+      "motion": "EXECUTING",
+      "commanded_path_id": 4,
+      "ordered_next_waypoint": 1,
+      "nearest_segment_index": 0,
+      "failed_commanded_waypoint": 4,
+      "failed_commanded_edge": null,
+      "failed_local_waypoint": 4,
+      "failed_local_edge": null,
+      "connector_to_old_cursor": false,
+      "clearance_m": 0.09693653874264695,
+      "robot_geom": "link5_visual",
+      "body_id": 1,
+      "segment_id": 6,
+      "remaining_human_ms": 701.976
+    },
+    {
+      "id": 3,
+      "cycle": 271,
+      "log_line": 262,
+      "local_time": "2026-11-16T23:59:45.185032+07:00",
+      "path_source": "planned_path",
+      "motion": "STOPPED",
+      "commanded_path_id": 4,
+      "ordered_next_waypoint": 1,
+      "nearest_segment_index": 0,
+      "failed_commanded_waypoint": null,
+      "failed_commanded_edge": null,
+      "failed_local_waypoint": 10,
+      "failed_local_edge": null,
+      "connector_to_old_cursor": false,
+      "clearance_m": 0.09686605074368283,
+      "robot_geom": "link5_visual",
+      "body_id": 1,
+      "segment_id": 6,
+      "remaining_human_ms": 577.026
+    },
+    {
+      "id": 4,
+      "cycle": 275,
+      "log_line": 274,
+      "local_time": "2026-11-16T23:59:46.205653+07:00",
+      "path_source": "planned_path",
+      "motion": "STOPPED",
+      "commanded_path_id": 4,
+      "ordered_next_waypoint": 1,
+      "nearest_segment_index": 0,
+      "failed_commanded_waypoint": null,
+      "failed_commanded_edge": null,
+      "failed_local_waypoint": 12,
+      "failed_local_edge": null,
+      "connector_to_old_cursor": false,
+      "clearance_m": 0.09946768361790576,
+      "robot_geom": "link2_visual",
+      "body_id": 1,
+      "segment_id": 6,
+      "remaining_human_ms": 490.416
+    },
+    {
+      "id": 5,
+      "cycle": 280,
+      "log_line": 287,
+      "local_time": "2026-11-16T23:59:47.564496+07:00",
+      "path_source": "planned_path",
+      "motion": "STOPPED",
+      "commanded_path_id": 4,
+      "ordered_next_waypoint": 1,
+      "nearest_segment_index": 0,
+      "failed_commanded_waypoint": null,
+      "failed_commanded_edge": null,
+      "failed_local_waypoint": 2,
+      "failed_local_edge": null,
+      "connector_to_old_cursor": false,
+      "clearance_m": 0.09294633197871693,
+      "robot_geom": "link3_visual",
+      "body_id": 1,
+      "segment_id": 6,
+      "remaining_human_ms": 564.37
+    },
+    {
+      "id": 6,
+      "cycle": 375,
+      "log_line": 341,
+      "local_time": "2026-11-17T00:00:07.590652+07:00",
+      "path_source": "remaining_execution",
+      "motion": "EXECUTING",
+      "commanded_path_id": 5,
+      "ordered_next_waypoint": 5,
+      "nearest_segment_index": 12,
+      "failed_commanded_waypoint": null,
+      "failed_commanded_edge": [
+        null,
+        5
+      ],
+      "failed_local_waypoint": null,
+      "failed_local_edge": 0,
+      "connector_to_old_cursor": true,
+      "clearance_m": 0.09985260246006741,
+      "robot_geom": "link5_visual",
+      "body_id": 1,
+      "segment_id": 6,
+      "remaining_human_ms": 737.717
+    }
+  ],
+  "failure_events": [
+    {
+      "id": 1,
+      "cycle": 248,
+      "stage": "human_guard",
+      "path_source": "remaining_execution",
+      "motion": "EXECUTING",
+      "pending": null,
+      "revision": 38,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 606.649,
+      "input_path_points": 8,
+      "checked_path_points": 8,
+      "checked_path_start_q": [
+        2.3006355073841935,
+        -1.5928296910565658,
+        2.15351141372678,
+        -0.2312159129337411,
+        0.759755603664468
+      ],
+      "checked_path_goal_q": [
+        0.08347058296203613,
+        -1.187291145324707,
+        2.1032681465148926,
+        1.0600529909133911,
+        1.2562031745910645
+      ],
+      "current_state_report": {
+        "clearance": 0.10593902080850055,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.34430856643409324,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.07490236578015284,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.07023479493659586,
+        "box_clearance": 0.10593902080850055,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 38,
+        "joints": [
+          2.3006355073841935,
+          -1.5928296910565658,
+          2.15351141372678,
+          -0.2312159129337411,
+          0.759755603664468
+        ]
+      },
+      "failure": {
+        "check": "EDGE_SAMPLE",
+        "failure": {
+          "sample_index": 16,
+          "sample_count": 29,
+          "fraction": 0.5714285714285714,
+          "state": {
+            "reason": "HUMAN_COLLISION",
+            "q": [
+              0.6459966557366508,
+              -1.7509824207850866,
+              2.1435956273760115,
+              0.9361475535801479,
+              1.1601955209459578
+            ],
+            "revision": 38,
+            "human": {
+              "clearance": 0.09992174933537455,
+              "robot_geom": "link2_visual",
+              "body_id": 1,
+              "segment_id": 6,
+              "center_distance": 0.3537650458366999,
+              "robot_radius": 0.19917140571734454,
+              "human_radius": 0.07490236578015284,
+              "safety_margin": 0.1,
+              "geometry_model": "SPHERE_AND_MESH_BOX",
+              "sphere_clearance": 0.07969127433920249,
+              "box_clearance": 0.09992174933537455,
+              "status": "NEAR"
+            }
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 8,
+        "revision_before": 38,
+        "revision_after": 38,
+        "point_index": null,
+        "edge_index": 4,
+        "edge_start_q": [
+          0.9653885364532471,
+          -1.6567845344543457,
+          2.0794568061828613,
+          0.8818726539611816,
+          1.0303189754486084
+        ],
+        "edge_goal_q": [
+          0.4064527451992035,
+          -1.821630835533142,
+          2.191699743270874,
+          0.9768537282943726,
+          1.2576029300689697
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 2,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 9,
+        "current_q": [
+          2.3006355073841935,
+          -1.5928296910565658,
+          2.15351141372678,
+          -0.2312159129337411,
+          0.759755603664468
+        ],
+        "ordered_next_q": [
+          1.9423469305038452,
+          -1.853438138961792,
+          2.298039436340332,
+          0.14433416724205017,
+          0.38246050477027893
+        ],
+        "ordered_next_max_error_rad": 0.3772950988941891,
+        "nearest_waypoint_index": 1,
+        "nearest_waypoint_l2_error_rad": 0.19790372306782036,
+        "nearest_segment_index": 1,
+        "nearest_segment_fraction": 0.21833914202269655,
+        "nearest_segment_l2_error_rad": 0.010919663851534728,
+        "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "commanded_path_id": 3
+      },
+      "failed_commanded_edge": [
+        5,
+        6
+      ],
+      "measured_to_ordered_connector": false,
+      "log_line": 209,
+      "time_s": 1794848378.4556499
+    },
+    {
+      "id": 2,
+      "cycle": 262,
+      "stage": "human_guard",
+      "path_source": "remaining_execution",
+      "motion": "EXECUTING",
+      "pending": null,
+      "revision": 46,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 701.976,
+      "input_path_points": 13,
+      "checked_path_points": 13,
+      "checked_path_start_q": [
+        2.288609725683907,
+        -1.6174614532680396,
+        2.1860598400174958,
+        -0.1701769421884513,
+        0.7209401371619738
+      ],
+      "checked_path_goal_q": [
+        -0.0011211364762857556,
+        -1.0626626014709473,
+        1.7506848573684692,
+        -0.2946089208126068,
+        -0.5698760151863098
+      ],
+      "current_state_report": {
+        "clearance": 0.13291040609807625,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.265892209054726,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.05538460593934334,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.011336197398038109,
+        "box_clearance": 0.13291040609807625,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 46,
+        "joints": [
+          2.288609725683907,
+          -1.6174614532680396,
+          2.1860598400174958,
+          -0.1701769421884513,
+          0.7209401371619738
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.7898530960083008,
+            -2.3476979732513428,
+            2.5894501209259033,
+            0.11957771331071854,
+            0.03065834380686283
+          ],
+          "revision": 46,
+          "human": {
+            "clearance": 0.09693653874264695,
+            "robot_geom": "link5_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.20957205578805368,
+            "robot_radius": 0.06770139687365663,
+            "human_radius": 0.05538460593934334,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.0864860529750537,
+            "box_clearance": 0.09693653874264695,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 13,
+        "revision_before": 46,
+        "revision_after": 46,
+        "point_index": 4,
+        "edge_index": null,
+        "point_q": [
+          1.7898530960083008,
+          -2.3476979732513428,
+          2.5894501209259033,
+          0.11957771331071854,
+          0.03065834380686283
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 1,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 13,
+        "current_q": [
+          2.288609725683907,
+          -1.6174614532680396,
+          2.1860598400174958,
+          -0.1701769421884513,
+          0.7209401371619738
+        ],
+        "ordered_next_q": [
+          2.6776609420776367,
+          -1.6509093046188354,
+          2.524751663208008,
+          0.23248426616191864,
+          0.7236304879188538
+        ],
+        "ordered_next_max_error_rad": 0.40266120835036995,
+        "nearest_waypoint_index": 0,
+        "nearest_waypoint_l2_error_rad": 0.037113446723682116,
+        "nearest_segment_index": 0,
+        "nearest_segment_fraction": 0.05331629804719752,
+        "nearest_segment_l2_error_rad": 0.003959675754644593,
+        "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "commanded_path_id": 4
+      },
+      "failed_commanded_waypoint": 4,
+      "log_line": 238,
+      "time_s": 1794848381.7946365
+    },
+    {
+      "id": 3,
+      "cycle": 271,
+      "stage": "human_guard",
+      "path_source": "planned_path",
+      "motion": "STOPPED",
+      "pending": null,
+      "revision": 54,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 577.026,
+      "input_path_points": 14,
+      "checked_path_points": 14,
+      "checked_path_start_q": [
+        2.3063325678687554,
+        -1.6201884540425484,
+        2.2007166161151397,
+        -0.15410461724022564,
+        0.7210333250062442
+      ],
+      "checked_path_goal_q": [
+        0.08347058296203613,
+        -1.187291145324707,
+        2.1032681465148926,
+        1.0600529909133911,
+        1.2562031745910645
+      ],
+      "current_state_report": {
+        "clearance": 0.1309468987338543,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.2745337191048189,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.05373020069375238,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.021632112693721964,
+        "box_clearance": 0.1309468987338543,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 54,
+        "joints": [
+          2.3063325680603977,
+          -1.6201884548677816,
+          2.20071661563716,
+          -0.1541046172438201,
+          0.7210333250123779
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            0.41147634387016296,
+            -2.1837897300720215,
+            2.3914570808410645,
+            1.4745861291885376,
+            1.3578767776489258
+          ],
+          "revision": 54,
+          "human": {
+            "clearance": 0.09686605074368283,
+            "robot_geom": "link5_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.19920028100964615,
+            "robot_radius": 0.06770139687365663,
+            "human_radius": 0.05373020069375238,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.07776868344223715,
+            "box_clearance": 0.09686605074368283,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 14,
+        "revision_before": 54,
+        "revision_after": 54,
+        "point_index": 10,
+        "edge_index": null,
+        "point_q": [
+          0.41147634387016296,
+          -2.1837897300720215,
+          2.3914570808410645,
+          1.4745861291885376,
+          1.3578767776489258
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 1,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 13,
+        "current_q": [
+          2.3063325680603977,
+          -1.6201884548677816,
+          2.20071661563716,
+          -0.1541046172438201,
+          0.7210333250123779
+        ],
+        "ordered_next_q": [
+          2.6776609420776367,
+          -1.6509093046188354,
+          2.524751663208008,
+          0.23248426616191864,
+          0.7236304879188538
+        ],
+        "ordered_next_max_error_rad": 0.3865888834057387,
+        "nearest_waypoint_index": 0,
+        "nearest_waypoint_l2_error_rad": 0.06523797224214622,
+        "nearest_segment_index": 0,
+        "nearest_segment_fraction": 0.09394836963682535,
+        "nearest_segment_l2_error_rad": 0.005277766233613954,
+        "last_update_reason": "NO_EXECUTION",
+        "commanded_path_id": 4
+      },
+      "log_line": 262,
+      "time_s": 1794848385.1850317
+    },
+    {
+      "id": 4,
+      "cycle": 275,
+      "stage": "human_guard",
+      "path_source": "planned_path",
+      "motion": "STOPPED",
+      "pending": null,
+      "revision": 57,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 490.416,
+      "input_path_points": 13,
+      "checked_path_points": 13,
+      "checked_path_start_q": [
+        2.3063325680623317,
+        -1.6201884548475065,
+        2.200716615639195,
+        -0.1541046172437872,
+        0.7210333250122996
+      ],
+      "checked_path_goal_q": [
+        0.08347058296203613,
+        -1.187291145324707,
+        2.1032681465148926,
+        1.0600529909133911,
+        1.2562031745910645
+      ],
+      "current_state_report": {
+        "clearance": 0.12171760413913293,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.27238555235888556,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.052603628746332724,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.020610517895208298,
+        "box_clearance": 0.12171760413913293,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 57,
+        "joints": [
+          2.3063325680607645,
+          -1.62018845481635,
+          2.200716615648963,
+          -0.15410461724369864,
+          0.7210333250121287
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            0.08347058296203613,
+            -1.187291145324707,
+            2.1032681465148926,
+            1.0600529909133911,
+            1.2562031745910645
+          ],
+          "revision": 57,
+          "human": {
+            "clearance": 0.09946768361790576,
+            "robot_geom": "link2_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.235772519678426,
+            "robot_radius": 0.19917140571734454,
+            "human_radius": 0.052603628746332724,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": -0.01600251478525127,
+            "box_clearance": 0.09946768361790576,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 13,
+        "revision_before": 57,
+        "revision_after": 57,
+        "point_index": 12,
+        "edge_index": null,
+        "point_q": [
+          0.08347058296203613,
+          -1.187291145324707,
+          2.1032681465148926,
+          1.0600529909133911,
+          1.2562031745910645
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 1,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 13,
+        "current_q": [
+          2.3063325680607645,
+          -1.62018845481635,
+          2.200716615648963,
+          -0.15410461724369864,
+          0.7210333250121287
+        ],
+        "ordered_next_q": [
+          2.6776609420776367,
+          -1.6509093046188354,
+          2.524751663208008,
+          0.23248426616191864,
+          0.7236304879188538
+        ],
+        "ordered_next_max_error_rad": 0.38658888340561726,
+        "nearest_waypoint_index": 0,
+        "nearest_waypoint_l2_error_rad": 0.06523797224353337,
+        "nearest_segment_index": 0,
+        "nearest_segment_fraction": 0.09394836964208085,
+        "nearest_segment_l2_error_rad": 0.005277766205945183,
+        "last_update_reason": "NO_EXECUTION",
+        "commanded_path_id": 4
+      },
+      "log_line": 274,
+      "time_s": 1794848386.2056532
+    },
+    {
+      "id": 5,
+      "cycle": 280,
+      "stage": "human_guard",
+      "path_source": "planned_path",
+      "motion": "STOPPED",
+      "pending": "RELEASE",
+      "revision": 61,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 564.37,
+      "input_path_points": 9,
+      "checked_path_points": 9,
+      "checked_path_start_q": [
+        2.306332568060735,
+        -1.620188454816118,
+        2.2007166156490467,
+        -0.15410461724369773,
+        0.721033325012128
+      ],
+      "checked_path_goal_q": [
+        -0.1009974554181099,
+        -1.0379782915115356,
+        2.177391767501831,
+        1.3321603536605835,
+        1.2331383228302002
+      ],
+      "current_state_report": {
+        "clearance": 0.13133419004232577,
+        "robot_geom": "link2_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.2731921155910076,
+        "robot_radius": 0.19917140571734454,
+        "human_radius": 0.05140632987031427,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.022614380003348776,
+        "box_clearance": 0.13133419004232577,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 61,
+        "joints": [
+          2.306332568060735,
+          -1.6201884548161092,
+          2.2007166156490467,
+          -0.15410461724369773,
+          0.721033325012128
+        ]
+      },
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.6361918449401855,
+            -1.9302033185958862,
+            2.281043767929077,
+            0.4134029150009155,
+            0.9172882437705994
+          ],
+          "revision": 61,
+          "human": {
+            "clearance": 0.09294633197871693,
+            "robot_geom": "link3_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.29865141287788854,
+            "robot_radius": 0.16226254521185388,
+            "human_radius": 0.05140632987031427,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.0849825377957204,
+            "box_clearance": 0.09294633197871693,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 9,
+        "revision_before": 61,
+        "revision_after": 61,
+        "point_index": 2,
+        "edge_index": null,
+        "point_q": [
+          1.6361918449401855,
+          -1.9302033185958862,
+          2.281043767929077,
+          0.4134029150009155,
+          0.9172882437705994
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 1,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 13,
+        "current_q": [
+          2.306332568060735,
+          -1.6201884548161092,
+          2.2007166156490467,
+          -0.15410461724369773,
+          0.721033325012128
+        ],
+        "ordered_next_q": [
+          2.6776609420776367,
+          -1.6509093046188354,
+          2.524751663208008,
+          0.23248426616191864,
+          0.7236304879188538
+        ],
+        "ordered_next_max_error_rad": 0.38658888340561637,
+        "nearest_waypoint_index": 0,
+        "nearest_waypoint_l2_error_rad": 0.06523797224353348,
+        "nearest_segment_index": 0,
+        "nearest_segment_fraction": 0.09394836964210018,
+        "nearest_segment_l2_error_rad": 0.00527776620578152,
+        "last_update_reason": "NO_EXECUTION",
+        "commanded_path_id": 4
+      },
+      "log_line": 287,
+      "time_s": 1794848387.5644956
+    },
+    {
+      "id": 6,
+      "cycle": 375,
+      "stage": "human_guard",
+      "path_source": "remaining_execution",
+      "motion": "EXECUTING",
+      "pending": null,
+      "revision": 145,
+      "human_status": "OBSERVED",
+      "human_reason": "CAPSULES_PRESENT",
+      "remaining_human_ms": 737.717,
+      "input_path_points": 10,
+      "checked_path_points": 10,
+      "checked_path_start_q": [
+        0.039034214793258845,
+        -1.4043194016276992,
+        2.0602511147703684,
+        1.200935971315337,
+        1.2647636818110546
+      ],
+      "checked_path_goal_q": [
+        0.08347058296203613,
+        -1.187291145324707,
+        2.1032681465148926,
+        1.0600529909133911,
+        1.2562031745910645
+      ],
+      "current_state_report": {
+        "clearance": 0.16757389361417474,
+        "robot_geom": "link5_visual",
+        "body_id": 1,
+        "segment_id": 6,
+        "center_distance": 0.28149267181972154,
+        "robot_radius": 0.06770139687365663,
+        "human_radius": 0.06399649116187006,
+        "safety_margin": 0.1,
+        "geometry_model": "SPHERE_AND_MESH_BOX",
+        "sphere_clearance": 0.14979478378419486,
+        "box_clearance": 0.16757389361417474,
+        "status": "FAR",
+        "detection_status": "OBSERVED",
+        "revision": 145,
+        "joints": [
+          0.039034214793258845,
+          -1.4043194016276992,
+          2.0602511147703684,
+          1.200935971315337,
+          1.2647636818110546
+        ]
+      },
+      "failure": {
+        "check": "EDGE_SAMPLE",
+        "failure": {
+          "sample_index": 20,
+          "sample_count": 95,
+          "fraction": 0.2127659574468085,
+          "state": {
+            "reason": "HUMAN_COLLISION",
+            "q": [
+              0.4372945006352096,
+              -1.5131213659449467,
+              2.0133356144700922,
+              1.0536169259323804,
+              1.1598635591241595
+            ],
+            "revision": 145,
+            "human": {
+              "clearance": 0.09985260246006741,
+              "robot_geom": "link5_visual",
+              "body_id": 1,
+              "segment_id": 6,
+              "center_distance": 0.21810127346063055,
+              "robot_radius": 0.06770139687365663,
+              "human_radius": 0.06399649116187006,
+              "safety_margin": 0.1,
+              "geometry_model": "SPHERE_AND_MESH_BOX",
+              "sphere_clearance": 0.08640338542510384,
+              "box_clearance": 0.09985260246006741,
+              "status": "NEAR"
+            }
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 10,
+        "revision_before": 145,
+        "revision_after": 145,
+        "point_index": null,
+        "edge_index": 0,
+        "edge_start_q": [
+          0.039034214793258845,
+          -1.4043194016276992,
+          2.0602511147703684,
+          1.200935971315337,
+          1.2647636818110546
+        ],
+        "edge_goal_q": [
+          1.9108575582504272,
+          -1.9156886339187622,
+          1.8397482633590698,
+          0.5085364580154419,
+          0.7717331051826477
+        ]
+      },
+      "progress": {
+        "ordered_next_waypoint": 5,
+        "waypoint_tolerance_rad": 0.02,
+        "nearest_is_progress_evidence": false,
+        "commanded_path_points": 14,
+        "current_q": [
+          0.039034214793258845,
+          -1.4043194016276992,
+          2.0602511147703684,
+          1.200935971315337,
+          1.2647636818110546
+        ],
+        "ordered_next_q": [
+          1.9108575582504272,
+          -1.9156886339187622,
+          1.8397482633590698,
+          0.5085364580154419,
+          0.7717331051826477
+        ],
+        "ordered_next_max_error_rad": 1.8718233434571685,
+        "nearest_waypoint_index": 12,
+        "nearest_waypoint_l2_error_rad": 0.14250366204060724,
+        "nearest_segment_index": 12,
+        "nearest_segment_fraction": 0.3479695458131869,
+        "nearest_segment_l2_error_rad": 0.01346035997167375,
+        "last_update_reason": "OUTSIDE_FEEDBACK_CHORD",
+        "commanded_path_id": 5
+      },
+      "failed_commanded_edge": [
+        null,
+        5
+      ],
+      "measured_to_ordered_connector": true,
+      "log_line": 341,
+      "time_s": 1794848407.590652
+    }
+  ],
+  "original_command_5": {
+    "receipt_ns": 1794848390644941662,
+    "stamp_ns": 1794848390644601306,
+    "frame": "",
+    "names": [
+      "joint1",
+      "joint2",
+      "joint3",
+      "joint4",
+      "joint5"
+    ],
+    "points": [
+      {
+        "positions": [
+          2.306332568060735,
+          -1.6201884548161092,
+          2.2007166156490467,
+          -0.15410461724369773,
+          0.721033325012128
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          2.403346300125122,
+          -1.522520661354065,
+          2.126349925994873,
+          -0.33792614936828613,
+          0.8672181367874146
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          2.436357021331787,
+          -1.7031588554382324,
+          2.0891404151916504,
+          -0.3991404175758362,
+          1.4453693628311157
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          2.279925584793091,
+          -1.6806633472442627,
+          1.8286383152008057,
+          0.1123041883111,
+          1.5039637088775635
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          2.3236019611358643,
+          -1.8299524784088135,
+          1.704521894454956,
+          0.15532933175563812,
+          1.229398488998413
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          1.9108575582504272,
+          -1.9156886339187622,
+          1.8397482633590698,
+          0.5085364580154419,
+          0.7717331051826477
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          1.466092586517334,
+          -2.118865966796875,
+          2.0587618350982666,
+          0.6404309272766113,
+          0.8102959394454956
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          1.2511045932769775,
+          -2.153305768966675,
+          2.2963247299194336,
+          0.8317574858665466,
+          1.0815632343292236
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          0.8516231775283813,
+          -2.2490031719207764,
+          2.277777671813965,
+          1.2105920314788818,
+          1.1428663730621338
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          0.41147634387016296,
+          -2.1837897300720215,
+          2.3914570808410645,
+          1.4745861291885376,
+          1.3578767776489258
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          -0.07446838915348053,
+          -2.191826105117798,
+          2.532963991165161,
+          1.426778793334961,
+          1.3580769300460815
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          -0.05696053430438042,
+          -1.8404351472854614,
+          2.0025269985198975,
+          1.5157434940338135,
+          1.2835972309112549
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          0.013255024328827858,
+          -1.5138631463050842,
+          2.052897572517395,
+          1.2878982424736023,
+          1.2699002027511597
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      },
+      {
+        "positions": [
+          0.08347058296203613,
+          -1.187291145324707,
+          2.1032681465148926,
+          1.0600529909133911,
+          1.2562031745910645
+        ],
+        "velocities": [],
+        "time_from_start_s": 0.0
+      }
+    ]
+  },
+  "progress_proof": {
+    "waypoint_passage": [
+      {
+        "waypoint_index": 0,
+        "closest_measured_s": 0.002500224,
+        "min_max_joint_error_rad": 0.0,
+        "closest_chord_max_error_rad": 0.0,
+        "closest_chord_s": 0.04684417
+      },
+      {
+        "waypoint_index": 1,
+        "closest_measured_s": 0.800088268,
+        "min_max_joint_error_rad": 0.009327025708642245,
+        "closest_chord_max_error_rad": 0.009327025708642245,
+        "closest_chord_s": 0.800088268
+      },
+      {
+        "waypoint_index": 2,
+        "closest_measured_s": 2.688441918,
+        "min_max_joint_error_rad": 0.012707508767081821,
+        "closest_chord_max_error_rad": 0.012707508767081821,
+        "closest_chord_s": 2.688441918
+      },
+      {
+        "waypoint_index": 3,
+        "closest_measured_s": 4.4021175,
+        "min_max_joint_error_rad": 0.01160199843178411,
+        "closest_chord_max_error_rad": 0.011265091297038649,
+        "closest_chord_s": 4.381647798
+      },
+      {
+        "waypoint_index": 4,
+        "closest_measured_s": 5.300633712,
+        "min_max_joint_error_rad": 0.007490990082097415,
+        "closest_chord_max_error_rad": 0.007490990082097415,
+        "closest_chord_s": 5.300633712
+      },
+      {
+        "waypoint_index": 5,
+        "closest_measured_s": 6.912098684,
+        "min_max_joint_error_rad": 0.02087526466744083,
+        "closest_chord_max_error_rad": 0.02087526466744083,
+        "closest_chord_s": 6.912098684
+      },
+      {
+        "waypoint_index": 6,
+        "closest_measured_s": 8.48933147,
+        "min_max_joint_error_rad": 0.03594721344837559,
+        "closest_chord_max_error_rad": 0.03594721344837559,
+        "closest_chord_s": 8.48933147
+      },
+      {
+        "waypoint_index": 7,
+        "closest_measured_s": 9.380298531,
+        "min_max_joint_error_rad": 0.02591646000501946,
+        "closest_chord_max_error_rad": 0.02591646000501946,
+        "closest_chord_s": 9.380298531
+      },
+      {
+        "waypoint_index": 8,
+        "closest_measured_s": 10.623805986,
+        "min_max_joint_error_rad": 0.02765497506470105,
+        "closest_chord_max_error_rad": 0.02765497506470105,
+        "closest_chord_s": 10.623805986
+      },
+      {
+        "waypoint_index": 9,
+        "closest_measured_s": 12.018087404,
+        "min_max_joint_error_rad": 0.013319491371878378,
+        "closest_chord_max_error_rad": 0.013319491371878378,
+        "closest_chord_s": 12.004189916
+      },
+      {
+        "waypoint_index": 10,
+        "closest_measured_s": 13.645086603,
+        "min_max_joint_error_rad": 0.014761738126468575,
+        "closest_chord_max_error_rad": 0.014761738126468575,
+        "closest_chord_s": 13.645086603
+      },
+      {
+        "waypoint_index": 11,
+        "closest_measured_s": 15.449698467,
+        "min_max_joint_error_rad": 0.01650860638761209,
+        "closest_chord_max_error_rad": 0.01650860638761209,
+        "closest_chord_s": 15.449698467
+      },
+      {
+        "waypoint_index": 12,
+        "closest_measured_s": 16.556169989,
+        "min_max_joint_error_rad": 0.008794485389701734,
+        "closest_chord_max_error_rad": 0.008794485389701734,
+        "closest_chord_s": 16.556169989
+      },
+      {
+        "waypoint_index": 13,
+        "closest_measured_s": 16.934393304,
+        "min_max_joint_error_rad": 0.21316623457770723,
+        "closest_chord_max_error_rad": 0.21316623457770723,
+        "closest_chord_s": 16.922731878
+      }
+    ],
+    "joint_sample_count_during_command": 1226,
+    "failure_elapsed_s": 16.945710242
+  },
+  "geometry_proof": {
+    "scope": "Offline original algorithm replay and frozen recorded geometry; no robot commands or changed progress rule.",
+    "source_capture_ns": 1794848407327306578,
+    "frame_receipt_ns": 1794848407561955974,
+    "logged_current_clearance_m": 0.16757389361417474,
+    "reconstructed_current_clearance_m": 0.16757389361417474,
+    "replayed_ordered_cursor": 5,
+    "replayed_advances": [
+      {
+        "elapsed_s": 0.800088268,
+        "before": 1,
+        "after": 2
+      },
+      {
+        "elapsed_s": 2.688441918,
+        "before": 2,
+        "after": 3
+      },
+      {
+        "elapsed_s": 4.4021175,
+        "before": 3,
+        "after": 4
+      },
+      {
+        "elapsed_s": 5.300633712,
+        "before": 4,
+        "after": 5
+      }
+    ],
+    "logged_ordered_cursor": 5,
+    "stored_remaining_valid": false,
+    "stored_remaining_failure": {
+      "check": "EDGE_SAMPLE",
+      "failure": {
+        "sample_index": 20,
+        "sample_count": 95,
+        "fraction": 0.2127659574468085,
+        "state": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            0.4372945006352096,
+            -1.5131213659449467,
+            2.0133356144700922,
+            1.0536169259323804,
+            1.1598635591241595
+          ],
+          "revision": 5,
+          "human": {
+            "clearance": 0.09985260246006741,
+            "robot_geom": "link5_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.21810127346063055,
+            "robot_radius": 0.06770139687365663,
+            "human_radius": 0.06399649116187006,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.08640338542510384,
+            "box_clearance": 0.09985260246006741,
+            "status": "NEAR"
+          }
+        }
+      },
+      "traversal": "WAYPOINTS_THEN_EDGES",
+      "path_points": 10,
+      "revision_before": 5,
+      "revision_after": 5,
+      "point_index": null,
+      "edge_index": 0,
+      "edge_start_q": [
+        0.039034214793258845,
+        -1.4043194016276992,
+        2.0602511147703684,
+        1.200935971315337,
+        1.2647636818110546
+      ],
+      "edge_goal_q": [
+        1.9108575582504272,
+        -1.9156886339187622,
+        1.8397482633590698,
+        0.5085364580154419,
+        0.7717331051826477
+      ]
+    },
+    "geometric_forward_tail_valid": true,
+    "geometric_forward_tail_path": [
+      [
+        0.039034214793258845,
+        -1.4043194016276992,
+        2.0602511147703684,
+        1.200935971315337,
+        1.2647636818110546
+      ],
+      [
+        0.08347058296203613,
+        -1.187291145324707,
+        2.1032681465148926,
+        1.0600529909133911,
+        1.2562031745910645
+      ]
+    ],
+    "forward_tail_sampled_min_clearance_m": 0.13237837582785325,
+    "forward_tail_sample_count": 12,
+    "limits": [
+      "The forward tail is only a geometric counterfactual, not an authorized online progress jump.",
+      "The replay consumes all recorded joint messages; actual executor callback delivery/timing may differ.",
+      "Raw capture lifetime is frozen solely for geometry isolation."
+    ]
+  },
+  "verified_findings": [
+    "Failure 6 occurs at 2026-11-17 00:00:07.590 Asia/Jakarta, command 5, cycle 375. Current measured pose is FAR with clearance 0.16757389361417474 m.",
+    "The original ordered passage algorithm replayed on all 1226 recorded joint messages during command 5 advances through waypoint 4 and stays at next waypoint 5.",
+    "Closest recorded feedback/chord to waypoint 5 has max-joint error 0.02087526466744083 rad, exceeding the existing 0.02 rad passage tolerance.",
+    "Recorded measured states later approach waypoints 9,10,11,12 within 0.02 rad in chronological order; at failure nearest segment is 12 with fraction 0.3479695.",
+    "At the exact recorded source frame, rebuilding current_q + command[5:] reproduces the same failed first edge/sample and human clearance 0.09985260246006741 m.",
+    "The geometric forward tail current_q + command[13:] passes the unchanged state/edge checker; minimum sampled human clearance is 0.13237837582785325 m.",
+    "Motion interpolates by elapsed trajectory time; it does not wait for measured arrival within 0.02 rad at every intermediate waypoint. That difference explains how Motion can advance while the Planning cursor remains stuck.",
+    "Failures 1 and 2 respectively reject commanded edge 5-6 while near segment 1, and waypoint 4 while near segment 0. They are ahead-of-progress rejections according to live traces, not the proven backward connector of failure 6.",
+    "Failures 3,4,5 concern planned paths while Motion is already stopped; their indices must not be compared directly with the previous command cursor."
+  ],
+  "limits": [
+    "Only failure 6 receives full same-frame geometric reconstruction here. Failures 1 and 2 precede this bag and are classified from logs only.",
+    "Observed-human topic begins later due to subscription discovery. All 193 captured human messages are valid observed; the wider launch has additional conditions.",
+    "Offline geometric tests freeze data lifetime to isolate geometry. No tail path or changed cursor is published to Motion.",
+    "Nearest segment alone cannot justify online progress on a looping/self-near path. The recorded chronology is additional evidence; any future algorithm needs ordered progression and renewed collision validation.",
+    "A final within-tolerance path completion follows STOP and replanning; it does not establish uninterrupted execution of original command 5.",
+    "No progress tolerance, collision margin, expiry threshold, GNG/A* or Motion controller is modified by this inspection."
+  ]
+}

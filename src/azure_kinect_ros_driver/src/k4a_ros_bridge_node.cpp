@@ -23,40 +23,46 @@ int main(int argc, char** argv)
 
 
   // Setup the K4A device
-  std::shared_ptr<K4AROSDevice> device(new K4AROSDevice);
-
-  k4a_result_t result = device->startCameras();
-
-  if (result != K4A_RESULT_SUCCEEDED)
+  std::shared_ptr<K4AROSDevice> device;
+  int exit_code = 0;
+  try
   {
-    RCLCPP_ERROR_STREAM(node->get_logger(),"Failed to start cameras");
-    return -1;
+    device = std::make_shared<K4AROSDevice>();
+    if (device->startCameras() != K4A_RESULT_SUCCEEDED)
+    {
+      RCLCPP_ERROR(node->get_logger(), "Failed to start cameras");
+      exit_code = 1;
+    }
+    else if (device->startImu() != K4A_RESULT_SUCCEEDED)
+    {
+      RCLCPP_ERROR(node->get_logger(), "Failed to start IMU");
+      exit_code = 2;
+    }
+    else
+    {
+      RCLCPP_INFO(node->get_logger(), "K4A Started");
+      // Camera-node callbacks are still serviced by its existing frame worker.
+      rclcpp::spin(node);
+      RCLCPP_INFO(node->get_logger(), "ROS Exit Started");
+    }
   }
-
-  result = device->startImu();
-  if (result != K4A_RESULT_SUCCEEDED)
+  catch (const std::exception& error)
   {
-    RCLCPP_ERROR_STREAM(node->get_logger(),"Failed to start IMU");
-    return -2;
-  }
-
-  RCLCPP_INFO(node->get_logger(),"K4A Started");
-
-  if (result == K4A_RESULT_SUCCEEDED)
-  {
-    rclcpp::spin(node);
-
-    RCLCPP_INFO(node->get_logger(),"ROS Exit Started");
+    RCLCPP_ERROR(node->get_logger(), "K4A initialization/runtime failure: %s", error.what());
+    exit_code = 3;
   }
 
   device.reset();
 
   RCLCPP_INFO(node->get_logger(),"ROS Exit");
 
-  rclcpp::shutdown();
+  if (rclcpp::ok())
+  {
+    rclcpp::shutdown();
+  }
 
   RCLCPP_INFO(node->get_logger(),"ROS Shutdown complete");
 
   RCLCPP_INFO(node->get_logger(),"Finished ros bridge main");
-  return 0;
+  return exit_code;
 }

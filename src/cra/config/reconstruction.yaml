@@ -13,7 +13,7 @@ reconstruction_node:
     max_sync_delay: 0.15
     data_timeout: 0.5
 
-    publish_voxels: true
+    publish_voxels: false
 
     capsule:
       torso_radius: 0.13

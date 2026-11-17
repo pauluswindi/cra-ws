@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-17",
+  "environment": "cra-humble; ROS 2 Humble; installed Sensor SDK 1.4.2; Body Tracking enabled through existing manual CMake fallback",
+  "build": "colcon build --packages-select azure_kinect_ros_driver --cmake-args -DBUILD_TESTING=ON: passed",
+  "unit_tests": {
+    "tests": "12",
+    "failures": "0",
+    "disabled": "0",
+    "errors": "0",
+    "time": "0.001",
+    "timestamp": "2026-11-17T08:48:01",
+    "name": "AllTests"
+  },
+  "native_installed_cases": [
+    {
+      "case": "no_device",
+      "returncode": 1,
+      "checks": {
+        "expected_exit_code": true,
+        "expected_reason": true,
+        "no_unhandled_exception": true,
+        "tracker_not_created_without_calibration": true,
+        "device_open_is_fake": true,
+        "unstarted_workers_cleaned_up": true
+      }
+    },
+    {
+      "case": "device_open_failed",
+      "returncode": 1,
+      "checks": {
+        "expected_exit_code": true,
+        "expected_reason": true,
+        "no_unhandled_exception": true,
+        "tracker_not_created_without_calibration": true,
+        "device_open_is_fake": true,
+        "unstarted_workers_cleaned_up": true
+      }
+    },
+    {
+      "case": "invalid_retry_budget",
+      "returncode": 3,
+      "checks": {
+        "expected_exit_code": true,
+        "expected_reason": true,
+        "no_unhandled_exception": true,
+        "tracker_not_created_without_calibration": true,
+        "device_open_is_fake": true
+      }
+    },
+    {
+      "case": "recording_open_exception",
+      "returncode": 3,
+      "checks": {
+        "expected_exit_code": true,
+        "expected_reason": true,
+        "no_unhandled_exception": true,
+        "tracker_not_created_without_calibration": true,
+        "device_open_is_fake": true
+      }
+    }
+  ],
+  "test_shim_installed": false,
+  "style": "Python Flake8 max-line-length=99 passed",
+  "source_and_binary_sha256": {
+    "src/azure_kinect_ros_driver/src/k4a_ros_device.cpp": "163a71aebabc44c82906f2d979ca8302bba6e74d6c9879c9e66c876e602d0706",
+    "src/azure_kinect_ros_driver/src/k4a_ros_bridge_node.cpp": "9be675b6c410f3e13a942df762c114deca5068889829ef4f3c9b6cdb33c421a9",
+    "src/azure_kinect_ros_driver/include/azure_kinect_ros_driver/k4a_ros_device.h": "562995b0035131a48421dabcb1a9c6280c3e83e69c5d286939056d984f396a7d",
+    "src/azure_kinect_ros_driver/include/azure_kinect_ros_driver/stream_control.h": "8435b68b1d747c985fe534aa2664b06e1d0de711cef4092a86feee34e17c6982",
+    "src/azure_kinect_ros_driver/CMakeLists.txt": "b97d60921dc3cbec29587e32ac1759ee72bb92915884451cda4ebe1629679bd9",
+    "src/azure_kinect_ros_driver/package.xml": "d5b8bcf320bdff10246608df0cd96ff2da386037bc9bf1a65e7ed57e03839ae7",
+    "src/azure_kinect_ros_driver/test/test_stream_control.cpp": "c1a5b559a33d38d09daddcdb565b7269dd3c5c1896d14a229abe9ccc097bd9a7",
+    "src/azure_kinect_ros_driver/test/test_startup_without_device.py": "59db3606ba47d1a0b4b822ed23fa238ce0093f090e42bc9f20db279d180dbc04",
+    "src/azure_kinect_ros_driver/test/fake_k4a_device.cpp": "be6886bf43c0aa379799949876fad5a1aae4916912e61a517d3eafa4c1e8bc3a",
+    "install/azure_kinect_ros_driver/lib/azure_kinect_ros_driver/node": "adf9125231e60ced7e26dc42297e974336cc24731ad7d13d83ab2b28d2135812"
+  },
+  "scope": "Hardware-free policy/thread tests and real ROS executable startup with all device opens denied. Timeout branch skips image publication by source inspection. No live camera recovery, loaded SDK tracker shutdown, full CRA integration or physical cause verified.",
+  "preserved": "30 FPS/resolution, ROS interfaces, Planning 2 s lifetime and 0.05 m human margin, execution flags, Motion and Planning algorithms"
+}

@@ -1,0 +1,476 @@
+{
+  "scope": "Controlled tests only: real production run loop/control/MuJoCo, fake ROS spin/viewer/wall clock; not live performance data.",
+  "test_counts": {
+    "existing_hold_tracking": 6,
+    "profiling": 8
+  },
+  "cases": {
+    "disabled_slow_viewer": {
+      "physics_time_s": 0.04000000000000002,
+      "controlled_wall_s": 0.06340000000011514,
+      "ratio": 0.6309148264972773,
+      "reports": [],
+      "final_position": [
+        1.9861581494424285,
+        -0.6460023278236263,
+        1.2284914005072807,
+        -0.9174148558504023,
+        -0.9428916978846786
+      ],
+      "operation_counts": {
+        "spin": 20,
+        "control": 20,
+        "physics": 20,
+        "feedback": 4,
+        "sync": 4,
+        "sleep": 20
+      }
+    },
+    "enabled_slow_viewer": {
+      "physics_time_s": 0.04000000000000002,
+      "controlled_wall_s": 0.0637000000001251,
+      "ratio": 0.6279434850851093,
+      "reports": [
+        {
+          "schema_version": 1,
+          "window_index": 1,
+          "wall_elapsed_s": 0.020250000000032742,
+          "physics_start_s": 0.0,
+          "physics_end_s": 0.014,
+          "physics_advanced_s": 0.014,
+          "real_time_factor": 0.6913580246902402,
+          "physics_time_reset": false,
+          "physics_step_s": 0.002,
+          "loops": 7,
+          "step_hz": 345.6790123451201,
+          "feedback_hz": 49.38271604930287,
+          "work_over_budget_loops": 1,
+          "work_mean_ms": 1.364285714300552,
+          "work_max_ms": 6.850000000014234,
+          "loop_mean_ms": 2.8928571428618204,
+          "loop_max_ms": 7.050000000020873,
+          "requested_sleep_total_ms": 9.29999999991037,
+          "unattributed_wall_ms": 0.0,
+          "stages": {
+            "ros_callbacks": {
+              "count": 7,
+              "total_ms": 1.4000000000464752,
+              "mean_ms": 0.2000000000066393,
+              "max_ms": 0.2000000000066393,
+              "wall_percent": 6.913580247131909
+            },
+            "viewer_lock_wait": {
+              "count": 7,
+              "total_ms": 0.3500000000116188,
+              "mean_ms": 0.05000000000165983,
+              "max_ms": 0.05000000000165983,
+              "wall_percent": 1.7283950617829773
+            },
+            "control": {
+              "count": 7,
+              "total_ms": 0.7000000000232376,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 3.4567901235659546
+            },
+            "physics": {
+              "count": 7,
+              "total_ms": 0.7000000000232376,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 3.4567901235659546
+            },
+            "feedback_and_markers": {
+              "count": 1,
+              "total_ms": 0.39999999999906777,
+              "mean_ms": 0.39999999999906777,
+              "max_ms": 0.39999999999906777,
+              "wall_percent": 1.9753086419675112
+            },
+            "viewer_sync": {
+              "count": 1,
+              "total_ms": 6.000000000000227,
+              "mean_ms": 6.000000000000227,
+              "max_ms": 6.000000000000227,
+              "wall_percent": 29.629629629582844
+            },
+            "sleep": {
+              "count": 7,
+              "total_ms": 10.699999999928878,
+              "mean_ms": 1.5285714285612682,
+              "max_ms": 1.7499999999870397,
+              "wall_percent": 52.83950617240285
+            },
+            "profile_output": {
+              "count": 0,
+              "total_ms": 0.0,
+              "mean_ms": 0.0,
+              "max_ms": 0.0,
+              "wall_percent": 0.0
+            }
+          }
+        },
+        {
+          "schema_version": 1,
+          "window_index": 2,
+          "wall_elapsed_s": 0.02035000000003606,
+          "physics_start_s": 0.014,
+          "physics_end_s": 0.02800000000000001,
+          "physics_advanced_s": 0.01400000000000001,
+          "real_time_factor": 0.6879606879594694,
+          "physics_time_reset": false,
+          "physics_step_s": 0.002,
+          "loops": 7,
+          "step_hz": 343.9803439797344,
+          "feedback_hz": 49.14004913996206,
+          "work_over_budget_loops": 1,
+          "work_mean_ms": 1.364285714300552,
+          "work_max_ms": 6.850000000014234,
+          "loop_mean_ms": 2.8928571428618204,
+          "loop_max_ms": 7.050000000020873,
+          "requested_sleep_total_ms": 9.29999999991037,
+          "unattributed_wall_ms": 0.0,
+          "stages": {
+            "ros_callbacks": {
+              "count": 7,
+              "total_ms": 1.4000000000464752,
+              "mean_ms": 0.2000000000066393,
+              "max_ms": 0.2000000000066393,
+              "wall_percent": 6.879606879823068
+            },
+            "viewer_lock_wait": {
+              "count": 7,
+              "total_ms": 0.3500000000116188,
+              "mean_ms": 0.05000000000165983,
+              "max_ms": 0.05000000000165983,
+              "wall_percent": 1.719901719955767
+            },
+            "control": {
+              "count": 7,
+              "total_ms": 0.7000000000232376,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 3.439803439911534
+            },
+            "physics": {
+              "count": 7,
+              "total_ms": 0.7000000000232376,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 3.439803439911534
+            },
+            "feedback_and_markers": {
+              "count": 1,
+              "total_ms": 0.39999999999906777,
+              "mean_ms": 0.39999999999906777,
+              "max_ms": 0.39999999999906777,
+              "wall_percent": 1.9656019655939014
+            },
+            "viewer_sync": {
+              "count": 1,
+              "total_ms": 6.000000000000227,
+              "mean_ms": 6.000000000000227,
+              "max_ms": 6.000000000000227,
+              "wall_percent": 29.484029483978354
+            },
+            "sleep": {
+              "count": 7,
+              "total_ms": 10.699999999928878,
+              "mean_ms": 1.5285714285612682,
+              "max_ms": 1.7499999999870397,
+              "wall_percent": 52.57985257940991
+            },
+            "profile_output": {
+              "count": 1,
+              "total_ms": 0.10000000000331966,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 0.4914004914159334
+            }
+          }
+        },
+        {
+          "schema_version": 1,
+          "window_index": 3,
+          "wall_elapsed_s": 0.023000000000052978,
+          "physics_start_s": 0.02800000000000001,
+          "physics_end_s": 0.04000000000000002,
+          "physics_advanced_s": 0.01200000000000001,
+          "real_time_factor": 0.5217391304335813,
+          "physics_time_reset": false,
+          "physics_step_s": 0.002,
+          "loops": 6,
+          "step_hz": 260.8695652167904,
+          "feedback_hz": 86.95652173893014,
+          "work_over_budget_loops": 2,
+          "work_mean_ms": 2.583333333348037,
+          "work_max_ms": 6.850000000014234,
+          "loop_mean_ms": 3.816666666674943,
+          "loop_max_ms": 7.050000000020873,
+          "requested_sleep_total_ms": 6.199999999940246,
+          "unattributed_wall_ms": 0.0,
+          "stages": {
+            "ros_callbacks": {
+              "count": 6,
+              "total_ms": 1.2000000000398359,
+              "mean_ms": 0.2000000000066393,
+              "max_ms": 0.2000000000066393,
+              "wall_percent": 5.2173913045090075
+            },
+            "viewer_lock_wait": {
+              "count": 6,
+              "total_ms": 0.30000000000995897,
+              "mean_ms": 0.05000000000165983,
+              "max_ms": 0.05000000000165983,
+              "wall_percent": 1.3043478261272519
+            },
+            "control": {
+              "count": 6,
+              "total_ms": 0.6000000000199179,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 2.6086956522545037
+            },
+            "physics": {
+              "count": 6,
+              "total_ms": 0.6000000000199179,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 2.6086956522545037
+            },
+            "feedback_and_markers": {
+              "count": 2,
+              "total_ms": 0.7999999999981355,
+              "mean_ms": 0.39999999999906777,
+              "max_ms": 0.39999999999906777,
+              "wall_percent": 3.478260869549099
+            },
+            "viewer_sync": {
+              "count": 2,
+              "total_ms": 12.000000000000455,
+              "mean_ms": 6.000000000000227,
+              "max_ms": 6.000000000000227,
+              "wall_percent": 52.17391304336006
+            },
+            "sleep": {
+              "count": 6,
+              "total_ms": 7.399999999961437,
+              "mean_ms": 1.2333333333269063,
+              "max_ms": 1.7499999999870397,
+              "wall_percent": 32.17391304323649
+            },
+            "profile_output": {
+              "count": 1,
+              "total_ms": 0.10000000000331966,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 0.434782608709084
+            }
+          }
+        }
+      ],
+      "final_position": [
+        1.9861581494424285,
+        -0.6460023278236263,
+        1.2284914005072807,
+        -0.9174148558504023,
+        -0.9428916978846786
+      ],
+      "operation_counts": {
+        "spin": 20,
+        "control": 20,
+        "physics": 20,
+        "feedback": 4,
+        "sync": 4,
+        "sleep": 20
+      }
+    },
+    "enabled_quick_viewer": {
+      "physics_time_s": 0.04000000000000002,
+      "controlled_wall_s": 0.0442000000000462,
+      "ratio": 0.9049773755646654,
+      "reports": [
+        {
+          "schema_version": 1,
+          "window_index": 1,
+          "wall_elapsed_s": 0.02200000000001978,
+          "physics_start_s": 0.0,
+          "physics_end_s": 0.020000000000000004,
+          "physics_advanced_s": 0.020000000000000004,
+          "real_time_factor": 0.9090909090900918,
+          "physics_time_reset": false,
+          "physics_step_s": 0.002,
+          "loops": 10,
+          "step_hz": 454.54545454504586,
+          "feedback_hz": 90.90909090900917,
+          "work_over_budget_loops": 0,
+          "work_mean_ms": 0.5700000000160799,
+          "work_max_ms": 1.0500000000206455,
+          "loop_mean_ms": 2.200000000001978,
+          "loop_max_ms": 2.200000000001978,
+          "requested_sleep_total_ms": 14.299999999839201,
+          "unattributed_wall_ms": 0.0,
+          "stages": {
+            "ros_callbacks": {
+              "count": 10,
+              "total_ms": 2.000000000066393,
+              "mean_ms": 0.2000000000066393,
+              "max_ms": 0.2000000000066393,
+              "wall_percent": 9.090909091202704
+            },
+            "viewer_lock_wait": {
+              "count": 10,
+              "total_ms": 0.5000000000165983,
+              "mean_ms": 0.05000000000165983,
+              "max_ms": 0.05000000000165983,
+              "wall_percent": 2.272727272800676
+            },
+            "control": {
+              "count": 10,
+              "total_ms": 1.0000000000331966,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 4.545454545601352
+            },
+            "physics": {
+              "count": 10,
+              "total_ms": 1.0000000000331966,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 4.545454545601352
+            },
+            "feedback_and_markers": {
+              "count": 2,
+              "total_ms": 0.7999999999981355,
+              "mean_ms": 0.39999999999906777,
+              "max_ms": 0.39999999999906777,
+              "wall_percent": 3.636363636351892
+            },
+            "viewer_sync": {
+              "count": 2,
+              "total_ms": 0.4000000000132786,
+              "mean_ms": 0.2000000000066393,
+              "max_ms": 0.2000000000066393,
+              "wall_percent": 1.8181818182405407
+            },
+            "sleep": {
+              "count": 10,
+              "total_ms": 16.299999999858983,
+              "mean_ms": 1.6299999999858983,
+              "max_ms": 1.7499999999870397,
+              "wall_percent": 74.09090909020148
+            },
+            "profile_output": {
+              "count": 0,
+              "total_ms": 0.0,
+              "mean_ms": 0.0,
+              "max_ms": 0.0,
+              "wall_percent": 0.0
+            }
+          }
+        },
+        {
+          "schema_version": 1,
+          "window_index": 2,
+          "wall_elapsed_s": 0.0221000000000231,
+          "physics_start_s": 0.020000000000000004,
+          "physics_end_s": 0.04000000000000002,
+          "physics_advanced_s": 0.020000000000000018,
+          "real_time_factor": 0.9049773755646657,
+          "physics_time_reset": false,
+          "physics_step_s": 0.002,
+          "loops": 10,
+          "step_hz": 452.4886877823324,
+          "feedback_hz": 90.49773755646649,
+          "work_over_budget_loops": 0,
+          "work_mean_ms": 0.5700000000160799,
+          "work_max_ms": 1.0500000000206455,
+          "loop_mean_ms": 2.200000000001978,
+          "loop_max_ms": 2.200000000001978,
+          "requested_sleep_total_ms": 14.299999999839201,
+          "unattributed_wall_ms": 0.0,
+          "stages": {
+            "ros_callbacks": {
+              "count": 10,
+              "total_ms": 2.000000000066393,
+              "mean_ms": 0.2000000000066393,
+              "max_ms": 0.2000000000066393,
+              "wall_percent": 9.04977375594707
+            },
+            "viewer_lock_wait": {
+              "count": 10,
+              "total_ms": 0.5000000000165983,
+              "mean_ms": 0.05000000000165983,
+              "max_ms": 0.05000000000165983,
+              "wall_percent": 2.2624434389867676
+            },
+            "control": {
+              "count": 10,
+              "total_ms": 1.0000000000331966,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 4.524886877973535
+            },
+            "physics": {
+              "count": 10,
+              "total_ms": 1.0000000000331966,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 4.524886877973535
+            },
+            "feedback_and_markers": {
+              "count": 2,
+              "total_ms": 0.7999999999981355,
+              "mean_ms": 0.39999999999906777,
+              "max_ms": 0.39999999999906777,
+              "wall_percent": 3.619909502250223
+            },
+            "viewer_sync": {
+              "count": 2,
+              "total_ms": 0.4000000000132786,
+              "mean_ms": 0.2000000000066393,
+              "max_ms": 0.2000000000066393,
+              "wall_percent": 1.809954751189414
+            },
+            "sleep": {
+              "count": 10,
+              "total_ms": 16.299999999858983,
+              "mean_ms": 1.6299999999858983,
+              "max_ms": 1.7499999999870397,
+              "wall_percent": 73.7556561078821
+            },
+            "profile_output": {
+              "count": 1,
+              "total_ms": 0.10000000000331966,
+              "mean_ms": 0.10000000000331966,
+              "max_ms": 0.10000000000331966,
+              "wall_percent": 0.4524886877973535
+            }
+          }
+        }
+      ],
+      "final_position": [
+        1.9861581494424285,
+        -0.6460023278236263,
+        1.2284914005072807,
+        -0.9174148558504023,
+        -0.9428916978846786
+      ],
+      "operation_counts": {
+        "spin": 20,
+        "control": 20,
+        "physics": 20,
+        "feedback": 4,
+        "sync": 4,
+        "sleep": 20
+      }
+    }
+  },
+  "source_sha256": {
+    "src/simulation/simulation/loop_profiling.py": "7f18a853a4ef1a64bb3c8688a6c0e250f231c958010e37aec6d817dbe8785906",
+    "src/simulation/simulation/robot_simulation.py": "a1b3b34dda3be44e14d3601642d39964aaaa8a3a4f54b0373cc3b5d1704f791d",
+    "src/simulation/test/test_loop_profiling.py": "3c48e21271d38d153e6a2f41aac98f572e8328786c15bd5ca7c69c16941c5685"
+  },
+  "build": "colcon build --packages-select simulation passed",
+  "native_ros_constructor": "Installed imports/parameters verified on isolated localhost domain 223; loop/viewer not run, no motion commands published."
+}

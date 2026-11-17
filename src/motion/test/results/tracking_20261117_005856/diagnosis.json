@@ -1,0 +1,252 @@
+{
+  "source_bag": "/tmp/cra_path_diag_1s_20261117_005856",
+  "source_database_sha256": {
+    "cra_path_diag_1s_20261117_005856_0.db3": "7389dfe53e828ee2648b1c99f7bf7750af15d8c8c50de81a70f788c86d9c8f24"
+  },
+  "recorded_fault": {
+    "stamp_ns": 1794851944963260884,
+    "state": "TRACKING_ERROR",
+    "joint": 5,
+    "error_rad": 0.212,
+    "reference_rad": -0.693,
+    "actual_rad": -0.905,
+    "command_rad_s": 0.724,
+    "filtered_rad_s": 0.5
+  },
+  "configuration": {
+    "control_mode": "joint_trajectory",
+    "target_source": "simulation_marker",
+    "feedback_timeout": 0.2,
+    "cartesian": {
+      "speed": 0.1,
+      "gain": 2.0,
+      "tolerance": 0.01
+    },
+    "joint": {
+      "speed": 0.5,
+      "gain": 2.0,
+      "tolerance": 0.02,
+      "start_tolerance": 0.1,
+      "max_segment_delta": 0.6
+    },
+    "monitoring": {
+      "goal_timeout": 10.0,
+      "stall_timeout": 2.0,
+      "tracking_error_limit": 0.2,
+      "tracking_error_timeout": 0.5
+    }
+  },
+  "curve": "linear",
+  "cases": {
+    "recorded_feedback": {
+      "controller": "RUNNING",
+      "fault": "TRACKING_ERROR",
+      "end_wall_s": 2.245,
+      "trajectory_duration_s": 13.858488225286163,
+      "peak_error_rad": [
+        0.10543970222002441,
+        0.029756963362323474,
+        0.0816900309009807,
+        0.016052000250616538,
+        0.21234825003904279
+      ],
+      "end_error_rad": [
+        -0.07621218542049979,
+        -0.02958509809090526,
+        0.00720539320462521,
+        0.016052000250616538,
+        0.210833310875557
+      ],
+      "max_feedback_age_s": 0.051291046,
+      "saturation_ticks_by_joint": [
+        0,
+        0,
+        0,
+        0,
+        325
+      ],
+      "fault_detail": {
+        "reference": -0.6944468999341005,
+        "feedback": -0.9052802108096575,
+        "error": 0.210833310875557,
+        "reference_velocity": 0.30000000000000004,
+        "command": 0.7216666217511141,
+        "filtered": 0.5,
+        "max_error_joint": 5
+      }
+    },
+    "physics_realtime": {
+      "controller": "COMPLETED",
+      "fault": null,
+      "end_wall_s": 13.86,
+      "trajectory_duration_s": 13.858488225286163,
+      "peak_error_rad": [
+        0.01391015789590977,
+        0.030670186078498807,
+        0.019974811327826192,
+        0.019264327278133653,
+        0.01932159398123723
+      ],
+      "end_error_rad": [
+        -0.0014578706701127708,
+        0.006433567273872232,
+        0.0014637067926306369,
+        0.0030945248819269633,
+        -0.00048016772809056363
+      ],
+      "max_feedback_age_s": 0.0070000000000014495,
+      "saturation_ticks_by_joint": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "max_contacts": 0,
+      "end_physics_s": 13.860000000001298
+    },
+    "physics_half_speed": {
+      "controller": "RUNNING",
+      "fault": "TRACKING_ERROR",
+      "end_wall_s": 3.245,
+      "trajectory_duration_s": 13.858488225286163,
+      "peak_error_rad": [
+        0.0872608574180116,
+        0.04256121812707114,
+        0.06611907172777598,
+        0.026043377485367614,
+        0.22815477684730012
+      ],
+      "end_error_rad": [
+        -0.07650179223042897,
+        -0.04196922667638059,
+        0.030316351554679377,
+        0.025550725290114595,
+        0.2261528033259187
+      ],
+      "max_feedback_age_s": 0.019000000000000128,
+      "saturation_ticks_by_joint": [
+        0,
+        0,
+        0,
+        0,
+        502
+      ],
+      "fault_detail": {
+        "reference": -0.3944468999341004,
+        "feedback": -0.6205997032600191,
+        "error": 0.2261528033259187,
+        "reference_velocity": 0.30000000000000004,
+        "command": 0.7523056066518374,
+        "filtered": 0.5,
+        "max_error_joint": 5
+      },
+      "max_contacts": 0,
+      "end_physics_s": 1.6240000000000012
+    },
+    "physics_recorded_cadence": {
+      "controller": "RUNNING",
+      "fault": "TRACKING_ERROR",
+      "end_wall_s": 2.585,
+      "trajectory_duration_s": 13.858488225286163,
+      "peak_error_rad": [
+        0.1030444836824842,
+        0.0342303285068295,
+        0.07842554939957824,
+        0.020270604673778114,
+        0.22537883915626322
+      ],
+      "end_error_rad": [
+        -0.07638683166048477,
+        -0.03344394503000481,
+        0.0159421281346539,
+        0.01956176058209874,
+        0.2213741252764312
+      ],
+      "max_feedback_age_s": 0.05129104600000001,
+      "saturation_ticks_by_joint": [
+        0,
+        0,
+        0,
+        0,
+        389
+      ],
+      "fault_detail": {
+        "reference": -0.5924468999341005,
+        "feedback": -0.8138210252105317,
+        "error": 0.2213741252764312,
+        "reference_velocity": 0.30000000000000004,
+        "command": 0.7427482505528624,
+        "filtered": 0.5,
+        "max_error_joint": 5
+      },
+      "max_contacts": 0,
+      "end_physics_s": 1.2340000000000009
+    }
+  },
+  "limits": [
+    "Isolated deterministic replay, not ROS/viewer end-to-end verification.",
+    "Exact command delivery, steady-clock start and full initial physics state were not recorded. Initial actuator target is gravity-balanced.",
+    "Uniform slowdown is a controlled experiment. Recorded-cadence mode interpolates five physics steps per feedback interval.",
+    "Human perception/planner callbacks are absent; physical XML collisions and production Motion tracking/stall/velocity guards are retained.",
+    "Recorded human capsules are not MuJoCo physical bodies in the live model."
+  ],
+  "timing_evidence": {
+    "feedback_rows_during_execution": 107,
+    "wall_span_s": 2.222911944,
+    "feedback_interval_median_s": 0.019614065,
+    "physics_step_s": 0.002,
+    "source_feedback_stride": 5,
+    "count_inferred_physics_span_s": 1.06,
+    "count_inferred_physics_to_wall_ratio": 0.4768519971567529,
+    "velocity_inferred_physics_interval_median_s": 0.010001664643829346,
+    "velocity_inferred_physics_to_wall_median": 0.5127738857439302,
+    "limitation": "No physics clock was recorded. Step-count inference assumes no feedback loss; independent dq/qvel estimates cross-check it."
+  },
+  "source_sha256": {
+    "src/motion/test/tracking_replay_bridge.cpp": "b54262ad556874507a452428e4cb3a54306485eb4895e17e8c4c2d1682360377",
+    "src/motion/src/controllers/joint_controller.cpp": "1abeb0cdf891b04bd689f27191efaf13368144f1cbb6a3ce5e69190308a799d4",
+    "src/motion/src/controllers/execution_monitor.cpp": "c54d5a06b62db90150d9f7e8067cb2a310354e8010564ed29b6beb0e8f3cc2fe",
+    "src/motion/src/modules/motion_guard.cpp": "6d159333c54028509af5fde6586e2d93999157acdc6121e1919eac50b74f81d3",
+    "src/motion/src/trajectory/trajectory_generator.cpp": "1972ee427047af0ccbd050034ba0c2f0f4b61918f4e1247d262c39a22b4f404a",
+    "src/motion/src/trajectory/motion_profile.cpp": "7c511bff1e3e0a572cb3f679463a39c3683179b2c61db75d8aa2fb3f6ba86220",
+    "src/motion/src/kinematics/robot_kinematics.cpp": "cc5b7156e7ab9b1265f727e49e19236928fab89933798e871fba0cc39ec4efbf",
+    "src/motion/src/kinematics/jacobian.cpp": "6eff552b5207e849194f35c8c730f64c4eb21998e1cf39ab9ee1861be4f048c8",
+    "src/motion/test/fixtures/tracking_20261117_005856.json": "7428c1d9a580aa0726e1fab7fc2b257a109a8ae219deee141ee0cf9be9983db4",
+    "src/cra/config/robot.yaml": "7245665d18707dc90f6dd9db092d0cf70b6384f9b3f69ca85189209af3e15292",
+    "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+    "src/simulation/simulation/robot_simulation.py": "406c23d1589d80900ed8bdb48038c6bff692e8385d35e0d5acf29dcedc683b2b",
+    "src/motion/src/motion_component/motion_component.cpp": "08f36c4e7f0781b67c7274e1ea1084b0873c363cb5b894a31b5f675d50942687",
+    "src/motion/test/replay_recorded_tracking.py": "399036b84e3c5a9c33c0d1eea5f0929ea1ec0972906622eeed1752d6ada6823b",
+    "src/motion/include/common.hpp": "502b4b13fdab68b276d8a04710d22da5d6273ce2e126bbaa03a0a93748923e34",
+    "src/motion/include/trajectory/trajectory_generator.hpp": "b4bc722132d580fc264a718acbf213a091d5a38a76e2b1722f62d0e32e009aad",
+    "src/motion/include/trajectory/motion_profile.hpp": "503a830e0594caf984dafee48199526cd5f30ef24ee9cd9c27ad73019a60efd0",
+    "src/motion/include/motion_component/motion_component.hpp": "f86d2284ad13787540fbf41c6d6f69088eb483fbbe1f2c86ff61f304fa204341",
+    "src/motion/include/controllers/execution_monitor.hpp": "3bfac2391df92574d2b39e3302e014c8f4eae5a940094802c96e634f109ee1bf",
+    "src/motion/include/controllers/joint_controller.hpp": "fb3b0a007b7e40a59fa9cbcad52bf725088dcea132fd51d15190eac499ec751d",
+    "src/motion/include/controllers/cartesian_controller.hpp": "bba2ee39cfb931c9ad7d93bb33025ccd614cfd18269826f14435b65837d32caa",
+    "src/motion/include/modules/data_module.hpp": "4a86add2aa6c9c9ea702f3c091b30109c4d29a97e4ad444ac36f022a16a132b7",
+    "src/motion/include/modules/servo_module.hpp": "252010a8f8a8dc74297950c13bc62cef55d06d5f806e1bb82d9ca3864c0a8143",
+    "src/motion/include/modules/joint_feedback.hpp": "ccaec1ed57bddc2c7863d04e9ef16d0f8fbe1ca3ca94195fb60469cf28b12375",
+    "src/motion/include/modules/motion_guard.hpp": "6c35b32240673af757fc31564e2b0283ab534b1e590283788a59e573b9c74bb8",
+    "src/motion/include/logic/robot_initializer.hpp": "e2a7fc3927d7cb25b65b828e582c45d3172d3dfa0943b916b2925a629ccd0e3e",
+    "src/motion/include/kinematics/jacobian.hpp": "1bc8828f031aca24333ed10db7c9203141cdaa8a823ec92d986fd6565abef85b",
+    "src/motion/include/kinematics/robot_kinematics.hpp": "a78889b88ab7de754023a656ed38cff7b487a49ee7fdb439f48a7ad54c3147ee",
+    "src/cra/models/robot_model/meshes/bdt2.stl": "58665dfe17c02e6d80119e0456eae137c80aa8316909281489897a7aeeccd3f6",
+    "src/cra/models/robot_model/meshes/link1_1.stl": "538eb1dd3b11d33956d6dc6db4e71368ac2505a20bdfd1158d19d0b49325a616",
+    "src/cra/models/robot_model/meshes/link5_1.stl": "71e7c4321d9bbc2ad3cf9c695124db03be0f719d7b2ad1c832c4a6daa50b5c21",
+    "src/cra/models/robot_model/meshes/link2_1.stl": "20676734078c7127278194c253a51e38cef4b0487ece6ccfcf1955968a625177",
+    "src/cra/models/robot_model/meshes/link3_1.stl": "3844e76e3d306b731b56c8e1df3456018749cf64aecc0ed9090429db33add5d8",
+    "src/cra/models/robot_model/meshes/link4_1.stl": "adbaf08b321c3dfdffa5cb0141b4ba5d72b845d300174ec405181911eff2a399",
+    "src/cra/models/robot_model/meshes/base_link.stl": "010853dac9c96b7683fb24e84cc64836e0b03245152caa387ae6e543d57f26e1"
+  },
+  "comparative_checks": {
+    "native_feedback_reproduces_recorded_fault": true,
+    "native_feedback_fault_time_matches_within_50ms": true,
+    "native_feedback_fault_error_matches_within_01rad": true,
+    "realtime_physics_completes": true,
+    "both_slow_physics_cases_reproduce_joint5_tracking_fault": true,
+    "all_physics_cases_keep_contacts_zero": true,
+    "all_cases_keep_feedback_fresh": true
+  }
+}

@@ -1,0 +1,854 @@
+{
+  "scope": "Read-only diagnosis of 2026-11-17 07:49:20 Asia/Jakarta run, recorded at 0.10 m human margin. A requested 0.05 m future configuration does not retroactively validate paths or this run. No recent rosbag exists for all-joint reconstruction.",
+  "sources": {
+    "planning": {
+      "path": "/home/lvinz/.ros/log/python3_916_1794876560444.log",
+      "sha256": "abe392a8966df10e18f9cd7cba6b785f4a1e992a59f75e2122cdf001f4ec928a"
+    },
+    "simulation": {
+      "path": "/home/lvinz/.ros/log/python3_910_1794876560455.log",
+      "sha256": "38cde80277fd24d183de68e229686b5ba4d4e76612719d2bea4cb086d0a47a80"
+    },
+    "motion": {
+      "path": "/home/lvinz/.ros/log/component_container_914_1794876560134.log",
+      "sha256": "311b51466492c8cdbee31c67b1520162303fc42091c929d34db0b4616e994a3f"
+    }
+  },
+  "planning_profiles": 115,
+  "profiled_states": {
+    "PATH_READY": 10,
+    "TRAJECTORY_SENT": 9,
+    "EXECUTING": 17,
+    "COMPLETED": 17,
+    "HUMAN_TOO_CLOSE": 3,
+    "HUMAN_RETREAT_BLOCKED": 17,
+    "WAITING_FOR_RELEASE": 10,
+    "HUMAN_PATH_BLOCKED": 5,
+    "HUMAN_VISION_UNKNOWN": 5,
+    "RECOVERY_SETTLING": 2,
+    "HUMAN_RETREAT_READY": 3,
+    "HUMAN_RETREAT_SENT": 2,
+    "HUMAN_RETREAT_DATA_UNKNOWN": 2,
+    "HUMAN_RETREAT_UNSAFE": 2,
+    "GOAL_UNREACHABLE": 2,
+    "MOTION_ERROR": 9
+  },
+  "profiled_actions": {
+    "NONE": 88,
+    "EXECUTE": 11,
+    "STOP": 7,
+    "RELEASE": 9
+  },
+  "searches": [
+    {
+      "cycle": 1,
+      "stage": "path_search",
+      "wall_ms": 6.985,
+      "remaining_before_ms": null,
+      "remaining_after_ms": null,
+      "revision_before": 5,
+      "revision_after": 5,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 308,
+      "stage": "path_search",
+      "wall_ms": 3.228,
+      "remaining_before_ms": 1697.207,
+      "remaining_after_ms": 1693.97,
+      "revision_before": 20,
+      "revision_after": 20,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 321,
+      "stage": "path_search",
+      "wall_ms": 17.931,
+      "remaining_before_ms": null,
+      "remaining_after_ms": null,
+      "revision_before": 23,
+      "revision_after": 23,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 426,
+      "stage": "path_search",
+      "wall_ms": 55.705,
+      "remaining_before_ms": null,
+      "remaining_after_ms": null,
+      "revision_before": 24,
+      "revision_after": 24,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 445,
+      "stage": "path_search",
+      "wall_ms": 154.754,
+      "remaining_before_ms": 1682.559,
+      "remaining_after_ms": 1527.788,
+      "revision_before": 32,
+      "revision_after": 32,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 448,
+      "stage": "path_search",
+      "wall_ms": 68.169,
+      "remaining_before_ms": 1696.601,
+      "remaining_after_ms": 1628.417,
+      "revision_before": 34,
+      "revision_after": 34,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 450,
+      "stage": "path_search",
+      "wall_ms": 83.984,
+      "remaining_before_ms": 1563.236,
+      "remaining_after_ms": 1479.222,
+      "revision_before": 36,
+      "revision_after": 36,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 452,
+      "stage": "path_search",
+      "wall_ms": 1619.352,
+      "remaining_before_ms": 1618.593,
+      "remaining_after_ms": -0.771,
+      "revision_before": 38,
+      "revision_after": 38,
+      "outcome": "FALSE"
+    },
+    {
+      "cycle": 466,
+      "stage": "path_search",
+      "wall_ms": 1684.757,
+      "remaining_before_ms": 1684.116,
+      "remaining_after_ms": -0.656,
+      "revision_before": 51,
+      "revision_after": 51,
+      "outcome": "FALSE"
+    },
+    {
+      "cycle": 468,
+      "stage": "path_search",
+      "wall_ms": 1658.757,
+      "remaining_before_ms": 1658.487,
+      "remaining_after_ms": -0.587,
+      "revision_before": 53,
+      "revision_after": 53,
+      "outcome": "FALSE"
+    },
+    {
+      "cycle": 470,
+      "stage": "path_search",
+      "wall_ms": 1729.882,
+      "remaining_before_ms": 1728.888,
+      "remaining_after_ms": -1.009,
+      "revision_before": 55,
+      "revision_after": 55,
+      "outcome": "FALSE"
+    },
+    {
+      "cycle": 472,
+      "stage": "path_search",
+      "wall_ms": 1653.776,
+      "remaining_before_ms": 1651.967,
+      "remaining_after_ms": -1.833,
+      "revision_before": 57,
+      "revision_after": 57,
+      "outcome": "FALSE"
+    },
+    {
+      "cycle": 474,
+      "stage": "path_search",
+      "wall_ms": 377.444,
+      "remaining_before_ms": 1693.45,
+      "remaining_after_ms": 1315.993,
+      "revision_before": 59,
+      "revision_after": 59,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 585,
+      "stage": "path_search",
+      "wall_ms": 78.57,
+      "remaining_before_ms": 1663.516,
+      "remaining_after_ms": 1584.935,
+      "revision_before": 163,
+      "revision_after": 163,
+      "outcome": "TRUE"
+    },
+    {
+      "cycle": 683,
+      "stage": "path_search",
+      "wall_ms": 126.899,
+      "remaining_before_ms": 1564.258,
+      "remaining_after_ms": 1437.346,
+      "revision_before": 249,
+      "revision_after": 249,
+      "outcome": "TRUE"
+    }
+  ],
+  "retreat_blocks": [
+    {
+      "cycle": 302,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "HUMAN_OVERLAP"
+    },
+    {
+      "cycle": 455,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "HUMAN_OVERLAP"
+    },
+    {
+      "cycle": 612,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 615,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED"
+    },
+    {
+      "cycle": 618,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 621,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 624,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 627,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 630,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 633,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 636,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 641,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 644,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 659,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 668,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 671,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    },
+    {
+      "cycle": 674,
+      "status": "HUMAN_RETREAT_BLOCKED",
+      "retreat_reason": "NO_MONOTONIC_STEP"
+    }
+  ],
+  "retreat_block_counts": {
+    "HUMAN_OVERLAP": 2,
+    "NO_MONOTONIC_STEP": 14,
+    "SEARCH_BUDGET_EXHAUSTED": 1
+  },
+  "human_collision_observations": [
+    {
+      "stamp": 1794876582.7415965,
+      "clearance_m": 0.4654665068312134,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link3_visual"
+    },
+    {
+      "stamp": 1794876620.7402205,
+      "clearance_m": 0.36479309719948505,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link5_visual"
+    },
+    {
+      "stamp": 1794876621.3391728,
+      "clearance_m": -0.021487904853120895,
+      "status": "NEAR",
+      "retreat_reason": "None",
+      "robot_geom": "link5_visual"
+    },
+    {
+      "stamp": 1794876621.5392537,
+      "clearance_m": -0.016709603852255957,
+      "status": "NEAR",
+      "retreat_reason": "HUMAN_OVERLAP",
+      "robot_geom": "link4_visual"
+    },
+    {
+      "stamp": 1794876621.7406719,
+      "clearance_m": -0.044945626034786135,
+      "status": "NEAR",
+      "retreat_reason": "HUMAN_OVERLAP",
+      "robot_geom": "link3_visual"
+    },
+    {
+      "stamp": 1794876622.3398924,
+      "clearance_m": -0.029434113662547563,
+      "status": "NEAR",
+      "retreat_reason": "HUMAN_OVERLAP",
+      "robot_geom": "link4_visual"
+    },
+    {
+      "stamp": 1794876622.5385745,
+      "clearance_m": 0.00021989313113784936,
+      "status": "NEAR",
+      "retreat_reason": "HUMAN_OVERLAP",
+      "robot_geom": "link5_visual"
+    },
+    {
+      "stamp": 1794876622.742674,
+      "clearance_m": 0.16267504109011194,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link5_visual"
+    },
+    {
+      "stamp": 1794876648.0577536,
+      "clearance_m": 0.5361473618736383,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876653.339316,
+      "clearance_m": -0.00685636132878336,
+      "status": "NEAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876653.5409875,
+      "clearance_m": -0.004364962324048344,
+      "status": "NEAR",
+      "retreat_reason": "HUMAN_OVERLAP",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876657.438012,
+      "clearance_m": 0.14623729306230562,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876659.203792,
+      "clearance_m": 0.13235878132604773,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876661.0720007,
+      "clearance_m": 0.12235560390490573,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876662.805303,
+      "clearance_m": 0.11905691386822993,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876663.3210175,
+      "clearance_m": 0.13552951325022491,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876673.3655396,
+      "clearance_m": 0.6223017983599609,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link5_visual"
+    },
+    {
+      "stamp": 1794876687.0431142,
+      "clearance_m": 0.037824776895605844,
+      "status": "NEAR",
+      "retreat_reason": "None",
+      "robot_geom": "link5_visual"
+    },
+    {
+      "stamp": 1794876687.1923351,
+      "clearance_m": 0.034174959617876755,
+      "status": "NEAR",
+      "retreat_reason": "None",
+      "robot_geom": "link3_visual"
+    },
+    {
+      "stamp": 1794876687.9809155,
+      "clearance_m": 0.030484759887064977,
+      "status": "NEAR",
+      "retreat_reason": "None",
+      "robot_geom": "link3_visual"
+    },
+    {
+      "stamp": 1794876688.1446655,
+      "clearance_m": 0.01485219393872507,
+      "status": "NEAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876690.5634427,
+      "clearance_m": 0.022441368295121958,
+      "status": "NEAR",
+      "retreat_reason": "NO_MONOTONIC_STEP",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876691.441302,
+      "clearance_m": 0.04053128810864415,
+      "status": "NEAR",
+      "retreat_reason": "SEARCH_BUDGET_EXHAUSTED",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876692.048313,
+      "clearance_m": 0.043616350104135865,
+      "status": "NEAR",
+      "retreat_reason": "NO_MONOTONIC_STEP",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876695.948437,
+      "clearance_m": 0.10096822162072863,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876696.508371,
+      "clearance_m": 0.09987371091752284,
+      "status": "NEAR",
+      "retreat_reason": "NO_MONOTONIC_STEP",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876697.3482218,
+      "clearance_m": 0.10028271415231146,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876699.9760084,
+      "clearance_m": 0.09908302706286856,
+      "status": "NEAR",
+      "retreat_reason": "NO_MONOTONIC_STEP",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876704.8666105,
+      "clearance_m": 0.14331872188953507,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876705.999007,
+      "clearance_m": 0.6777033712192899,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link2_visual"
+    },
+    {
+      "stamp": 1794876707.1944206,
+      "clearance_m": 0.6715416121261685,
+      "status": "FAR",
+      "retreat_reason": "None",
+      "robot_geom": "link5_visual"
+    }
+  ],
+  "failed_path_events": [
+    {
+      "cycle": 444,
+      "source": "remaining_execution",
+      "motion": "EXECUTING",
+      "failure": {
+        "check": "EDGE_SAMPLE",
+        "failure": {
+          "sample_index": 12,
+          "sample_count": 21,
+          "fraction": 0.6,
+          "state": {
+            "reason": "HUMAN_COLLISION",
+            "q": [
+              0.7342462420463562,
+              -1.73155357837677,
+              2.251586389541626,
+              0.8602483630180359,
+              1.2042174577713012
+            ],
+            "revision": 31,
+            "human": {
+              "clearance": 0.09947173577978823,
+              "robot_geom": "link5_visual",
+              "body_id": 1,
+              "segment_id": 6,
+              "center_distance": 0.21797239868242418,
+              "robot_radius": 0.06770139687365663,
+              "human_radius": 0.0680349243814443,
+              "safety_margin": 0.1,
+              "geometry_model": "SPHERE_AND_MESH_BOX",
+              "sphere_clearance": 0.08223607742732326,
+              "box_clearance": 0.09947173577978823,
+              "status": "NEAR"
+            }
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 10,
+        "revision_before": 31,
+        "revision_after": 31,
+        "point_index": null,
+        "edge_index": 7,
+        "edge_start_q": [
+          0.9653885364532471,
+          -1.6567845344543457,
+          2.0794568061828613,
+          0.8818726539611816,
+          1.0303189754486084
+        ],
+        "edge_goal_q": [
+          0.580151379108429,
+          -1.7813996076583862,
+          2.3663394451141357,
+          0.8458321690559387,
+          1.3201497793197632
+        ]
+      },
+      "hypothetical_5cm_sample_clear": true,
+      "failed_sample_clearance_m": 0.09947173577978823
+    },
+    {
+      "cycle": 447,
+      "source": "planned_path",
+      "motion": "IDLE",
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            0.580151379108429,
+            -1.7813996076583862,
+            2.3663394451141357,
+            0.8458321690559387,
+            1.3201497793197632
+          ],
+          "revision": 33,
+          "human": {
+            "clearance": 0.09655860203092477,
+            "robot_geom": "link5_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.21349426092218607,
+            "robot_radius": 0.06770139687365663,
+            "human_radius": 0.0680349243814443,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.07775793966708512,
+            "box_clearance": 0.09655860203092477,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 7,
+        "revision_before": 33,
+        "revision_after": 33,
+        "point_index": 5,
+        "edge_index": null,
+        "point_q": [
+          0.580151379108429,
+          -1.7813996076583862,
+          2.3663394451141357,
+          0.8458321690559387,
+          1.3201497793197632
+        ]
+      },
+      "hypothetical_5cm_sample_clear": true,
+      "failed_sample_clearance_m": 0.09655860203092477
+    },
+    {
+      "cycle": 449,
+      "source": "planned_path",
+      "motion": "IDLE",
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.3396152257919312,
+            -1.042794942855835,
+            1.655845046043396,
+            0.6866962313652039,
+            -0.06923197954893112
+          ],
+          "revision": 35,
+          "human": {
+            "clearance": 0.09388363778048857,
+            "robot_geom": "link5_visual",
+            "body_id": 1,
+            "segment_id": 2,
+            "center_distance": 0.2238320535497626,
+            "robot_radius": 0.06770139687365663,
+            "human_radius": 0.08182694364595793,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.07430371303014806,
+            "box_clearance": 0.09388363778048857,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 7,
+        "revision_before": 35,
+        "revision_after": 35,
+        "point_index": 1,
+        "edge_index": null,
+        "point_q": [
+          1.3396152257919312,
+          -1.042794942855835,
+          1.655845046043396,
+          0.6866962313652039,
+          -0.06923197954893112
+        ]
+      },
+      "hypothetical_5cm_sample_clear": true,
+      "failed_sample_clearance_m": 0.09388363778048857
+    },
+    {
+      "cycle": 451,
+      "source": "planned_path",
+      "motion": "IDLE",
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            1.1526881456375122,
+            -1.7183693647384644,
+            2.1340668201446533,
+            0.8113343119621277,
+            1.0878103971481323
+          ],
+          "revision": 37,
+          "human": {
+            "clearance": 0.09199963100104844,
+            "robot_geom": "link4_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.2229814577113369,
+            "robot_radius": 0.06018336476416798,
+            "human_radius": 0.07806014115751542,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.08473795178965349,
+            "box_clearance": 0.09199963100104844,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 8,
+        "revision_before": 37,
+        "revision_after": 37,
+        "point_index": 4,
+        "edge_index": null,
+        "point_q": [
+          1.1526881456375122,
+          -1.7183693647384644,
+          2.1340668201446533,
+          0.8113343119621277,
+          1.0878103971481323
+        ]
+      },
+      "hypothetical_5cm_sample_clear": true,
+      "failed_sample_clearance_m": 0.09199963100104844
+    },
+    {
+      "cycle": 592,
+      "source": "remaining_execution",
+      "motion": "EXECUTING",
+      "failure": {
+        "check": "WAYPOINT",
+        "failure": {
+          "reason": "HUMAN_COLLISION",
+          "q": [
+            0.9653885364532471,
+            -1.6567845344543457,
+            2.0794568061828613,
+            0.8818726539611816,
+            1.0303189754486084
+          ],
+          "revision": 170,
+          "human": {
+            "clearance": 0.08030595866754008,
+            "robot_geom": "link5_visual",
+            "body_id": 1,
+            "segment_id": 6,
+            "center_distance": 0.20906102516857192,
+            "robot_radius": 0.06770139687365663,
+            "human_radius": 0.07811163089163813,
+            "safety_margin": 0.1,
+            "geometry_model": "SPHERE_AND_MESH_BOX",
+            "sphere_clearance": 0.06324799740327715,
+            "box_clearance": 0.08030595866754008,
+            "status": "NEAR"
+          }
+        },
+        "traversal": "WAYPOINTS_THEN_EDGES",
+        "path_points": 10,
+        "revision_before": 170,
+        "revision_after": 170,
+        "point_index": 2,
+        "edge_index": null,
+        "point_q": [
+          0.9653885364532471,
+          -1.6567845344543457,
+          2.0794568061828613,
+          0.8818726539611816,
+          1.0303189754486084
+        ]
+      },
+      "hypothetical_5cm_sample_clear": true,
+      "failed_sample_clearance_m": 0.08030595866754008
+    }
+  ],
+  "motion_faults": [
+    "[ERROR] [1794876673.675504648] [motion_component]: Execution failure: STALLED | joint=2 | error=0.062 rad | reference=-2.160 | actual=-2.222 | command=0.423 | filtered=0.423",
+    "[ERROR] [1794876707.260135908] [motion_component]: Execution failure: STALLED | joint=1 | error=0.095 rad | reference=0.723 | actual=0.629 | command=0.489 | filtered=0.489",
+    "[ERROR] [1794876714.340141664] [motion_component]: Execution failure: STALLED | joint=5 | error=0.059 rad | reference=0.925 | actual=0.866 | command=0.418 | filtered=0.418"
+  ],
+  "simulation": {
+    "profile_windows": 38,
+    "wall_s": 190.04996962400037,
+    "physics_s": 131.07999999989778,
+    "real_time_factor": 0.6897133435971063,
+    "range": [
+      0.6106945473404726,
+      0.8090337890244841
+    ]
+  },
+  "last_snapshot": "[INFO] [1794876756.338210979] [planning_node]: Planning snapshot: status=MOTION_ERROR, motion=CONTROL_ERROR, failure_reason=STALLED, fault=True, stop_owned=False, pending=None, planning_required=True, path_points=0, feedback_ready=True, obstacles_ready=True, human=UNKNOWN/VISION_INVALID, human_checks=False, human_validation_pending=False, path_validation=CLEAR, next_waypoint=1, plan_failure=NONE, target=[0.06101063681630065, -0.09999816339340063, 0.37362267266016513], eof=[0.24850688050408676, -0.12165530888943503, 0.11986140309317396], target_error_m=0.3162572612293941, selected_goal_error_m=None, goal_tolerance_m=0.12, target_clearance_m=0.04",
+  "cache_totals_last_profile": {
+    "capacity": 256,
+    "entries": 0,
+    "hits_total": 7878,
+    "misses_total": 29564
+  },
+  "limits": [
+    "Negative clearance is overlap of conservative robot/human approximations, not proof of physical contact.",
+    "Human collision report reasons may be retained from a preceding retreat attempt; inspect numeric clearance and matching failure event.",
+    "Motion failure logs label the largest tracking-error joint, not necessarily the joint that triggered the stall condition.",
+    "STALLED currently uses net displacement over 2 s versus integrated absolute commanded velocity. Reversals can create a false positive, but the missing latest all-joint/command bag prevents proving that for these three faults.",
+    "Five samples rejected at 10 cm can be reconsidered at 5 cm; the entire path still requires complete revalidation.",
+    "No camera-driver/controller/retreat algorithm fix was made by this inspection."
+  ],
+  "camera_errors": {
+    "first_device_poll_failure": {
+      "path": "/home/lvinz/.ros/log/node_918_1794876560187.log",
+      "stamp": 1794876607.3984406,
+      "message": "Failed to poll cameras: node cannot continue."
+    },
+    "later_reconnect_failures": {
+      "example_path": "/home/lvinz/.ros/log/node_1248_1794876755852.log",
+      "stamp": 1794876755.936944,
+      "message": "Failed to open K4A device at index 0"
+    },
+    "launch_log": "/tmp/cra_2s_cache_20261117_074919.log (container)",
+    "scope": "Read-only observed SDK process abort/restart and device-open failures; no USB/device cause inferred or driver configuration changed."
+  },
+  "margin_boundary_verification": {
+    "scope": "Offline real MuJoCo geometry, fixed synthetic capsules and frozen clock. State boundary only, not ROS execution or a full path replay.",
+    "rows": [
+      {
+        "fixture_requested_clearance_m": 0.049,
+        "measured_clearance_m": 0.04900000000016275,
+        "status": "NEAR",
+        "ordinary_state_valid": false,
+        "margin_m": 0.05
+      },
+      {
+        "fixture_requested_clearance_m": 0.051,
+        "measured_clearance_m": 0.05099999999987907,
+        "status": "FAR",
+        "ordinary_state_valid": true,
+        "margin_m": 0.05
+      },
+      {
+        "fixture_requested_clearance_m": 0.075,
+        "measured_clearance_m": 0.07500000000013694,
+        "status": "FAR",
+        "ordinary_state_valid": true,
+        "margin_m": 0.05
+      },
+      {
+        "fixture_requested_clearance_m": -0.005,
+        "measured_clearance_m": -0.004999999999686089,
+        "status": "NEAR",
+        "ordinary_state_valid": false,
+        "margin_m": 0.05,
+        "retreat_failure": "HUMAN_OVERLAP"
+      }
+    ],
+    "source_sha256": {
+      "src/cra/config/robot.yaml": "a5dd5b0b3be20acc384a091db3fda31a44720e3224fa889e27421c1058275ba2",
+      "src/planning/planning/algorithms/collision_filter.py": "6127fe5937b66276e530104c387850354a653001425d8b934e7b5efc18cec2d0",
+      "src/planning/planning/algorithms/human_collision.py": "acc02047150a975daa942f1029da84268ed187d4cb0a472a7910cf5d7dd3fdde",
+      "src/planning/planning/path_planner.py": "63515ced4cbbd5080810d9a299b39a9696e0afb7ea931ca89eebcf198bc81c48"
+    },
+    "build": "cra and planning builds passed",
+    "targeted_tests": {
+      "mesh_bounds": 11,
+      "collision_memoization": 13
+    },
+    "native_installed_constructor": "Verified 0.05 m human margin, 2.0 s timeout at both layers, cache 256, static margin 0.005 m and execution flags preserved; isolated localhost ROS domain 223, no callback spin/motion command."
+  },
+  "stall_detector_probe": {
+    "artifact": "src/motion/test/diagnostics/stall_monitor_probe_20261117.json",
+    "finding": "Synthetic 0.24 rad reversing travel with nearly zero net displacement produces STALLED with unchanged monitor; stationary and monotonic controls behave as expected. This verifies a possible false-positive class, not the cause of the three live events."
+  },
+  "applied_change": "Future simulation human margin 0.05 m, timeout remains 2.0 s and cache 256; no Motion/retreat/controller/camera algorithm change."
+}
