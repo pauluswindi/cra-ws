@@ -21,6 +21,7 @@ from visualization_msgs.msg import Marker
 from planning.human_capsule_monitor import HumanCapsuleMonitor
 from planning.path_planner import PathPlanner
 from planning.planning_manager import PlanningManager
+from planning.rrt_shadow import ShadowRRTObserver
 from planning.visualization.planning_visualizer import PlanningVisualizer
 from simulation.frame_transform import FrameTransform
 
@@ -245,6 +246,21 @@ class PlanningNode(Node):
             self.planning_cycle,
         )
 
+        self.rrt_shadow = None
+        shadow_config = config.get('planning', {}).get('rrt_shadow', {})
+        shadow_enabled = shadow_config.get('enabled', False)
+        if not isinstance(shadow_enabled, bool):
+            raise ValueError('rrt_shadow.enabled must be boolean')
+        if shadow_enabled and robot.get('mode') == 'simulation':
+            self.rrt_shadow = ShadowRRTObserver(
+                paths['model_path'], self.joint_names,
+                {key: getattr(checker, key) for key in (
+                    'safety_margin', 'max_joint_step', 'human_safety_margin',
+                    'human_data_timeout', 'human_report_cache_size')},
+                **{key: value for key, value in shadow_config.items() if key != 'enabled'})
+            self.rrt_shadow_pub = self.create_publisher(String, '/planning/rrt_shadow', 10)
+            self.rrt_shadow_timer = self.create_timer(.05, self.observe_rrt)
+
         self.set_status("WAITING_FOR_FEEDBACK")
 
         self.get_logger().info(
@@ -255,6 +271,7 @@ class PlanningNode(Node):
             f"human_safety_margin={human_safety_margin:.3f}m, "
             f"human_geometry_cache={checker.human_report_cache_size}, "
             f"profile_planning={self.manager.profiler.enabled}, "
+            f"rrt_shadow={self.rrt_shadow is not None}, "
             f"segment_progress={self.planner.segment_progress_enabled}, "
             f"progress_corridor="
             f"{self.planner.execution_progress_config['corridor_tolerance']}rad, "
@@ -262,6 +279,19 @@ class PlanningNode(Node):
             f"{self.manager.simulation_only_ignore_unknown}, "
             f"human_margin_recovery={self.manager.human_margin_recovery_enabled}"
         )
+
+    def observe_rrt(self):
+        # No manager.step(), path replacement, STOP, RELEASE or EXECUTE here.
+        event = self.rrt_shadow.tick(self.manager)
+        if event is not None:
+            payload = json.dumps(event, allow_nan=False, separators=(',', ':'))
+            self.rrt_shadow_pub.publish(String(data=payload))
+            self.get_logger().info(f'RRT shadow: {payload}')
+
+    def destroy_node(self):
+        if getattr(self, 'rrt_shadow', None) is not None:
+            self.rrt_shadow.close()
+        return super().destroy_node()
 
     def initialize_environment(self):
         checker = self.planner.collision_filter

@@ -44,6 +44,15 @@ planning:
   collision_checks:
     human_report_cache_size: 256 # Exact geometry reuse within the current snapshot.
 
+  rrt_shadow:
+    enabled: true # Simulation observation only; candidates never command Motion.
+    search_budget: 0.5
+    selection_budget: 2.0
+    preference_search_budget: 0.8
+    validation_budget: 0.5
+    preferred_clearance: 0.07
+    retry_interval: 3.0
+
   execution_progress:
     enabled: true
     corridor_tolerance: 0.04 # Joint-space passage evidence, not a collision margin.

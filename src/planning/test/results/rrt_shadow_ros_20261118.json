@@ -1,0 +1,92 @@
+{
+  "scope": "Headless ROS transport probe on an isolated domain; no robot or Motion node.\n\nThe ordinary planning timer is cancelled deliberately. An artificial graph\nfailure exposes the new observer while real DDS joint/human callbacks run.\nThis does not prove whole-cycle responsiveness of the existing synchronous A*.\n",
+  "ros_domain": 224,
+  "events": [
+    {
+      "event": "SEARCH_SUBMITTED",
+      "attempt": 1,
+      "observation_only": true,
+      "scene_revision": 5
+    },
+    {
+      "kind": "search",
+      "worker_pid": 1371,
+      "reason": "NONE",
+      "scene_revision": 5,
+      "search": {
+        "iterations": 0,
+        "nodes": 2,
+        "state_checks": 4,
+        "edge_checks": 2,
+        "waypoints": 2,
+        "path_length_rad": 1.9232369572445733,
+        "reason": "NONE",
+        "environment_revision": 5,
+        "elapsed_s": 0.037989976999597275,
+        "seed": 1
+      },
+      "preference": {
+        "selection": "BASELINE_RETAINED",
+        "candidate_reason": "PREFERENCE_ALREADY_MET",
+        "clearance_samples": 338,
+        "baseline_score": {
+          "min_clearance_m": 17.1837538818643,
+          "start_clearance_m": 17.205243740184155,
+          "goal_clearance_m": 17.1837538818643,
+          "length_rad": 1.9232369572445733
+        },
+        "effective_preference_m": 0.07,
+        "selected_score": {
+          "min_clearance_m": 17.1837538818643,
+          "start_clearance_m": 17.205243740184155,
+          "goal_clearance_m": 17.1837538818643,
+          "length_rad": 1.9232369572445733
+        },
+        "reason": "NONE",
+        "environment_revision": 5,
+        "elapsed_s": 0.17606897999939974
+      },
+      "elapsed_s": 0.21424639499855402,
+      "event": "LATEST_VALIDATION_SUBMITTED",
+      "attempt": 1,
+      "observation_only": true,
+      "candidate_points": 2,
+      "capture_to_result_s": 0.649901538999984,
+      "feedback_age_s": 0.016224843999225413,
+      "human_age_at_capture_s": 0.0066320969999651425,
+      "human_age_at_result_s": 0.6565336359999492
+    },
+    {
+      "kind": "validate",
+      "worker_pid": 1371,
+      "reason": "NONE",
+      "scene_revision": 5,
+      "points": 4,
+      "elapsed_s": 0.03493805399921257,
+      "event": "RESULT",
+      "attempt": 1,
+      "observation_only": true,
+      "candidate_points": 0,
+      "capture_to_result_s": 0.04996663200108742,
+      "feedback_age_s": 0.00604880500031868,
+      "human_age_at_capture_s": 0.017027985999447992,
+      "human_age_at_result_s": 0.06699461800053541,
+      "disposition": "VALID_FOR_CURRENT_SCENE_NO_DISPATCH"
+    }
+  ],
+  "parent_pid": 1325,
+  "feedback_updates_while_worker_active": 36,
+  "human_updates_while_worker_active": 36,
+  "max_spin_once_s": 0.00713476599958085,
+  "elapsed_s": 0.7066132009986177,
+  "motion_commands": [],
+  "normal_astar_timer_cancelled": true,
+  "source_sha256": {
+    "src/planning/test/verify_rrt_shadow_ros.py": "1e019e0119c75bc1ba5acdaddefa1e978390b244aecc89f83427b6448d1f2e06",
+    "src/cra/config/robot.yaml": "de381f4c27cfd1e02a2d1f7a6572073a1d62e716fe8885c1276d808870028d02",
+    "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+    "src/planning/planning/rrt_shadow.py": "32bcebe01a6785a74eb90db1336e86d917cc7995cbcb7bf7b3368ab7a8d054e0",
+    "src/planning/planning/planning_node.py": "d534789527447a99cb704d9d45aed8fa04db552641d1ff20610f8f13aba89d47",
+    "src/planning/planning/planning_manager.py": "3d2f814808fddb23337a329d7b85da02e75a41e8e5697199391067e2cc644dcf"
+  }
+}

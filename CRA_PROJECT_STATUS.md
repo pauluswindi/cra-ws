@@ -1,7 +1,7 @@
 # Cognitive Robotic Arm (CRA)
 # Development Status
 
-Last updated: 2026-11-17
+Last updated: 2026-11-18
 
 ## 1. Project Information
 
@@ -161,6 +161,123 @@ the local preview. SET TARGET validates the preview and submits one command.
 Current Target changes only when valid simulation feedback arrives.
 
 ## 5. Recent Development
+
+### 2026-11-18 — Isolated RRT observation and latest-scene validation
+
+Status: User-authorized observation stage implemented and built. GNG/A* still
+supplies live paths. RRT candidates do not command Motion. No best-first
+retreat or completed-task/idle-policy change is included.
+
+- PlanningManager records failed graph attempts after its existing goal
+  alternatives. A 50 ms node timer admits/polls one spawned-process job; no
+  extra search is added to the live manager step. Worker owns model/data/cache.
+  Inputs copy obstacle sizes/masks/poses and retain original human expiry.
+- RRT and the clearance selector run observationally. A candidate is checked
+  again using CRA's actual trajectory-path preparation and collision validation
+  on a new latest scene. Target/attempt replacement, movement, stale feedback,
+  human expiry and later scene changes prevent current-scene labeling. No live
+  path assignment or STOP/RELEASE/EXECUTE comes from the observer.
+- `planning.rrt_shadow.enabled=true` enables this only in simulation; disabling
+  it restores the original node without observer jobs. Original 5 cm mandatory
+  margin, 2 s human timeout and execution/UNKNOWN experimental flags remain.
+  One submission per attempt, >=3 s spacing, no queued backlog. Running stale
+  jobs drain under cooperative deadlines; worker errors disable only observer.
+- All 204 Planning functional tests pass, including 22 new observer tests.
+  Planning/cra build and new Python style checks pass. Actual headless DDS
+  probe on isolated domain 224 receives 36 joint and 36 human updates while
+  worker active, labels the latest-scene validation successful, and emits no
+  Motion commands. Source hashes and event/timing evidence are saved.
+- Probe scope: synthetic far human, artificial failed graph attempt and
+  cancelled ordinary planning timer. Existing A*, recovery searches and final
+  live path preparation remain synchronous; whole-pipeline responsiveness,
+  physical camera behavior and robot execution are not established here.
+
+Files: planning/rrt_shadow.py; planning/planning_node.py;
+planning/planning_manager.py; test/test_rrt_shadow.py;
+test/verify_rrt_shadow_ros.py; test/RRT_SHADOW.md;
+test/results/rrt_shadow_ros_20261118.json (under src/planning), plus
+src/cra/config/robot.yaml. Diagnostics: /planning/rrt_shadow and RRT shadow logs.
+Next: collect normal simulation failure/freshness/revalidation timings before
+choosing shared live budgets or active fallback dispatch.
+
+### 2026-11-18 — Offline clearance preference and small human perturbations
+
+Status: User-approved offline extension of the RRT prototype. No live caller,
+launch configuration, motion command, best-first retreat or idle policy changed.
+
+- Added `ClearancePathPreference`: score the baseline's minimum sampled
+  clearance, try one RRT-Connect alternative around a preferred 7 cm band,
+  select only if clearance improves and joint path length stays within 125%
+  of baseline. Fixed start/goal clearances cap the preference. Mandatory 5 cm
+  margin is unchanged. Baseline fallback requires fresh final certification;
+  expiry, revision changes and final deadline failures return no path.
+- Search uses isolated MuJoCo data/cache and the existing collision geometry.
+  Ranking always requests all-pair mesh-box refinement at the original margin.
+  Ordinary fast FAR reports may otherwise expose different-quality sphere
+  lower bounds; those are not interchangeable with the refined ranking metric.
+- Eight paired seeds in the blocked-direct capsule scene all returned baseline
+  and preferred paths, independently prepared/certified. Median refined minimum
+  clearance improved 5.1373 -> 7.0838 cm; median path length 4.8412 -> 5.0923 rad.
+  Maximum individual extra travel was 20.46%, within the 25% cap.
+- Unchanged paths were checked against +/-1, +/-3 and +/-5 mm capsule shifts
+  on each axis. Baseline validity: 44/48, 34/48, 32/48; preferred: 48/48 at each
+  amplitude. Both nominal scenes give 8/8. This is one synthetic static scene
+  and deterministic perturbations, not measured sensor noise or moving humans.
+- Selection overhead median 1.354 s (0.909-1.710 s), additional to baseline
+  generation. Geometry freshness is frozen only for the experiment; real CPU
+  deadlines advance. The 2 s selector budget is not a live feedback latency
+  guarantee. Integrating synchronously into the current ROS pipeline is pending
+  timing/freshness design, not authorized by these offline results.
+- All 182 Planning functional tests pass, including 17 preference tests.
+  Planning build, new Python style and installed imports pass. Benchmark source
+  hashes match. No camera, ROS or robot execution trial ran.
+
+Files: planning/algorithms/clearance_preference.py;
+test/test_clearance_preference.py; test/benchmark_clearance_preference.py;
+test/CLEARANCE_PREFERENCE.md; test/results/clearance_preference_20261118.json
+(all under src/planning).
+Next: discuss bounded fallback scheduling and fresh feedback before runtime
+integration; preserve the existing GNG/A* and Motion safety protocol.
+
+### 2026-11-18 — First bounded RRT-Connect prototype and offline comparison
+
+Status: User-agreed first development experiment implemented, built and tested
+offline. It is not called by PathPlanner/PlanningManager or the live launch.
+Checkpoint 5e10ba9 remains the pre-experiment baseline. No runtime config,
+Motion, GNG/A*, retreat guard or completed-task behavior changed.
+
+- Added a standalone five-joint bidirectional RRT-Connect with ordinary CRA
+  state/edge checks, full assembled-path certification, deterministic seeds,
+  finite joint bounds and explicit iteration/node/cooperative wall budgets.
+  It rejects stale human data, environment changes, invalid endpoints and
+  late/checker-error results. It cannot escape an invalid human-margin start.
+- 16 new tests use exact slab-intersection obstacles and exercise detours,
+  reversed goal branches, invalid states, expiry, revisions, checker errors,
+  final certification and bounded inner CONNECT expansion. All 165 Planning
+  functional tests pass. Planning build, Python style and syntax checks pass.
+- Offline benchmark: 8 seeds/repeats per method across five scenes, 80 trials
+  total. Far-human and blocked-direct scenes both give 8/8 for A* and RRT.
+  The deliberate two-node/no-edge graph plus blocked direct segment gives
+  A* 0/8 and RRT 8/8 with real tree growth. This is an artificial graph-gap
+  control, not a diagnosis of the live graph. Both reject the 3 cm non-contact
+  start under the 5 cm margin and reject expired observations.
+- All 40 returned paths are prepared under existing Motion segment limits
+  and independently checked with new MuJoCo data, disabled geometry cache
+  and twice-finer 0.01 rad sampling. Source/config/graph hashes are saved.
+- Blocked-direct medians: existing A* 0.315 s/7.011 rad path; RRT 0.234 s/
+  4.841 rad path. Human geometry is deliberately frozen; RRT's 0.5 s deadline
+  uses real perf_counter. A* keeps its existing limits without a new wall
+  deadline. These are not an equal-budget race or live timing guarantees.
+- Some RRT paths graze the allowed margin: minimum sampled clearance
+  0.050079 m. Frozen-scene success does not establish noise robustness,
+  moving-human safety, continuous collision freedom or servo trackability.
+
+Files: planning/algorithms/rrt_connect.py; test/test_rrt_connect.py;
+test/benchmark_rrt_connect.py; test/RRT_CONNECT_PROTOTYPE.md;
+test/results/rrt_connect_offline_20261118.json (all under src/planning).
+Next: discuss clearance robustness and total feedback/freshness budgets before
+live fallback dispatch; completed-task hold policy and best-first retreat
+remain separate unimplemented work. No ROS/camera/robot trial was started.
 
 ### 2026-11-17 — Checkpoint before retreat-search algorithm experiments
 

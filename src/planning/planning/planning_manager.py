@@ -59,6 +59,10 @@ class PlanningManager:
         self.path_failure_sequence = 0
         self.execution_path_id = 0
         self.execution_progress_reason = "NO_EXECUTION"
+        # Read-only observation hook; never used to choose Motion decisions.
+        self.target_generation = 0
+        self.graph_attempt_sequence = 0
+        self.last_graph_failure = None
         self.segment_progress = None
         self.segment_progress_path = None
         self.human_revision = None
@@ -735,6 +739,8 @@ class PlanningManager:
         self.planner.update_obstacle("target", target_world)
 
         self.target_base = target_base.copy()
+        self.target_generation += 1
+        self.last_graph_failure = None
 
         if not self.safe_recovery_active:
             self.recovery_blocked = False
@@ -1445,6 +1451,8 @@ class PlanningManager:
                 )
 
             self.planning_required = False
+            self.graph_attempt_sequence += 1
+            self.last_graph_failure = None
 
             try:
                 goal = self.profiler.call(
@@ -1474,6 +1482,12 @@ class PlanningManager:
                     if alternative is not None:
                         goal, planned = alternative, True
                 if not planned:
+                    if self.planner.last_plan_failure == "NO_GRAPH_PATH":
+                        self.last_graph_failure = {
+                            "sequence": self.graph_attempt_sequence,
+                            "target_generation": self.target_generation,
+                            "start": self.current_q.copy(), "goal": np.asarray(goal).copy(),
+                        }
                     self.human_retry_count += 1
                     self._remember_human_block()
                     if self.planner.last_plan_failure == "HUMAN_VISION_UNKNOWN":

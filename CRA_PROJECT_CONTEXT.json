@@ -1,9 +1,9 @@
 {
   "metadata": {
     "document_name": "CRA_PROJECT_CONTEXT.json",
-    "version": "1.25",
+    "version": "1.28",
     "created_date": "2026-11-12",
-    "last_updated": "2026-11-17",
+    "last_updated": "2026-11-18",
     "project_name": "Cognitive Robotic Arm",
     "purpose": "Maintain shared project context for ChatGPT and Codex development.",
     "source_of_truth": "Actual repository source code, configuration, and reproducible test results.",
@@ -204,6 +204,43 @@
       "status": "ACTIVE",
 
       "role": "Generate and validate robot-arm paths using GNG and A*.",
+
+      "rrt_shadow_observation_2026_11_18": {
+        "status": "USER_AUTHORIZED_OBSERVATION_ONLY_BUILT_NATIVE_ROS_PROBE_PASSED",
+        "implementation": "PlanningManager exposes a read-only NO_GRAPH_PATH attempt after existing alternative-goal attempts. A 50 ms PlanningNode timer polls one spawned-process job with its own CollisionFilter/model/data/cache. The observer never calls manager.step, assigns a live path or publishes a Motion command. No backlog; one job per graph attempt and >=3 s between searches.",
+        "validation": "Copied sizes, masks, mocap poses and immutable human geometry retain original monotonic receipt/expiry. Known OBSERVED human and fresh feedback/static obstacles required. Target generation and attempt replacement invalidate old results. Candidate is prepared/certified with actual PathPlanner methods on a new latest scene in the worker at <=0.01 rad sampling. Further scene revision or measured-start change rejects current-scene labeling. VALID_FOR_CURRENT_SCENE_NO_DISPATCH is diagnostic, not an execution certificate for future use.",
+        "configuration": "planning.rrt_shadow.enabled=true in robot.yaml, simulation-only. RRT 0.5 s, selection 2 s, preferred search 0.8 s, latest validation 0.5 s, preference 0.07 m, retry interval 3 s. Mandatory margin 0.05 m, human timeout 2 s, execute_path=True and simulation_only_ignore_unknown=True unchanged. Worker does not use the UNKNOWN experiment override.",
+        "verification": "All 204 Planning functional tests pass, including 22 new process/coordinator/manager tests. Planning/cra colcon build and new-file Flake8 pass. Tests cover target replacement, motion, stale inputs, blocked latest geometry, no-dispatch reports and process isolation. Actual DDS headless probe passes on isolated domain 224 with 36 joint and 36 human updates while worker active and zero Motion commands; source hashes saved.",
+        "limits": "Headless probe uses a synthetic far human and artificial graph failure, with ordinary A* timer cancelled; it does not prove full-cycle nonblocking behavior, moving-human safety or execution. Original A*, recovery and live execution preparation remain synchronous. Running cooperative jobs drain after logical cancellation and may overrun on a native query; expired/late outputs are rejected. No active RRT dispatch, best-first retreat or idle-policy change.",
+        "next_step": "Observe /planning/rrt_shadow during normal MuJoCo failures; compare compute, capture-to-result and feedback/human age, skipped context and latest-validation rejection before choosing active-dispatch/shared-budget architecture.",
+        "documentation": "src/planning/test/RRT_SHADOW.md",
+        "artifact": "src/planning/test/results/rrt_shadow_ros_20261118.json"
+      },
+
+      "clearance_preference_prototype_2026_11_18": {
+        "status": "USER_APPROVED_OFFLINE_IMPLEMENTED_TESTED_NOT_IN_LIVE_DISPATCH",
+        "mechanism": "ClearancePathPreference scores a baseline and tries one RRT-Connect alternative at preferred 0.07 m clearance, capped by fixed endpoint clearances. Mandatory 0.05 m margin is unchanged. Select only a larger bottleneck clearance with joint length <=1.25 times baseline; otherwise recertify baseline. Unknown data, scene changes, checker failures and final deadline violations return no result.",
+        "geometry": "Native search isolates mutable MuJoCo data and geometry cache. Baseline/candidate ranking always uses existing all-pair sphere/mesh-box refinement at the original mandatory threshold; ordinary fast FAR sphere lower bounds are recorded separately and cannot be compared as if they were refined surface metrics.",
+        "verification": "182 Planning functional tests pass, including 17 preference and 16 previous RRT tests. Planning colcon build, new Python Flake8 and installed imports pass. Eight paired seeds in one synthetic blocked-direct capsule scene produce 16 independently prepared/recertified paths. Saved source hashes match. No ROS/camera/robot trial.",
+        "results": "All eight seeds select improved paths. Median refined minimum clearance 0.051373 -> 0.070838 m; median joint path length 4.8412 -> 5.0923 rad; greatest individual length increase 20.46%, below 25% cap. Baseline validity at +/-1, +/-3, +/-5 mm axis shifts is 44/48, 34/48, 32/48; preferred is 48/48 each. Nominal validity 8/8 each.",
+        "timing_and_limits": "Median additional selection time 1.354 s, range 0.909-1.710 s, beyond external baseline search. Selector cooperative budget 2 s and candidate search cap 0.8 s are offline only. Human monotonic time is frozen; real perf_counter advances. One scene and deterministic translations do not prove real sensor-noise robustness, moving-human safety, continuous collision freedom, physical surface distance or servo trackability.",
+        "preserved": "No live callers, YAML changes, Motion changes, GNG/A* changes, completed-task hold policy or best-first retreat. Human timeout 2 s, margin 5 cm, execute_path=True and simulation_only_ignore_unknown=True remain unchanged.",
+        "next_step": "Discuss shared planning/freshness/feedback budgets and nonblocking fallback scheduling before live integration, preserving GNG/A* as primary route and STOP/RELEASE/EXECUTE checks.",
+        "documentation": "src/planning/test/CLEARANCE_PREFERENCE.md",
+        "artifact": "src/planning/test/results/clearance_preference_20261118.json"
+      },
+
+      "rrt_connect_prototype_2026_11_18": {
+        "status": "OFFLINE_PROTOTYPE_IMPLEMENTED_BUILT_TESTED_NOT_IN_LIVE_DISPATCH",
+        "baseline_commit": "5e10ba9",
+        "implementation": "Standalone finite five-joint RRT-Connect, two temporary trees, ordinary CollisionFilter state/edge checks and final assembled-path certification. Default 0.15 rad Euclidean step, 0.5 s cooperative perf_counter budget, 1000 outer iterations and 3000 total nodes. Checks revision/freshness before and after queries; invalid starts, expiry, budgets and checker errors return distinct failures. No margin escape, persistent tree reuse or concurrent checker sharing.",
+        "verification": "165 Planning functional tests pass, including 16 new exact-wall search/certification/failure tests. Planning build and new Python style/syntax pass. Eight seeds/repeats per method in five real-model frozen-human scenes give 80 trials and 40 returned paths, all recertified with fresh MuJoCo data, no geometry cache and 0.01 rad edge sampling.",
+        "results": "Both algorithms return 8/8 on far-human and blocked-direct scenes. Artificial two-node/no-edge graph with blocked direct segment: A* 0/8, RRT 8/8 with actual tree growth; not proof of live graph deficiency. Both reject a 3 cm start under 5 cm margin and expired observations. Blocked-direct median search: A* 0.315 s/7.011 rad, RRT 0.234 s/4.841 rad. Different existing search limits; not an equal-budget race.",
+        "limits": "Minimum sampled RRT clearance 0.050079 m indicates near-margin paths and unresolved noise robustness. Frozen observations do not prove moving-human safety, continuous collision freedom or servo trackability. No runtime callers, ROS/camera/robot launch, completed-task policy change or best-first retreat added. A long checker call can overrun a cooperative budget; late results are rejected.",
+        "next_step": "Discuss clearance preference, shared planning/feedback/freshness budgets and mission-state hold policy before live fallback integration. Preserve GNG/A*, current collision rules and Motion protocol.",
+        "documentation": "src/planning/test/RRT_CONNECT_PROTOTYPE.md",
+        "artifact": "src/planning/test/results/rrt_connect_offline_20261118.json"
+      },
 
       "human_margin_5cm_and_stuck_2026_11_17": {
         "status": "USER_REQUESTED_5CM_SIMULATION_MARGIN_BUILT_VERIFIED_LIVE_TRIAL_PENDING",
