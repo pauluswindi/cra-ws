@@ -1,5 +1,8 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 import math
 
 def deg(angle_degrees):
@@ -44,7 +47,10 @@ def generate_launch_description():
         package='azure_kinect_ros_driver',
         executable='node',
         name='k4a_ros_device_node',
-        parameters=[kinect_config],
+        parameters=[kinect_config, {
+            'tracker_enqueue_wait_ms': ParameterValue(
+                LaunchConfiguration('tracker_enqueue_wait_ms'), value_type=int),
+        }],
         respawn=True,
         respawn_delay=3.0,
         output='screen',
@@ -71,7 +77,7 @@ def generate_launch_description():
         name='base_to_camera_tf',
         arguments=[
             '0.0', '0.0', '0.2',             # x, y, z (meters) - Match the physical camera position on the robot
-            deg(0.0), deg(35.0), deg(0.0),   # roll, pitch, yaw
+            deg(0.0), deg(39.0), deg(0.0),   # roll, pitch, yaw
             'base_link',                     # Parent frame
             'camera_base',                   # Child frame (Azure Kinect TF root)
         ],
@@ -92,6 +98,9 @@ def generate_launch_description():
     }
 
     return LaunchDescription([
+        DeclareLaunchArgument(
+            'tracker_enqueue_wait_ms', default_value='-1', choices=['-1', '5'],
+            description='Tracker admission wait: -1 blocking (default), or 5 ms bounded'),
         kinect_node,
         static_tf_publisher,
 

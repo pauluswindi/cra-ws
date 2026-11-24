@@ -1,0 +1,979 @@
+{
+  "date": "2026-11-20",
+  "status": "ISOLATED_EXPERIMENT_COMPLETE_NOT_PROMOTED",
+  "scope": "Real Azure Kinect, real tracker, original TF/workspace and reconstruction; no Planning, Motion or GUI. No image/pose/capsule payloads recorded.",
+  "production_mode": "blocking; unchanged normal-launch behavior",
+  "experimental_mode": "BUILD_TESTING-only tracker_nonblocking_probe, zero-timeout SDK admission, busy skips tracker input without inventing pending results; real SDK errors propagate",
+  "measured_seconds": 120,
+  "warmup_seconds_per_trial": 15,
+  "trial_orders": [
+    "blocking then nonblocking",
+    "nonblocking then blocking"
+  ],
+  "policy_tests": {
+    "cpp_passed": 15,
+    "native_startup_cases_passed": 4,
+    "flake8_passed": true,
+    "whitespace_passed": true
+  },
+  "summary": {
+    "blocking": {
+      "runs": 2,
+      "active_human_measured_seconds": 60,
+      "observed_geometry_seconds": 60,
+      "invalid_geometry_seconds": 0,
+      "capture_hz": [
+        24.98,
+        24.685000000000002
+      ],
+      "received_rgb_hz": [
+        8.433333333,
+        9.866666667
+      ],
+      "received_depth_hz": [
+        11,
+        13
+      ],
+      "received_geometry_hz": [
+        11.66666667,
+        11.43333333
+      ],
+      "received_skeleton_hz": [
+        25.1,
+        24.5
+      ],
+      "median_skeleton_age_ms": [
+        318.097775,
+        322.090543
+      ],
+      "median_geometry_depth_stamp_age_ms": [
+        240.555678,
+        240.861195
+      ],
+      "median_enqueue_ms": [
+        34.047,
+        32.396
+      ]
+    },
+    "nonblocking": {
+      "runs": 2,
+      "active_human_measured_seconds": 60,
+      "observed_geometry_seconds": 60,
+      "invalid_geometry_seconds": 0,
+      "capture_hz": [
+        30.0,
+        30.0
+      ],
+      "received_rgb_hz": [
+        19.13333333,
+        17.23333333
+      ],
+      "received_depth_hz": [
+        19,
+        16.9
+      ],
+      "received_geometry_hz": [
+        20.36666667,
+        18.23333333
+      ],
+      "received_skeleton_hz": [
+        14.83333333,
+        14.73333333
+      ],
+      "median_skeleton_age_ms": [
+        82.703036,
+        79.936213
+      ],
+      "median_geometry_depth_stamp_age_ms": [
+        29.545943,
+        31.12087
+      ],
+      "median_enqueue_ms": [
+        0.010499999999999999,
+        0.0195
+      ]
+    }
+  },
+  "comparisons": {
+    "ab": {
+      "scope": "Real-camera blocking/nonblocking comparison without Planning or Motion.\n\nUses existing camera/workspace/calibration settings and reconstruction YAML.\nThe nonblocking executable is a BUILD_TESTING-only target, never installed.\nNo images, skeleton positions or capsule geometry are saved; only metadata.\n",
+      "domain": 221,
+      "configuration": {
+        "kinect_config": {
+          "body_tracking_enabled": true,
+          "body_tracking_smoothing_factor": 0.6,
+          "depth_enabled": true,
+          "depth_mode": "WFOV_2X2BINNED",
+          "color_enabled": true,
+          "color_resolution": "1536P",
+          "color_format": "jpeg",
+          "fps": 30,
+          "point_cloud": false,
+          "rgb_point_cloud": false,
+          "point_cloud_in_depth_frame": true,
+          "rescale_ir_to_mono8": false,
+          "ir_mono8_scaling_factor": 1.0,
+          "imu_rate_target": 100,
+          "wired_sync_mode": 0,
+          "subordinate_delay_off_master_usec": 0,
+          "sensor_sn": "",
+          "recording_file": "",
+          "recording_loop_enabled": false
+        },
+        "tf_arguments": [
+          "0.0",
+          "0.0",
+          "0.2",
+          "0.0",
+          "0.5881759579220891",
+          "0.0",
+          "base_link",
+          "camera_base"
+        ],
+        "workspace_params": {
+          "workspace_polygon": [
+            0.0,
+            -0.7,
+            0.8,
+            -0.7,
+            0.8,
+            0.7,
+            0.0,
+            0.7
+          ],
+          "workspace_z": [
+            -0.7,
+            0.7
+          ],
+          "exit_timeout_s": 0.5
+        }
+      },
+      "configuration_sha256": {
+        "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628",
+        "src/cra/config/reconstruction.yaml": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+        "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8"
+      },
+      "trials": [
+        {
+          "warmup_s": 15,
+          "measured_s": 30,
+          "body_packets_with_people": 754,
+          "active_zone_s": 30,
+          "observed_while_zone_active_s": 30,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 30
+          },
+          "streams": {
+            "body_index": {
+              "count": 750,
+              "received_hz": 25,
+              "max_callback_gap_s": 0.100527301,
+              "age_samples": 750,
+              "max_age_ms": 402.315397,
+              "median_age_ms": 320.251743,
+              "p95_age_ms": 352.461977
+            },
+            "body_packets": {
+              "count": 754,
+              "received_hz": 25.13333333,
+              "max_callback_gap_s": 0.096940383,
+              "age_samples": 754,
+              "max_age_ms": 387.801474,
+              "median_age_ms": 316.779521,
+              "p95_age_ms": 343.374319
+            },
+            "depth": {
+              "count": 330,
+              "received_hz": 11,
+              "max_callback_gap_s": 0.436857336,
+              "age_samples": 330,
+              "max_age_ms": 259.184636,
+              "median_age_ms": 238.92771,
+              "p95_age_ms": 252.202724
+            },
+            "geometry_observed": {
+              "count": 350,
+              "received_hz": 11.66666667,
+              "max_callback_gap_s": 0.403025389,
+              "age_samples": 350,
+              "max_age_ms": 275.52391,
+              "median_age_ms": 240.555678,
+              "p95_age_ms": 255.060713
+            },
+            "rgb": {
+              "count": 253,
+              "received_hz": 8.433333333,
+              "max_callback_gap_s": 0.650608221,
+              "age_samples": 253,
+              "max_age_ms": 326.44833,
+              "median_age_ms": 271.209688,
+              "p95_age_ms": 291.803146
+            },
+            "skeleton": {
+              "count": 753,
+              "received_hz": 25.1,
+              "max_callback_gap_s": 0.089602022,
+              "age_samples": 753,
+              "max_age_ms": 390.218345,
+              "median_age_ms": 318.097775,
+              "p95_age_ms": 344.710437
+            },
+            "zone": {
+              "count": 753,
+              "received_hz": 25.1,
+              "max_callback_gap_s": 0.088517162,
+              "age_samples": 753,
+              "max_age_ms": 391.395501,
+              "median_age_ms": 318.607316,
+              "p95_age_ms": 345.927413
+            }
+          },
+          "observer_latest_depth_body_delta": {
+            "count": 750,
+            "received_hz": 25,
+            "max_callback_gap_s": 0,
+            "age_samples": 750,
+            "max_age_ms": 333.439136,
+            "median_age_ms": 66.49967,
+            "p95_age_ms": 133.503749
+          },
+          "observer_nearest_depth_body_delta": {
+            "count": 750,
+            "received_hz": 25,
+            "max_callback_gap_s": 0,
+            "age_samples": 750,
+            "max_age_ms": 333.439136,
+            "median_age_ms": 33.192009,
+            "p95_age_ms": 133.503749
+          },
+          "pair_delta_note": "Observer receipt ordering; authoritative validity remains in ReconstructionNode",
+          "mode": "blocking",
+          "wall_s": 46.85998918400219,
+          "exits_before_cleanup": {
+            "tf": null,
+            "skeleton": null,
+            "zone": null,
+            "reconstruction": null,
+            "monitor": 0,
+            "driver": null
+          },
+          "capture_profiles": [
+            {
+              "capture_fps": 22.52,
+              "sdk_wait_mean_ms": 4.384,
+              "sdk_wait_max_ms": 466.9,
+              "process_mean_ms": 32.725,
+              "process_max_ms": 64.593,
+              "last_tracker_enqueue_ms": 37.292
+            },
+            {
+              "capture_fps": 24.94,
+              "sdk_wait_mean_ms": 0.004,
+              "sdk_wait_max_ms": 0.026,
+              "process_mean_ms": 33.766,
+              "process_max_ms": 59.722,
+              "last_tracker_enqueue_ms": 33.345
+            },
+            {
+              "capture_fps": 24.26,
+              "sdk_wait_mean_ms": 0.004,
+              "sdk_wait_max_ms": 0.025,
+              "process_mean_ms": 34.171,
+              "process_max_ms": 77.535,
+              "last_tracker_enqueue_ms": 31.669
+            },
+            {
+              "capture_fps": 24.38,
+              "sdk_wait_mean_ms": 0.004,
+              "sdk_wait_max_ms": 0.02,
+              "process_mean_ms": 33.336,
+              "process_max_ms": 70.4,
+              "last_tracker_enqueue_ms": 14.762
+            },
+            {
+              "capture_fps": 25.69,
+              "sdk_wait_mean_ms": 0.003,
+              "sdk_wait_max_ms": 0.024,
+              "process_mean_ms": 31.098,
+              "process_max_ms": 51.102,
+              "last_tracker_enqueue_ms": 39.883
+            },
+            {
+              "capture_fps": 25.82,
+              "sdk_wait_mean_ms": 0.003,
+              "sdk_wait_max_ms": 0.013,
+              "process_mean_ms": 30.616,
+              "process_max_ms": 46.728,
+              "last_tracker_enqueue_ms": 32.508
+            },
+            {
+              "capture_fps": 26.06,
+              "sdk_wait_mean_ms": 0.003,
+              "sdk_wait_max_ms": 0.011,
+              "process_mean_ms": 31.16,
+              "process_max_ms": 47.271,
+              "last_tracker_enqueue_ms": 36.295
+            },
+            {
+              "capture_fps": 25.02,
+              "sdk_wait_mean_ms": 0.004,
+              "sdk_wait_max_ms": 0.023,
+              "process_mean_ms": 32.359,
+              "process_max_ms": 67.036,
+              "last_tracker_enqueue_ms": 34.749
+            }
+          ],
+          "sdk_busy_skips_reported": 0,
+          "fatal_capture_timeout": false,
+          "capture_timeout_warnings": 0,
+          "camera_cleanup_completed": true,
+          "invalid_diagnostics": [
+            "[WARN] [1795162917.835847821] [reconstruction_node]: Reconstruction invalid: last_block=FRAME_OR_SKELETON_SYNC depth_rx_age_ms=41.3 body_index_rx_age_ms=21.1 skeleton_rx_age_ms=454.0 zone_rx_age_ms=453.6 last_success_age_ms=515.6 depth_body_sync_ms=66.7 active_bodies=1",
+            "[WARN] [1795162948.935025344] [reconstruction_node]: Reconstruction invalid: last_block=INPUTS_STALE_OR_MISSING depth_rx_age_ms=536.3 body_index_rx_age_ms=457.5 skeleton_rx_age_ms=438.4 zone_rx_age_ms=438.4 last_success_age_ms=533.0 depth_body_sync_ms=0.0 active_bodies=1"
+          ],
+          "driver_sha256": "c752af800b2cbfc092deb6d9703e9c852940a78c36b91ce0a28057a49ce9bb76"
+        },
+        {
+          "warmup_s": 15,
+          "measured_s": 30,
+          "body_packets_with_people": 444,
+          "active_zone_s": 30,
+          "observed_while_zone_active_s": 30,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 30
+          },
+          "streams": {
+            "body_index": {
+              "count": 439,
+              "received_hz": 14.63333333,
+              "max_callback_gap_s": 0.177478511,
+              "age_samples": 439,
+              "max_age_ms": 169.383439,
+              "median_age_ms": 86.404072,
+              "p95_age_ms": 123.074311
+            },
+            "body_packets": {
+              "count": 444,
+              "received_hz": 14.8,
+              "max_callback_gap_s": 0.142510431,
+              "age_samples": 444,
+              "max_age_ms": 149.769372,
+              "median_age_ms": 81.818963,
+              "p95_age_ms": 109.431728
+            },
+            "depth": {
+              "count": 570,
+              "received_hz": 19,
+              "max_callback_gap_s": 0.30301482,
+              "age_samples": 570,
+              "max_age_ms": 40.849188,
+              "median_age_ms": 27.844449,
+              "p95_age_ms": 31.550742
+            },
+            "geometry_observed": {
+              "count": 611,
+              "received_hz": 20.36666667,
+              "max_callback_gap_s": 0.222189125,
+              "age_samples": 611,
+              "max_age_ms": 97.224885,
+              "median_age_ms": 29.545943,
+              "p95_age_ms": 41.472736
+            },
+            "rgb": {
+              "count": 574,
+              "received_hz": 19.13333333,
+              "max_callback_gap_s": 0.466446155,
+              "age_samples": 574,
+              "max_age_ms": 43.718495,
+              "median_age_ms": 28.442267,
+              "p95_age_ms": 33.966387
+            },
+            "skeleton": {
+              "count": 445,
+              "received_hz": 14.83333333,
+              "max_callback_gap_s": 0.149237061,
+              "age_samples": 445,
+              "max_age_ms": 149.786243,
+              "median_age_ms": 82.703036,
+              "p95_age_ms": 111.370053
+            },
+            "zone": {
+              "count": 445,
+              "received_hz": 14.83333333,
+              "max_callback_gap_s": 0.149218027,
+              "age_samples": 445,
+              "max_age_ms": 149.792953,
+              "median_age_ms": 83.042673,
+              "p95_age_ms": 112.933196
+            }
+          },
+          "observer_latest_depth_body_delta": {
+            "count": 439,
+            "received_hz": 14.63333333,
+            "max_callback_gap_s": 0,
+            "age_samples": 439,
+            "max_age_ms": 233.185219,
+            "median_age_ms": 33.322,
+            "p95_age_ms": 67.298902
+          },
+          "observer_nearest_depth_body_delta": {
+            "count": 439,
+            "received_hz": 14.63333333,
+            "max_callback_gap_s": 0,
+            "age_samples": 439,
+            "max_age_ms": 233.185219,
+            "median_age_ms": 0.356018,
+            "p95_age_ms": 66.660344
+          },
+          "pair_delta_note": "Observer receipt ordering; authoritative validity remains in ReconstructionNode",
+          "mode": "nonblocking",
+          "wall_s": 46.86334703800094,
+          "exits_before_cleanup": {
+            "tf": null,
+            "skeleton": null,
+            "zone": null,
+            "reconstruction": null,
+            "monitor": 0,
+            "driver": null
+          },
+          "capture_profiles": [
+            {
+              "capture_fps": 27.35,
+              "sdk_wait_mean_ms": 3.629,
+              "sdk_wait_max_ms": 470.035,
+              "process_mean_ms": 2.782,
+              "process_max_ms": 18.468,
+              "last_tracker_enqueue_ms": 0.005
+            },
+            {
+              "capture_fps": 30.0,
+              "sdk_wait_mean_ms": 0.01,
+              "sdk_wait_max_ms": 0.033,
+              "process_mean_ms": 2.064,
+              "process_max_ms": 14.299,
+              "last_tracker_enqueue_ms": 0.015
+            },
+            {
+              "capture_fps": 29.98,
+              "sdk_wait_mean_ms": 0.009,
+              "sdk_wait_max_ms": 0.041,
+              "process_mean_ms": 1.485,
+              "process_max_ms": 8.158,
+              "last_tracker_enqueue_ms": 0.013
+            },
+            {
+              "capture_fps": 30.0,
+              "sdk_wait_mean_ms": 0.02,
+              "sdk_wait_max_ms": 1.434,
+              "process_mean_ms": 1.755,
+              "process_max_ms": 13.997,
+              "last_tracker_enqueue_ms": 0.016
+            },
+            {
+              "capture_fps": 30.02,
+              "sdk_wait_mean_ms": 0.042,
+              "sdk_wait_max_ms": 3.945,
+              "process_mean_ms": 2.741,
+              "process_max_ms": 15.049,
+              "last_tracker_enqueue_ms": 0.006
+            },
+            {
+              "capture_fps": 30.0,
+              "sdk_wait_mean_ms": 0.068,
+              "sdk_wait_max_ms": 5.671,
+              "process_mean_ms": 3.206,
+              "process_max_ms": 27.773,
+              "last_tracker_enqueue_ms": 0.006
+            },
+            {
+              "capture_fps": 30.0,
+              "sdk_wait_mean_ms": 0.015,
+              "sdk_wait_max_ms": 0.271,
+              "process_mean_ms": 3.199,
+              "process_max_ms": 25.322,
+              "last_tracker_enqueue_ms": 0.008
+            },
+            {
+              "capture_fps": 29.99,
+              "sdk_wait_mean_ms": 0.014,
+              "sdk_wait_max_ms": 0.063,
+              "process_mean_ms": 3.313,
+              "process_max_ms": 18.202,
+              "last_tracker_enqueue_ms": 0.015
+            }
+          ],
+          "sdk_busy_skips_reported": 598,
+          "fatal_capture_timeout": false,
+          "capture_timeout_warnings": 0,
+          "camera_cleanup_completed": true,
+          "invalid_diagnostics": [
+            "[WARN] [1795162995.860456402] [reconstruction_node]: Reconstruction invalid: last_block=INPUTS_STALE_OR_MISSING depth_rx_age_ms=543.5 body_index_rx_age_ms=526.0 skeleton_rx_age_ms=544.6 zone_rx_age_ms=544.5 last_success_age_ms=535.5 depth_body_sync_ms=66.7 active_bodies=1"
+          ],
+          "driver_sha256": "8bd8b406e313439eb17310529ab786e488146a1acab3ba8a2bb7aa2d6baef257"
+        }
+      ],
+      "main_launch_nonblocking": false,
+      "limitations": [
+        "No Planning/Motion/GUI or full CRA workload",
+        "People and workspace occupancy can vary between trials",
+        "EMPTY is not proof of active-human geometry continuity",
+        "Observer pair deltas are not reconstruction validity certificates"
+      ]
+    },
+    "ba": {
+      "scope": "Real-camera blocking/nonblocking comparison without Planning or Motion.\n\nUses existing camera/workspace/calibration settings and reconstruction YAML.\nThe nonblocking executable is a BUILD_TESTING-only target, never installed.\nNo images, skeleton positions or capsule geometry are saved; only metadata.\n",
+      "domain": 221,
+      "configuration": {
+        "kinect_config": {
+          "body_tracking_enabled": true,
+          "body_tracking_smoothing_factor": 0.6,
+          "depth_enabled": true,
+          "depth_mode": "WFOV_2X2BINNED",
+          "color_enabled": true,
+          "color_resolution": "1536P",
+          "color_format": "jpeg",
+          "fps": 30,
+          "point_cloud": false,
+          "rgb_point_cloud": false,
+          "point_cloud_in_depth_frame": true,
+          "rescale_ir_to_mono8": false,
+          "ir_mono8_scaling_factor": 1.0,
+          "imu_rate_target": 100,
+          "wired_sync_mode": 0,
+          "subordinate_delay_off_master_usec": 0,
+          "sensor_sn": "",
+          "recording_file": "",
+          "recording_loop_enabled": false
+        },
+        "tf_arguments": [
+          "0.0",
+          "0.0",
+          "0.2",
+          "0.0",
+          "0.5881759579220891",
+          "0.0",
+          "base_link",
+          "camera_base"
+        ],
+        "workspace_params": {
+          "workspace_polygon": [
+            0.0,
+            -0.7,
+            0.8,
+            -0.7,
+            0.8,
+            0.7,
+            0.0,
+            0.7
+          ],
+          "workspace_z": [
+            -0.7,
+            0.7
+          ],
+          "exit_timeout_s": 0.5
+        }
+      },
+      "configuration_sha256": {
+        "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628",
+        "src/cra/config/reconstruction.yaml": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+        "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8"
+      },
+      "trials": [
+        {
+          "warmup_s": 15,
+          "measured_s": 30,
+          "body_packets_with_people": 441,
+          "active_zone_s": 30,
+          "observed_while_zone_active_s": 30,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 30
+          },
+          "streams": {
+            "body_index": {
+              "count": 442,
+              "received_hz": 14.73333333,
+              "max_callback_gap_s": 0.127932461,
+              "age_samples": 442,
+              "max_age_ms": 168.564988,
+              "median_age_ms": 83.88195,
+              "p95_age_ms": 125.471693
+            },
+            "body_packets": {
+              "count": 441,
+              "received_hz": 14.7,
+              "max_callback_gap_s": 0.158734183,
+              "age_samples": 441,
+              "max_age_ms": 151.814422,
+              "median_age_ms": 78.789445,
+              "p95_age_ms": 110.53652
+            },
+            "depth": {
+              "count": 507,
+              "received_hz": 16.9,
+              "max_callback_gap_s": 0.332749345,
+              "age_samples": 507,
+              "max_age_ms": 47.052184,
+              "median_age_ms": 29.265051,
+              "p95_age_ms": 33.108576
+            },
+            "geometry_observed": {
+              "count": 547,
+              "received_hz": 18.23333333,
+              "max_callback_gap_s": 0.468018625,
+              "age_samples": 547,
+              "max_age_ms": 65.843677,
+              "median_age_ms": 31.12087,
+              "p95_age_ms": 42.847237
+            },
+            "rgb": {
+              "count": 517,
+              "received_hz": 17.23333333,
+              "max_callback_gap_s": 0.406478962,
+              "age_samples": 517,
+              "max_age_ms": 78.758847,
+              "median_age_ms": 29.911497,
+              "p95_age_ms": 36.513658
+            },
+            "skeleton": {
+              "count": 442,
+              "received_hz": 14.73333333,
+              "max_callback_gap_s": 0.157358238,
+              "age_samples": 442,
+              "max_age_ms": 156.804352,
+              "median_age_ms": 79.936213,
+              "p95_age_ms": 113.568663
+            },
+            "zone": {
+              "count": 442,
+              "received_hz": 14.73333333,
+              "max_callback_gap_s": 0.156153292,
+              "age_samples": 442,
+              "max_age_ms": 156.864417,
+              "median_age_ms": 80.353975,
+              "p95_age_ms": 115.603691
+            }
+          },
+          "observer_latest_depth_body_delta": {
+            "count": 442,
+            "received_hz": 14.73333333,
+            "max_callback_gap_s": 0,
+            "age_samples": 442,
+            "max_age_ms": 266.063905,
+            "median_age_ms": 33.345,
+            "p95_age_ms": 99.951933
+          },
+          "observer_nearest_depth_body_delta": {
+            "count": 442,
+            "received_hz": 14.73333333,
+            "max_callback_gap_s": 0,
+            "age_samples": 442,
+            "max_age_ms": 266.063905,
+            "median_age_ms": 32.458466,
+            "p95_age_ms": 99.765569
+          },
+          "pair_delta_note": "Observer receipt ordering; authoritative validity remains in ReconstructionNode",
+          "mode": "nonblocking",
+          "wall_s": 46.79320107700187,
+          "exits_before_cleanup": {
+            "tf": null,
+            "skeleton": null,
+            "zone": null,
+            "reconstruction": null,
+            "monitor": 0,
+            "driver": null
+          },
+          "capture_profiles": [
+            {
+              "capture_fps": 27.33,
+              "sdk_wait_mean_ms": 3.712,
+              "sdk_wait_max_ms": 470.418,
+              "process_mean_ms": 4.527,
+              "process_max_ms": 41.425,
+              "last_tracker_enqueue_ms": 0.037
+            },
+            {
+              "capture_fps": 29.95,
+              "sdk_wait_mean_ms": 0.013,
+              "sdk_wait_max_ms": 0.047,
+              "process_mean_ms": 3.88,
+              "process_max_ms": 25.045,
+              "last_tracker_enqueue_ms": 0.03
+            },
+            {
+              "capture_fps": 30.07,
+              "sdk_wait_mean_ms": 0.013,
+              "sdk_wait_max_ms": 0.046,
+              "process_mean_ms": 4.593,
+              "process_max_ms": 46.09,
+              "last_tracker_enqueue_ms": 0.007
+            },
+            {
+              "capture_fps": 30.0,
+              "sdk_wait_mean_ms": 0.011,
+              "sdk_wait_max_ms": 0.074,
+              "process_mean_ms": 3.003,
+              "process_max_ms": 17.012,
+              "last_tracker_enqueue_ms": 0.009
+            },
+            {
+              "capture_fps": 29.98,
+              "sdk_wait_mean_ms": 0.027,
+              "sdk_wait_max_ms": 2.791,
+              "process_mean_ms": 1.93,
+              "process_max_ms": 15.01,
+              "last_tracker_enqueue_ms": 0.03
+            },
+            {
+              "capture_fps": 30.02,
+              "sdk_wait_mean_ms": 0.118,
+              "sdk_wait_max_ms": 16.098,
+              "process_mean_ms": 3.21,
+              "process_max_ms": 15.698,
+              "last_tracker_enqueue_ms": 0.005
+            },
+            {
+              "capture_fps": 30.0,
+              "sdk_wait_mean_ms": 0.011,
+              "sdk_wait_max_ms": 0.057,
+              "process_mean_ms": 2.469,
+              "process_max_ms": 12.88,
+              "last_tracker_enqueue_ms": 0.008
+            },
+            {
+              "capture_fps": 30.0,
+              "sdk_wait_mean_ms": 0.011,
+              "sdk_wait_max_ms": 0.042,
+              "process_mean_ms": 2.565,
+              "process_max_ms": 20.405,
+              "last_tracker_enqueue_ms": 0.034
+            }
+          ],
+          "sdk_busy_skips_reported": 602,
+          "fatal_capture_timeout": false,
+          "capture_timeout_warnings": 0,
+          "camera_cleanup_completed": true,
+          "invalid_diagnostics": [
+            "[WARN] [1795163128.437291653] [reconstruction_node]: Reconstruction invalid: last_block=INPUTS_STALE_OR_MISSING depth_rx_age_ms=505.3 body_index_rx_age_ms=557.5 skeleton_rx_age_ms=558.1 zone_rx_age_ms=558.1 last_success_age_ms=495.6 depth_body_sync_ms=133.5 active_bodies=1"
+          ],
+          "driver_sha256": "8bd8b406e313439eb17310529ab786e488146a1acab3ba8a2bb7aa2d6baef257"
+        },
+        {
+          "warmup_s": 15,
+          "measured_s": 30,
+          "body_packets_with_people": 733,
+          "active_zone_s": 30,
+          "observed_while_zone_active_s": 30,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 30
+          },
+          "streams": {
+            "body_index": {
+              "count": 736,
+              "received_hz": 24.53333333,
+              "max_callback_gap_s": 0.097123609,
+              "age_samples": 736,
+              "max_age_ms": 412.590242,
+              "median_age_ms": 325.752602,
+              "p95_age_ms": 360.097716
+            },
+            "body_packets": {
+              "count": 733,
+              "received_hz": 24.43333333,
+              "max_callback_gap_s": 0.086645749,
+              "age_samples": 733,
+              "max_age_ms": 399.753203,
+              "median_age_ms": 321.093534,
+              "p95_age_ms": 351.070094
+            },
+            "depth": {
+              "count": 390,
+              "received_hz": 13,
+              "max_callback_gap_s": 0.436219371,
+              "age_samples": 390,
+              "max_age_ms": 258.2808,
+              "median_age_ms": 235.818068,
+              "p95_age_ms": 253.305529
+            },
+            "geometry_observed": {
+              "count": 343,
+              "received_hz": 11.43333333,
+              "max_callback_gap_s": 0.503509946,
+              "age_samples": 343,
+              "max_age_ms": 283.445031,
+              "median_age_ms": 240.861195,
+              "p95_age_ms": 257.511803
+            },
+            "rgb": {
+              "count": 296,
+              "received_hz": 9.866666667,
+              "max_callback_gap_s": 0.426171689,
+              "age_samples": 296,
+              "max_age_ms": 306.710178,
+              "median_age_ms": 272.824249,
+              "p95_age_ms": 292.042288
+            },
+            "skeleton": {
+              "count": 735,
+              "received_hz": 24.5,
+              "max_callback_gap_s": 0.086242978,
+              "age_samples": 735,
+              "max_age_ms": 399.818523,
+              "median_age_ms": 322.090543,
+              "p95_age_ms": 352.262282
+            },
+            "zone": {
+              "count": 735,
+              "received_hz": 24.5,
+              "max_callback_gap_s": 0.087367019,
+              "age_samples": 735,
+              "max_age_ms": 401.290713,
+              "median_age_ms": 322.632444,
+              "p95_age_ms": 352.730258
+            }
+          },
+          "observer_latest_depth_body_delta": {
+            "count": 736,
+            "received_hz": 24.53333333,
+            "max_callback_gap_s": 0,
+            "age_samples": 736,
+            "max_age_ms": 333.399,
+            "median_age_ms": 66.666,
+            "p95_age_ms": 133.122152
+          },
+          "observer_nearest_depth_body_delta": {
+            "count": 736,
+            "received_hz": 24.53333333,
+            "max_callback_gap_s": 0,
+            "age_samples": 736,
+            "max_age_ms": 333.399,
+            "median_age_ms": 0.428538,
+            "p95_age_ms": 100.157764
+          },
+          "pair_delta_note": "Observer receipt ordering; authoritative validity remains in ReconstructionNode",
+          "mode": "blocking",
+          "wall_s": 46.665088336001645,
+          "exits_before_cleanup": {
+            "tf": null,
+            "skeleton": null,
+            "zone": null,
+            "reconstruction": null,
+            "monitor": 0,
+            "driver": null
+          },
+          "capture_profiles": [
+            {
+              "capture_fps": 22.17,
+              "sdk_wait_mean_ms": 4.461,
+              "sdk_wait_max_ms": 469.172,
+              "process_mean_ms": 33.99,
+              "process_max_ms": 75.218,
+              "last_tracker_enqueue_ms": 33.9
+            },
+            {
+              "capture_fps": 24.7,
+              "sdk_wait_mean_ms": 0.003,
+              "sdk_wait_max_ms": 0.013,
+              "process_mean_ms": 32.515,
+              "process_max_ms": 65.728,
+              "last_tracker_enqueue_ms": 38.295
+            },
+            {
+              "capture_fps": 25.48,
+              "sdk_wait_mean_ms": 0.003,
+              "sdk_wait_max_ms": 0.022,
+              "process_mean_ms": 31.921,
+              "process_max_ms": 58.973,
+              "last_tracker_enqueue_ms": 13.405
+            },
+            {
+              "capture_fps": 23.93,
+              "sdk_wait_mean_ms": 0.004,
+              "sdk_wait_max_ms": 0.023,
+              "process_mean_ms": 34.35,
+              "process_max_ms": 68.192,
+              "last_tracker_enqueue_ms": 29.663
+            },
+            {
+              "capture_fps": 25.07,
+              "sdk_wait_mean_ms": 0.003,
+              "sdk_wait_max_ms": 0.022,
+              "process_mean_ms": 33.887,
+              "process_max_ms": 55.625,
+              "last_tracker_enqueue_ms": 40.255
+            },
+            {
+              "capture_fps": 24.76,
+              "sdk_wait_mean_ms": 0.013,
+              "sdk_wait_max_ms": 1.136,
+              "process_mean_ms": 32.873,
+              "process_max_ms": 52.339,
+              "last_tracker_enqueue_ms": 26.165
+            },
+            {
+              "capture_fps": 24.35,
+              "sdk_wait_mean_ms": 0.004,
+              "sdk_wait_max_ms": 0.017,
+              "process_mean_ms": 34.412,
+              "process_max_ms": 65.035,
+              "last_tracker_enqueue_ms": 30.892
+            },
+            {
+              "capture_fps": 24.67,
+              "sdk_wait_mean_ms": 0.004,
+              "sdk_wait_max_ms": 0.024,
+              "process_mean_ms": 35.474,
+              "process_max_ms": 63.314,
+              "last_tracker_enqueue_ms": 36.684
+            }
+          ],
+          "sdk_busy_skips_reported": 0,
+          "fatal_capture_timeout": false,
+          "capture_timeout_warnings": 0,
+          "camera_cleanup_completed": true,
+          "invalid_diagnostics": [
+            "[WARN] [1795163137.367393766] [reconstruction_node]: Reconstruction invalid: last_block=INPUTS_STALE_OR_MISSING depth_rx_age_ms=572.3 body_index_rx_age_ms=27.8 skeleton_rx_age_ms=38.3 zone_rx_age_ms=38.2 last_success_age_ms=562.7 depth_body_sync_ms=433.7 active_bodies=1",
+            "[WARN] [1795163175.166905613] [reconstruction_node]: Reconstruction invalid: last_block=INPUTS_STALE_OR_MISSING depth_rx_age_ms=533.3 body_index_rx_age_ms=521.3 skeleton_rx_age_ms=522.7 zone_rx_age_ms=522.6 last_success_age_ms=532.5 depth_body_sync_ms=66.7 active_bodies=1"
+          ],
+          "driver_sha256": "c752af800b2cbfc092deb6d9703e9c852940a78c36b91ce0a28057a49ce9bb76"
+        }
+      ],
+      "main_launch_nonblocking": false,
+      "limitations": [
+        "No Planning/Motion/GUI or full CRA workload",
+        "People and workspace occupancy can vary between trials",
+        "EMPTY is not proof of active-human geometry continuity",
+        "Observer pair deltas are not reconstruction validity certificates"
+      ]
+    }
+  },
+  "conclusion": "Nonblocking improved consumed capture rate, received RGB/depth, geometry output rate and timestamp freshness in both orders. Active-human geometry remained observed throughout all warmed measurement windows. Skeleton throughput dropped from about 25 to 15 Hz. Experimental mode remains separate pending controlled fast-motion/occlusion and full-stack validation.",
+  "interpretation": [
+    "Received topic rates are not sensor hardware FPS or GUI display FPS",
+    "Geometry can reuse a skeleton across fresh depth frames within existing sync allowance; higher geometry Hz is not a higher independent pose-measurement rate",
+    "Zero invalid-state seconds means the probe did not receive invalidity during measurement; maximum gaps and capture ages remain recorded separately",
+    "Pair deltas are passive observer estimates; actual ReconstructionNode validity checks are unchanged",
+    "Diagnostic lines include warm-up and shutdown outside measured windows",
+    "No inference accuracy or physical-robot safety claim; no controlled fast-person/occlusion experiment",
+    "No claim the older intermittent camera capture loss is fixed; each trial is shorter than a long production run"
+  ],
+  "preserved_sha256": {
+    "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8",
+    "src/cra/config/reconstruction.yaml": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+    "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628",
+    "src/perception/vision/src/nodes/reconstruction_node.cpp": "5799e4eb08c5c849af4e57a2d665ec138de971917aa727e9fb6ff82e628062c6",
+    "src/planning/planning/planning_manager.py": "880ae8436b84c20b3cb34815fac1d53e130254b66622595dc6cdfbe3388baad8"
+  },
+  "source_sha256": {
+    "src/azure_kinect_ros_driver/include/azure_kinect_ros_driver/stream_control.h": "d2f8584c29da58f1fbafc5789cd03da275f6116aa4efd29a5a9cb04ca626bcb3",
+    "src/azure_kinect_ros_driver/src/k4a_ros_device.cpp": "e24eaad23698a2ca353af5c82601f8490801bcabc8fd85aa3c60a7c446bedd24",
+    "src/azure_kinect_ros_driver/CMakeLists.txt": "a967bd6e84ea7a806a13b9678f2a3278dd2f833877f62209b512e1e360337372",
+    "src/azure_kinect_ros_driver/test/test_stream_control.cpp": "8e75adafff0e24babe6819a2c9ba902aae1af9cbfd1e141b7b9e261f1bfeaa62",
+    "src/perception/vision/test/vision_stream_probe.cpp": "2d5f309717f547be08a54ac1b72b4b64e01f136e226a45afbc8d02aceda70231",
+    "src/perception/vision/test/compare_tracker_admission.py": "5882963530b4a209d8b38a65554badc0a83dcf7c2f49113fbccff69e243cab7a",
+    "src/perception/vision/CMakeLists.txt": "aa066098162cf093629cb076127977cc2bffa64101cc0e6349df53415f509bc8"
+  }
+}

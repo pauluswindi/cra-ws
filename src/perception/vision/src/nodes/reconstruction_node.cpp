@@ -484,7 +484,12 @@ private:
             return;
         }
 
-        if (!inputsReady() || !frameValid()) {
+        if (!inputsReady()) {
+            last_frame_block_reason_ = "INPUTS_STALE_OR_MISSING";
+            return;
+        }
+        if (!frameValid()) {
+            last_frame_block_reason_ = "FRAME_OR_SKELETON_SYNC";
             return;
         }
 
@@ -493,6 +498,7 @@ private:
         const rclcpp::Time frame_stamp(depth.header.stamp);
 
         if (frame_stamp == last_processed_stamp_) {
+            last_frame_block_reason_ = "DUPLICATE_DEPTH_STAMP";
             return;
         }
 
@@ -505,6 +511,7 @@ private:
                 depth.header.stamp,
                 rclcpp::Duration::from_seconds(0.03));
         } catch (const tf2::TransformException& error) {
+            last_frame_block_reason_ = "DEPTH_TF_UNAVAILABLE";
             RCLCPP_WARN_THROTTLE(
                 get_logger(),
                 *get_clock(),
@@ -527,9 +534,11 @@ private:
                     active_body_ids_,
                     publish_voxels_,
                     result)) {
+                last_frame_block_reason_ = "NO_RECONSTRUCTION";
                 return;
             }
         } catch (const std::exception& error) {
+            last_frame_block_reason_ = "RECONSTRUCTION_EXCEPTION";
             RCLCPP_WARN_THROTTLE(
                 get_logger(),
                 *get_clock(),
@@ -590,6 +599,7 @@ private:
         }
 
         if (all_capsules.empty()) {
+            last_frame_block_reason_ = "NO_CAPSULES";
             return;
         }
 
@@ -622,6 +632,7 @@ private:
 
         last_processed_stamp_ = frame_stamp;
         last_successful_update_ = now();
+        last_frame_block_reason_ = "NONE";
 
         geometry_pub_->publish(geometry_output);
         invalid_geometry_published_ = false;
@@ -672,6 +683,23 @@ private:
 
     void clearOutputs()
     {
+        if (!invalid_geometry_published_) {
+            const auto current = now();
+            const auto age_ms = [&current](const rclcpp::Time& stamp) {
+                return stamp.nanoseconds() == 0 ? -1. : (current - stamp).seconds() * 1000.;
+            };
+            const double sync_ms = depth_image_ && body_index_map_
+                ? stampDifference(depth_image_->header.stamp, body_index_map_->header.stamp) * 1000.
+                : -1.;
+            RCLCPP_WARN(get_logger(),
+                "Reconstruction invalid: last_block=%s depth_rx_age_ms=%.1f "
+                "body_index_rx_age_ms=%.1f skeleton_rx_age_ms=%.1f zone_rx_age_ms=%.1f "
+                "last_success_age_ms=%.1f depth_body_sync_ms=%.1f active_bodies=%zu",
+                last_frame_block_reason_.c_str(), age_ms(last_depth_received_),
+                age_ms(last_body_index_received_), age_ms(last_skeleton_received_),
+                age_ms(last_zone_received_), age_ms(last_successful_update_), sync_ms,
+                active_body_ids_.size());
+        }
         clearMarkers();
         publishInvalidGeometry();
     }
@@ -688,6 +716,9 @@ private:
 
         if (!inputsReady() ||
             !isRecent(last_successful_update_)) {
+            if (!inputsReady()) {
+                last_frame_block_reason_ = "INPUTS_STALE_OR_MISSING";
+            }
             clearOutputs();
         }
     }
@@ -695,6 +726,7 @@ private:
     std::string depth_topic_;
     std::string camera_info_topic_;
     std::string body_index_topic_;
+    std::string last_frame_block_reason_ = "NO_INPUT";
 
     double max_sync_delay_ = 0.15;
     double data_timeout_ = 0.5;

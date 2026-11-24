@@ -1,0 +1,4916 @@
+{
+  "scope": "Automated synthetic-input verification only; no Kinect or live-human disturbance trial",
+  "reports": [
+    {
+      "scope": "Synthetic input test: real probe, relay and Reconstruction watchdog.\n\nDefault Motion/Planning statuses are fixtures. --with-simulation uses real\nPlanning, C++ Motion and MuJoCo instead. Neither mode uses Kinect hardware.\n",
+      "result": {
+        "scenario": "vision-loss",
+        "status": "passed",
+        "reason": "Disturbance, STOP, fresh recovery and completion were observed",
+        "evidence_s": {
+          "target": 2.011713979,
+          "executing": 2.02604826,
+          "depth_off": 2.03194196,
+          "disturbance": 2.605292123,
+          "stop_command": 2.606626913,
+          "stopped": 2.629266376,
+          "depth_on": 5.047825807,
+          "recovery_geometry": 5.058801617,
+          "release": 5.060128739,
+          "resumed": 5.116006749,
+          "trajectory": 5.061437704,
+          "completed": 6.26120489,
+          "planning_completed": 6.07366061
+        },
+        "scope": "Observed command/status sequence; not physical stop distance",
+        "receipt_order_uncertainty_s": 0.2
+      },
+      "invalid_seen": true,
+      "recovered_seen": true,
+      "withheld": 55,
+      "target_count": 1,
+      "relayed_depth_count": 193,
+      "mock_stopped_at_s": 2.6162023590004537,
+      "events": [
+        {
+          "elapsed_s": 0.004596267,
+          "stream": "vision",
+          "state": "invalid"
+        },
+        {
+          "elapsed_s": 0.013839315,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.036503787,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.03885478,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.094579337,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.096989262,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.152946465,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.155359533,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.21058176,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.212919363,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.267586552,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.26997908,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.325061579,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.327624093,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.382484875,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.383687509,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.440058297,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.442466677,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.498334284,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.499709555,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.555440061,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.556651506,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.611864578,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.613040106,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.666676426,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.669063607,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.723129405,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.724336296,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.778714516,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.779856182,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.834273622,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.83549347,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.89198961,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.894566463,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.949181765,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.951558103,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.006933988,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.008154816,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.062638261,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.063859133,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.118908794,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.121428813,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.1764889,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.178822314,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.233290289,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.235697728,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.29083957,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.293348171,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.347009667,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.348189376,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.403797684,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.406226725,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.459224245,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.461770032,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.516196702,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.519026682,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.57296677,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.575388753,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.629199995,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.630406653,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.683639063,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.686060844,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.740528963,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.743180066,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.798518999,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.801038649,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.855915491,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.858310868,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.91458338,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.91576794,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.971836297,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 1.973210296,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.011713979,
+          "stream": "target",
+          "state": "SET"
+        },
+        {
+          "elapsed_s": 2.02604826,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.027246806,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.03194196,
+          "stream": "fault",
+          "state": "DEPTH_OFF"
+        },
+        {
+          "elapsed_s": 2.082401412,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.137878729,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.192686348,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.247424317,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.302762911,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.357178649,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.412059372,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.466761021,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.521987067,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.575746313,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 2.605292123,
+          "stream": "vision",
+          "state": "invalid"
+        },
+        {
+          "elapsed_s": 2.606569213,
+          "stream": "planning",
+          "state": "HUMAN_VISION_UNKNOWN"
+        },
+        {
+          "elapsed_s": 2.606626913,
+          "stream": "command",
+          "state": "STOP"
+        },
+        {
+          "elapsed_s": 2.629266376,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 2.683031999,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 2.736377498,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 2.790635886,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 2.843823635,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 2.898128557,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 2.951910119,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.005503494,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.059906996,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.116106222,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.16963356,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.22428139,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.27775083,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.331422313,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.384960642,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.438416105,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.493188909,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.547031509,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.601040055,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.656291465,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.710171979,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.765499901,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.819950879,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.874070295,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.926748391,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 3.980387621,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.034517018,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.088744002,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.141907423,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.195515328,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.248618108,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.30183341,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.356333577,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.409115655,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.462683436,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.516676067,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.571607877,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.624850517,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.677603831,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.732153844,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.785456593,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.839949685,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.892968539,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 4.946270583,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 5.000864519,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 5.047825807,
+          "stream": "fault",
+          "state": "DEPTH_ON"
+        },
+        {
+          "elapsed_s": 5.056011152,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 5.058801617,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.060128739,
+          "stream": "command",
+          "state": "RELEASE"
+        },
+        {
+          "elapsed_s": 5.061437704,
+          "stream": "trajectory",
+          "state": "1"
+        },
+        {
+          "elapsed_s": 5.116006749,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.11846786,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.174940147,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.176116103,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.232928349,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.234124696,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.289728929,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.29214766,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.346623101,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.347820341,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.402480363,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.403790132,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.458691724,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.459903125,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.514984136,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.517379941,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.573516896,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.574725906,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.629715857,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.632316122,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.687130721,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.689590501,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.744708337,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.747097959,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.801422677,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.80279897,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.857216093,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.859830076,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.913792839,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.915008333,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.969789762,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 5.972194034,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.028578361,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 6.029917936,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.07366061,
+          "stream": "planning",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.084703588,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.087161717,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.143469679,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.14474774,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.200513325,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.20177443,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.26120489,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.26240885,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.319943311,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.321352236,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.378010904,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.379281699,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.434737822,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.436019313,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.489706177,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.490922085,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.543808646,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.546239054,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.601141808,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.602424314,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.658857124,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.660268595,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.716272759,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.717496431,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.77401295,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.775376131,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.831916594,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.833132354,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.889745071,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.89111786,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.946558215,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 6.94786334,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.002533314,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.003789718,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.059675332,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.061000377,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.115908941,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.11712007,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.17328478,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.174544767,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.229266847,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.230463428,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.284690631,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.285878086,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.340891952,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.343328736,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.400097773,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.401505042,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.457427465,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.460070597,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.515885558,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.517094483,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.572414438,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.573784128,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.630087593,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.631386304,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.687516039,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.688849808,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.744463732,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.745801036,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.801799049,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.80312554,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.857879384,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.861482354,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.917795266,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.919123766,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 7.97559408,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 7.976920057,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.032050419,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.033441599,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.089496754,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.090771748,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.146371948,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.147637423,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.203023376,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.204289162,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.25919749,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.260479828,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.315345922,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.316530698,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.371039616,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.372355328,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.427678928,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.428976181,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.48426727,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.485672479,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.540797804,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.542058733,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.597427359,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.598655648,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.653408307,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.655889473,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.710639441,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.713085251,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.767690392,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.77019873,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.825652275,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.826877581,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.882194105,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.883401853,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.938033999,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.939307302,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 8.994156081,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 8.996523781,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.051555146,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.053989597,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.110659169,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.111862924,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.16721295,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.16841571,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.224778083,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.226006483,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.282464095,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.283663749,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.339036136,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.340304518,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.396297506,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.39768188,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.453973344,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.455274607,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.511894746,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.513131595,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.5681616,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.569404269,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.625334468,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.627886387,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.683256234,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.684560843,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.740679903,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.741921834,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.796567015,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.79773783,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.852606727,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.855197518,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.912128522,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.9133827,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.97011769,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 9.971442447,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.02793188,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.02928257,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.08446978,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.08585425,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.14166764,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.14294946,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.19748872,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.19894396,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.25532421,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.2577464,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.31458682,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.31588736,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.37076686,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.37200212,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.42626069,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.42750648,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.4830263,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.48570882,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.54229489,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.54350298,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.59917015,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.60039041,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.65543,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.65676194,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.71347337,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.7149381,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.76987384,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.77272892,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.82872457,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.83010339,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.88654019,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.88919668,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.94580793,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.94722196,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.00241813,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.00378652,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.05851339,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.06115694,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.11599902,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.11730825,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.1713204,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.17393772,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.22830412,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.23077571,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.28516342,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.2880058,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.3430092,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.34572475,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.40027258,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.40297127,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.45783379,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.45911261,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.51370645,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.51495177,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.57000954,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.57149105,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.62677031,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.62810882,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.6830113,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.68428911,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.73954041,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.74229968,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.79743768,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.79871486,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.85269172,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.85540378,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.91091356,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.91214599,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.96727657,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.96979676,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.02471408,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.0260025,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.08153976,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.08281604,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.13716404,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.13953714,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.19499063,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.19627245,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.25121962,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.25253834,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.30838551,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.30982725,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.36455068,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.3657876,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.42294969,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.42548292,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.48066824,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.48191086,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.5376891,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.53889892,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.59405737,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.59524677,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.65102967,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.65349932,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.70921145,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.71041201,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.76559713,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.76696493,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.8231702,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.82452262,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.88136198,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.88265879,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.93719283,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.93842615,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.99267973,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 12.99398951,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.04874666,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.04996549,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.10667207,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.10795818,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.163498,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.16596347,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.22358891,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.22483603,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.28170396,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.28413658,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.3392965,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.33933901,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.39439742,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.39670546,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.45171212,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.45411373,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.51010398,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.51140458,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.56612701,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.5685757,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.62362925,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.62609644,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.68288102,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.68533007,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.73960397,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.74093526,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.79585946,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.79709528,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.85256449,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.85386947,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.90929903,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.91163598,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.96776935,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 13.96893979,
+          "stream": "vision",
+          "state": "observed"
+        }
+      ]
+    },
+    {
+      "scope": "Real Planning/C++ Motion/MuJoCo and Reconstruction; synthetic camera frames and skeletons. No Kinect hardware or live-human verification.",
+      "result": {
+        "scenario": "vision-loss",
+        "status": "passed",
+        "reason": "Disturbance, STOP, fresh recovery and completion were observed",
+        "evidence_s": {
+          "target": 5.858368533,
+          "executing": 6.19999444,
+          "depth_off": 6.209129106,
+          "disturbance": 6.716879693,
+          "stop_command": 6.79473216,
+          "stopped": 6.794679683,
+          "depth_on": 9.209940121,
+          "recovery_geometry": 9.255680157,
+          "release": 9.398531296,
+          "resumed": 9.605266534,
+          "trajectory": 9.605281976,
+          "completed": 10.86776536,
+          "planning_completed": 10.99132759
+        },
+        "scope": "Observed command/status sequence; not physical stop distance",
+        "receipt_order_uncertainty_s": 0.2
+      },
+      "invalid_seen": true,
+      "recovered_seen": true,
+      "withheld": 57,
+      "target_count": 1,
+      "relayed_depth_count": 484,
+      "mock_stopped_at_s": null,
+      "events": [
+        {
+          "elapsed_s": 0.015878533,
+          "stream": "vision",
+          "state": "invalid"
+        },
+        {
+          "elapsed_s": 0.029065288,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.081936695,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.136326047,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.189961933,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.24382913,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.297769377,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.350942816,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.40427666,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.457123604,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.509778395,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.563260319,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.615658552,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.668955197,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.722366687,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.726982485,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 0.77565547,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.828913315,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.882894966,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.936794572,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.990185913,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 0.993693351,
+          "stream": "planning",
+          "state": "WAITING_FOR_FEEDBACK"
+        },
+        {
+          "elapsed_s": 1.045769591,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.103208869,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.161371991,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.214572431,
+          "stream": "planning",
+          "state": "PATH_READY"
+        },
+        {
+          "elapsed_s": 1.215682939,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.270266777,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.3262796,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.386043262,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.410931956,
+          "stream": "planning",
+          "state": "TRAJECTORY_SENT"
+        },
+        {
+          "elapsed_s": 1.412067016,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 1.412118859,
+          "stream": "trajectory",
+          "state": "4"
+        },
+        {
+          "elapsed_s": 1.440309848,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.495554715,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.550502012,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.590995983,
+          "stream": "planning",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 1.604989292,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.661542992,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.71861828,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.773618144,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.829107016,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.88797731,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.942652533,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 1.997646501,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.05189057,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.108440666,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.165858661,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.220284141,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.276356845,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.331651764,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.386852666,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.442081,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.497157294,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.553458013,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.607280324,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.662927066,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.717878105,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.771346399,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.826414121,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.880410404,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.935128766,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 2.992047651,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.04823918,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.102865104,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.158885761,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.215387228,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.269617451,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.325801122,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.382574889,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.437282452,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.493171299,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.550106118,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.6039818,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.660533898,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.715462849,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.771773648,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.827623281,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.883869628,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.939900103,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 3.995401632,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.051417919,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.108142708,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.172922203,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.217855183,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.273284266,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.329228356,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.383665791,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.439065873,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.496144637,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.552152996,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.60855938,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.665325242,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.72086981,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.777012238,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.833638791,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.890639422,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 4.948197367,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.005419335,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.060453656,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.115779672,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.171058048,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.224833636,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.281757045,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.338395303,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.392055523,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.447742246,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.505029795,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.563154837,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.620347093,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.674673487,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.731337856,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.790247596,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.843923212,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.852195942,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 5.858368533,
+          "stream": "target",
+          "state": "SET"
+        },
+        {
+          "elapsed_s": 5.899266988,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 5.95457989,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.005078542,
+          "stream": "planning",
+          "state": "PATH_READY"
+        },
+        {
+          "elapsed_s": 6.007434289,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.062253396,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.119305884,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.176376287,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 6.199971848,
+          "stream": "planning",
+          "state": "TRAJECTORY_SENT"
+        },
+        {
+          "elapsed_s": 6.19999444,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 6.200001596,
+          "stream": "trajectory",
+          "state": "2"
+        },
+        {
+          "elapsed_s": 6.209129106,
+          "stream": "fault",
+          "state": "DEPTH_OFF"
+        },
+        {
+          "elapsed_s": 6.390804204,
+          "stream": "planning",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 6.716879693,
+          "stream": "vision",
+          "state": "invalid"
+        },
+        {
+          "elapsed_s": 6.79348893,
+          "stream": "planning",
+          "state": "HUMAN_VISION_UNKNOWN"
+        },
+        {
+          "elapsed_s": 6.794679683,
+          "stream": "motion",
+          "state": "STOPPED"
+        },
+        {
+          "elapsed_s": 6.79473216,
+          "stream": "command",
+          "state": "STOP"
+        },
+        {
+          "elapsed_s": 9.209940121,
+          "stream": "fault",
+          "state": "DEPTH_ON"
+        },
+        {
+          "elapsed_s": 9.255680157,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.315783876,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.373781197,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.397354352,
+          "stream": "planning",
+          "state": "WAITING_FOR_RELEASE"
+        },
+        {
+          "elapsed_s": 9.398515803,
+          "stream": "motion",
+          "state": "IDLE"
+        },
+        {
+          "elapsed_s": 9.398531296,
+          "stream": "command",
+          "state": "RELEASE"
+        },
+        {
+          "elapsed_s": 9.430004284,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.485226589,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.542234763,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.599556161,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.604154286,
+          "stream": "planning",
+          "state": "TRAJECTORY_SENT"
+        },
+        {
+          "elapsed_s": 9.605266534,
+          "stream": "motion",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 9.605281976,
+          "stream": "trajectory",
+          "state": "2"
+        },
+        {
+          "elapsed_s": 9.653858583,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.709318197,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.764375308,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.790709646,
+          "stream": "planning",
+          "state": "EXECUTING"
+        },
+        {
+          "elapsed_s": 9.819818643,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.874725619,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.929762392,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 9.982837713,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.03703238,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.09252622,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.14780154,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.20340832,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.25719862,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.31406085,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.36889671,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.42351103,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.47861072,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.53441177,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.59058397,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.64526613,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.69955803,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.75472315,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.8107721,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.86533968,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.86776536,
+          "stream": "motion",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 10.92000594,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.97464448,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 10.99132759,
+          "stream": "planning",
+          "state": "COMPLETED"
+        },
+        {
+          "elapsed_s": 11.0295689,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.08530099,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.14140075,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.19626976,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.2511611,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.30455579,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.36171158,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.41593977,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.47324615,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.52901459,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.5847147,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.64045553,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.69649484,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.75303195,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.80805264,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.86355856,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.91962561,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 11.9744371,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.03057062,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.08551504,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.14128171,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.19799913,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.25411915,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.30878538,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.36556562,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.42079297,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.47763589,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.53286172,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.58805317,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.64488756,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.70148189,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.75731696,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.81402888,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.87241117,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.92801866,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 12.98489753,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.03988631,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.09520361,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.14896035,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.20483294,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.25969266,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.31580973,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.3699346,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.42543056,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.480038,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.53893306,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.59518092,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.64897058,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.7052237,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.76013645,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.81461718,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.87079807,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.92754719,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 13.98493866,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.04014842,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.09541315,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.15097233,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.20490849,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.26238116,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.31714524,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.37181435,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.4265146,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.48390267,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.53752588,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.59208127,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.64680948,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.70092098,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.75552921,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.81081857,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.8682054,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.92320634,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 14.97751104,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.03319901,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.0892227,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.1483175,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.20462057,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.25886648,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.31413818,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.37062044,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.42654609,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.48349484,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.53986238,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.59606749,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.65369479,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.71125342,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.76639671,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.82534573,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.87945676,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.93251577,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 15.98472716,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.0383005,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.09319325,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.14685156,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.20187807,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.25548399,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.31115132,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.36601729,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.42102155,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.47549631,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.53381728,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.5915845,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.64826822,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.70694154,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.76481324,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.82099307,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.87689213,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.93305772,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 16.98972216,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.04594266,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.10178607,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.15848504,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.21489504,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.26995941,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.32587155,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.3826294,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.43875738,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.49324453,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.55068358,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.60670767,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.66248015,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.71890704,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.77553441,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.83128238,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.887576,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.94291073,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 17.99961179,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.0554851,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.11245954,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.16851814,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.22560892,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.28166752,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.33888079,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.39330485,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.44929443,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.50598878,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.56145081,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.61748988,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.6734501,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.72892996,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.78040857,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.83635826,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.89240787,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 18.94968481,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.00399654,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.0574329,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.11296879,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.16962465,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.22400656,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.28075211,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.33800196,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.39337907,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.44726217,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.50258921,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.55715668,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.61345229,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.66800681,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.7230478,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.77773989,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.83518147,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.8916307,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 19.94664813,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.00274536,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.05722064,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.11359212,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.16813015,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.22214838,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.27880898,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.33602291,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.39280782,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.44952079,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.50753921,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.56368049,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.61956749,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.67472569,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.73155744,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.78726752,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.84350828,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.90010544,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 20.95512705,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.01126264,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.06743611,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.1221388,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.17814355,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.23434184,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.28956039,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.34505766,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.39879247,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.45213599,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.50764988,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.56241672,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.61769674,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.6726733,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.7258296,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.78169671,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.83861846,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.89665363,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 21.95292091,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.00839674,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.06372206,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.1190289,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.17461536,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.23071164,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.28678959,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.34274802,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.39779395,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.45270338,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.50894505,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.56546287,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.62350321,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.6797681,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.73562121,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.79042899,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.84508438,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.89865386,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 22.9529739,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.00911204,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.06432639,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.12176371,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.17621446,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.22978908,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.28313757,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.33659421,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.38874183,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.44097644,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.49404611,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.54756956,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.60458944,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.66138083,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.71662576,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.77193097,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.82721932,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.8831111,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.93932163,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 23.9946796,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.04946424,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.10469088,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.16028891,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.21626919,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.27209924,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.32782278,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.38427779,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.44067532,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.49683217,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.55421768,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.60997361,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.66422989,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.7183409,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.77355075,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.82851856,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.88463409,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.94012418,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 24.99657582,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.0513235,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.10680199,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.16076811,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.21594521,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.27064558,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.3269077,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.38213785,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.43827791,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.49227797,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.54826439,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.60217518,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.65865975,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.71712391,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.77306017,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.82826145,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.88297943,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.93830858,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 25.99366144,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.05001582,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.10655865,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.16346183,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.21973667,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.27495399,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.33033657,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.3867037,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.44338408,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.49903958,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.55198476,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.60584111,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.66172861,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.7188011,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.7741844,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.82732137,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.88131401,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.93569288,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 26.9902857,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.04462454,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.09800256,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.15372646,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.20948967,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.26773861,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.32358843,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.37893075,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.43524635,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.4905219,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.54658492,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.60168432,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.65779321,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.71354553,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.77032152,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.82739984,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.88530343,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.94156672,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 27.99747581,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.05204717,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.10628711,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.16193777,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.21608345,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.27112266,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.32883262,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.38596924,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.44091403,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.49767682,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.5521138,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.60735982,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.66452524,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.71930051,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.77563489,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.83073291,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.88622011,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.94206545,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 28.99858538,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.05486435,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.10951119,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.16501023,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.2205679,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.27751332,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.33463734,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.38992639,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.44656339,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.50291286,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.56078259,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.61773275,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.67632544,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.73302938,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.78816299,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.84481961,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.90141432,
+          "stream": "vision",
+          "state": "observed"
+        },
+        {
+          "elapsed_s": 29.95672381,
+          "stream": "vision",
+          "state": "observed"
+        }
+      ]
+    }
+  ],
+  "evaluated_files_sha256": {
+    "src/perception/vision/test/compare_tracker_admission.py": "619ee1d33d08493434db07c327207814264a96113d790bd5b6c1a5e925cb54b6",
+    "src/perception/vision/test/tracker_motion_scenario.py": "e64546ca6ac6632e7f4446e537454ecc942b0cac7e2a8ca319776c65a49a973a",
+    "src/perception/vision/test/verify_motion_scenario_ros.py": "3127fbcf11f1b1f54467cc0a49e7573f2e1fc8979e4f156d32e09d58ea784509",
+    "src/perception/vision/test/vision_stream_probe.cpp": "5e19afb14ff0ae1799f1a22a9471f1356648c284d0ede06ca2378e695043c945",
+    "build/vision/vision_stream_probe": "7794a80d85dd3795fff81a089c77256d1998fd00b032c2ebfa0b0c7fd05f69f7",
+    "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8",
+    "src/cra/config/reconstruction.yaml": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+    "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628"
+  }
+}

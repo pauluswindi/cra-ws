@@ -1,0 +1,144 @@
+{
+  "scope": "Native Planning -> C++ Motion -> MuJoCo test on isolated domain 228.\n\nUse a temporary disconnected two-node roadmap and real physics/controller.\nOnly the interactive viewer is replaced with a headless context. Vision\ngeometry is synthetic; this is not live Kinect or dynamic-human validation.\n",
+  "ros_domain": 228,
+  "roadmap_nodes": 2,
+  "roadmap_edges": 0,
+  "fixture_start": [
+    0.023162707686424255,
+    -1.3472504615783691,
+    1.1848934888839722,
+    -0.5477003455162048,
+    0.6865991950035095
+  ],
+  "fixture_goal": [
+    0.9231627076864243,
+    -1.3472504615783691,
+    1.1848934888839722,
+    -0.5477003455162048,
+    0.6865991950035095
+  ],
+  "path_source": "RRT_CONNECT",
+  "first_goal_max_error_rad": 0.019609701028284077,
+  "first_goal_duration_s": 4.021582982000837,
+  "trajectory_messages": 2,
+  "rrt_events": [
+    {
+      "event": "SEARCH_SUBMITTED",
+      "mode": "fallback",
+      "observation_only": false,
+      "attempt": 1,
+      "scene_revision": 6
+    },
+    {
+      "event": "LATEST_VALIDATION_SUBMITTED",
+      "mode": "fallback",
+      "observation_only": false,
+      "attempt": 1,
+      "kind": "search",
+      "reason": "NONE",
+      "worker_pid": 6797,
+      "elapsed_s": 0.02025276600033976,
+      "capture_to_result_s": 0.5001754069999151
+    },
+    {
+      "event": "FALLBACK_VALIDATED",
+      "mode": "fallback",
+      "observation_only": false,
+      "attempt": 1,
+      "kind": "validate",
+      "reason": "NONE",
+      "worker_pid": 6797,
+      "elapsed_s": 0.02328804799981299,
+      "capture_to_result_s": 0.049937678002606845,
+      "points": 3,
+      "delivered_to_planning": true
+    },
+    {
+      "event": "SEARCH_SUBMITTED",
+      "mode": "fallback",
+      "observation_only": false,
+      "attempt": 2,
+      "scene_revision": 7
+    },
+    {
+      "event": "LATEST_VALIDATION_SUBMITTED",
+      "mode": "fallback",
+      "observation_only": false,
+      "attempt": 2,
+      "kind": "search",
+      "reason": "NONE",
+      "worker_pid": 6797,
+      "elapsed_s": 0.027827434001665097,
+      "capture_to_result_s": 0.04991578599947388
+    },
+    {
+      "event": "FALLBACK_VALIDATED",
+      "mode": "fallback",
+      "observation_only": false,
+      "attempt": 2,
+      "kind": "validate",
+      "reason": "NONE",
+      "worker_pid": 6797,
+      "elapsed_s": 0.02094175900128903,
+      "capture_to_result_s": 0.04995098300059908,
+      "points": 3,
+      "delivered_to_planning": true
+    }
+  ],
+  "rrt_marker_points": {
+    "start_tree": 1,
+    "goal_tree": 1,
+    "final_path": 2
+  },
+  "planning_statuses": [
+    "WAITING_FOR_FEEDBACK",
+    "RRT_SEARCHING",
+    "RRT_PATH_READY",
+    "TRAJECTORY_SENT",
+    "EXECUTING",
+    "RRT_SEARCHING",
+    "RRT_PATH_READY",
+    "TRAJECTORY_SENT",
+    "RRT_HUMAN_VISION_UNKNOWN",
+    "HUMAN_VISION_UNKNOWN"
+  ],
+  "motion_statuses": [
+    "IDLE",
+    "EXECUTING",
+    "COMPLETED",
+    "EXECUTING",
+    "STOPPED"
+  ],
+  "camera_loss_caused_stop": true,
+  "no_execute_or_release_after_camera_loss": true,
+  "measured_q_after_stop": [
+    0.8693833378715126,
+    -1.3660537783163025,
+    1.1821610211410816,
+    -0.5477668373578969,
+    0.6866728676192663
+  ],
+  "native_mujoco_physics": true,
+  "native_cpp_motion": true,
+  "interactive_viewer": false,
+  "synthetic_human_input": true,
+  "loaded_package_paths": {
+    "planning_node": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/planning_node.py",
+    "planning_manager": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/planning_manager.py",
+    "rrt_shadow": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/rrt_shadow.py",
+    "rrt_fallback": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/rrt_fallback.py",
+    "algorithms.rrt_connect": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/algorithms/rrt_connect.py"
+  },
+  "source_sha256": {
+    "src/planning/test/verify_rrt_fallback_simulation.py": "6fc0980f92202f5c5f1095f7cb00980cd0da9d2c4e34fcdc634cd5ec1f813422",
+    "src/cra/config/robot.yaml": "d1b0bbe753b5ba6a007e7908d97864c5c13fde8f0b6a1d59fd708e21982049ab",
+    "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+    "src/planning/planning/planning_manager.py": "880ae8436b84c20b3cb34815fac1d53e130254b66622595dc6cdfbe3388baad8",
+    "src/planning/planning/planning_node.py": "0238a7c16a6b78f300875c2c207042c5dd2bb6ed74bcf0e52248f4f50c837a95",
+    "src/planning/planning/algorithms/rrt_connect.py": "dc24405f3dc6233ee68767f77673a5e95d14b784e6501f1db813d352f26ef3cb",
+    "src/planning/planning/algorithms/collision_filter.py": "6127fe5937b66276e530104c387850354a653001425d8b934e7b5efc18cec2d0",
+    "src/planning/planning/path_planner.py": "2b7a701fd611d656811db10b4880d7e9188490b0c646d92f6b59e1d21d5f8c90",
+    "src/planning/planning/rrt_fallback.py": "b02f1aadceec1164b738bbde95419a20e4d0b9f85ed055f8494bc9da391127f9",
+    "src/planning/planning/rrt_shadow.py": "8ce39728c458a6c6580a65f6cc2360a4885760416b5a108ceb35a0953e58271e"
+  }
+}

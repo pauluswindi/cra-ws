@@ -7,6 +7,7 @@
 
 // System headers
 //
+#include <algorithm>
 #include <thread>
 #include <iomanip>
 #include <unordered_map>
@@ -67,6 +68,25 @@ K4AROSDevice::K4AROSDevice()
   capture_timeout_limit_ = this->declare_parameter<int>("capture_max_consecutive_timeouts", 5);
   // Validate before opening any device or creating worker threads.
   (void)k4a_driver::CaptureTimeoutPolicy(capture_timeout_limit_);
+#if defined(CRA_TEST_NONBLOCKING_TRACKER)
+  constexpr int default_tracker_wait = 0;
+#else
+  constexpr int default_tracker_wait = -1;
+#endif
+  rcl_interfaces::msg::ParameterDescriptor enqueue_wait_descriptor;
+  enqueue_wait_descriptor.read_only = true;
+  enqueue_wait_descriptor.description = "Startup-only tracker admission wait: -1 blocking, 5 ms bounded";
+  tracker_enqueue_wait_ms_ = this->declare_parameter<int>(
+      "tracker_enqueue_wait_ms", default_tracker_wait, enqueue_wait_descriptor);
+#if defined(CRA_TEST_NONBLOCKING_TRACKER)
+  k4a_driver::validateTrackerEnqueueWait(tracker_enqueue_wait_ms_, true);
+  RCLCPP_WARN(this->get_logger(), "TEST-ONLY tracker admission: enqueue_wait_ms=%d",
+              tracker_enqueue_wait_ms_);
+#else
+  k4a_driver::validateTrackerEnqueueWait(tracker_enqueue_wait_ms_);
+#endif
+  RCLCPP_INFO(this->get_logger(), "Tracker admission: mode=%s enqueue_wait_ms=%d (startup-only)",
+              tracker_enqueue_wait_ms_ < 0 ? "blocking" : "bounded", tracker_enqueue_wait_ms_);
   this->declare_parameter<bool>("point_cloud", true);
   this->declare_parameter<bool>("rgb_point_cloud", true);
   this->declare_parameter<bool>("point_cloud_in_depth_frame", true);
@@ -917,17 +937,35 @@ void K4AROSDevice::framePublisherThread()
   RCLCPP_INFO(this->get_logger(), "Capture retry limit=%d, regular wait=%ld ms",
               capture_timeout_limit_, static_cast<long>(regularFrameWaitTime.count()));
 
+  using ProfileClock = std::chrono::steady_clock;
+  auto profile_started = ProfileClock::now();
+  auto last_capture = profile_started;
+  std::size_t profile_captures = 0;
+  double capture_total_ms = 0., capture_max_ms = 0.;
+  double process_total_ms = 0., process_max_ms = 0., last_process_ms = 0.;
+  double last_enqueue_ms = 0.;
+  std::size_t tracker_busy_skips = 0;
+
   while (running_ && rclcpp::ok())
   {
     if (k4a_device_)
     {
-      if (!k4a_device_.get_capture(&capture, waitTime))
+      const auto capture_began = ProfileClock::now();
+      const bool captured = k4a_device_.get_capture(&capture, waitTime);
+      const double capture_ms = std::chrono::duration<double, std::milli>(
+          ProfileClock::now() - capture_began).count();
+      if (!captured)
       {
         if (!running_ || !rclcpp::ok())
         {
           return;
         }
         capture = k4a::capture();
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+            "Capture diagnostic: gap_since_success_ms=%.1f sdk_wait_ms=%.1f "
+            "last_process_ms=%.1f last_tracker_enqueue_ms=%.1f",
+            std::chrono::duration<double, std::milli>(ProfileClock::now() - last_capture).count(),
+            capture_ms, last_process_ms, last_enqueue_ms);
         if (capture_timeouts.timedOut())
         {
           RCLCPP_ERROR(this->get_logger(),
@@ -946,6 +984,10 @@ void K4AROSDevice::framePublisherThread()
       }
       else
       {
+        last_capture = ProfileClock::now();
+        ++profile_captures;
+        capture_total_ms += capture_ms;
+        capture_max_ms = std::max(capture_max_ms, capture_ms);
         if (capture_timeouts.count() > 0)
         {
           RCLCPP_INFO(this->get_logger(), "Capture resumed after %d timeout(s)",
@@ -991,6 +1033,7 @@ void K4AROSDevice::framePublisherThread()
       last_capture_time_usec_ = getCaptureTimestamp(capture).count();
     }
 
+    const auto process_began = ProfileClock::now();
     CompressedImage::SharedPtr rgb_jpeg_frame(new CompressedImage);
     Image::SharedPtr rgb_raw_frame(new Image);
     Image::SharedPtr rgb_rect_frame(new Image);
@@ -1100,15 +1143,24 @@ void K4AROSDevice::framePublisherThread()
         if (params_.body_tracking_enabled && k4abt_tracker_queue_size_ < 3 &&
             (this->count_subscribers("body_tracking_data") > 0 || this->count_subscribers("body_index_map/image_raw") > 0))
         {
-          if (!k4abt_tracker_.enqueue_capture(capture))
+          const auto enqueue_began = ProfileClock::now();
+          const bool enqueued = k4a_driver::tryEnqueueTrackerCapture(
+              k4abt_tracker_, capture, k4abt_tracker_queue_size_,
+              std::chrono::milliseconds(tracker_enqueue_wait_ms_));
+          last_enqueue_ms = std::chrono::duration<double, std::milli>(
+              ProfileClock::now() - enqueue_began).count();
+          if (!enqueued)
           {
-            RCLCPP_ERROR(this->get_logger(),"Error! Add capture to tracker process queue failed!");
-            rclcpp::shutdown();
-            return;
-          }
-          else
-          {
-            ++k4abt_tracker_queue_size_;
+            if (tracker_enqueue_wait_ms_ >= 0)
+            {
+              ++tracker_busy_skips;
+            }
+            else
+            {
+              RCLCPP_ERROR(this->get_logger(),"Error! Add capture to tracker process queue failed!");
+              rclcpp::shutdown();
+              return;
+            }
           }
         }
 #endif
@@ -1242,6 +1294,30 @@ void K4AROSDevice::framePublisherThread()
     }
 
     rclcpp::spin_some(shared_from_this());
+    last_process_ms = std::chrono::duration<double, std::milli>(
+        ProfileClock::now() - process_began).count();
+    process_total_ms += last_process_ms;
+    process_max_ms = std::max(process_max_ms, last_process_ms);
+    const auto profile_now = ProfileClock::now();
+    const double elapsed = std::chrono::duration<double>(profile_now - profile_started).count();
+    if (elapsed >= 5. && k4a_device_ && profile_captures > 0)
+    {
+      RCLCPP_INFO(this->get_logger(),
+          "Capture profile: capture_fps=%.2f sdk_wait_mean_ms=%.3f sdk_wait_max_ms=%.3f "
+          "process_mean_ms=%.3f process_max_ms=%.3f last_tracker_enqueue_ms=%.3f",
+          profile_captures / elapsed, capture_total_ms / profile_captures, capture_max_ms,
+          process_total_ms / profile_captures, process_max_ms, last_enqueue_ms);
+      if (params_.body_tracking_enabled && tracker_enqueue_wait_ms_ >= 0)
+      {
+        RCLCPP_INFO(this->get_logger(),
+                    "Tracker admission profile: enqueue_wait_ms=%d sdk_busy_skips=%zu",
+                    tracker_enqueue_wait_ms_, tracker_busy_skips);
+      }
+      tracker_busy_skips = 0;
+      profile_started = profile_now;
+      profile_captures = 0;
+      capture_total_ms = capture_max_ms = process_total_ms = process_max_ms = 0.;
+    }
     loop_rate.sleep();
   }
 }

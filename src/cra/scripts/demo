@@ -18,6 +18,7 @@ def configure_console_logging():
         launch.logging.handlers.FileHandler(os.devnull, **kwargs)
     )
     os.environ['OVERRIDE_LAUNCH_PROCESS_OUTPUT'] = 'screen'
+    os.environ['CRA_CONSOLE_ONLY_LOGGING'] = '1'
 
 
 def console_actions():

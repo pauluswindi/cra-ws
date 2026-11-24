@@ -1,0 +1,312 @@
+{
+  "date": "2026-11-19",
+  "scope": "Observational RRT visualization; no live Motion execution or interactive RViz rendering",
+  "planning_regression": {
+    "tests": 240,
+    "passed": 240,
+    "elapsed_s": 29.678,
+    "new_visualization_tests": 18
+  },
+  "build": {
+    "packages": [
+      "planning",
+      "cra"
+    ],
+    "passed": true,
+    "elapsed_s": 1.53
+  },
+  "style": {
+    "flake8_max_line_length": 100,
+    "passed": true,
+    "diff_check_passed": true
+  },
+  "shared_fk_checks": {
+    "stored_joint_eof_indices": [
+      0,
+      17,
+      100,
+      500,
+      1000
+    ],
+    "absolute_tolerance_m": 1e-06
+  },
+  "shadow_marker_ros": {
+    "scope": "Headless ROS transport probe on an isolated domain; no robot or Motion node.\n\nThe ordinary planning timer is cancelled deliberately. An artificial graph\nfailure exposes the new observer while real DDS joint/human callbacks run.\nThis does not prove whole-cycle responsiveness of the existing synchronous A*.\n",
+    "ros_domain": 224,
+    "events": [
+      {
+        "event": "SEARCH_SUBMITTED",
+        "attempt": 1,
+        "observation_only": true,
+        "scene_revision": 5
+      },
+      {
+        "kind": "search",
+        "worker_pid": 1066,
+        "reason": "NONE",
+        "scene_revision": 5,
+        "search": {
+          "iterations": 0,
+          "nodes": 2,
+          "state_checks": 4,
+          "edge_checks": 2,
+          "waypoints": 2,
+          "path_length_rad": 1.9232369572445733,
+          "reason": "NONE",
+          "environment_revision": 5,
+          "elapsed_s": 0.03787531899797614,
+          "seed": 1
+        },
+        "preference": {
+          "selection": "BASELINE_RETAINED",
+          "candidate_reason": "PREFERENCE_ALREADY_MET",
+          "clearance_samples": 338,
+          "baseline_score": {
+            "min_clearance_m": 17.1837538818643,
+            "start_clearance_m": 17.205243740184155,
+            "goal_clearance_m": 17.1837538818643,
+            "length_rad": 1.9232369572445733
+          },
+          "effective_preference_m": 0.07,
+          "selected_score": {
+            "min_clearance_m": 17.1837538818643,
+            "start_clearance_m": 17.205243740184155,
+            "goal_clearance_m": 17.1837538818643,
+            "length_rad": 1.9232369572445733
+          },
+          "reason": "NONE",
+          "environment_revision": 5,
+          "elapsed_s": 0.1735642790008569
+        },
+        "elapsed_s": 0.2115391279985488,
+        "visualization_summary": {
+          "projected_nodes": 2,
+          "recorded_events": 4,
+          "projection_s": 0.0001051399995048996,
+          "dropped_nodes": 0,
+          "dropped_events": 0
+        },
+        "event": "LATEST_VALIDATION_SUBMITTED",
+        "attempt": 1,
+        "observation_only": true,
+        "candidate_points": 2,
+        "capture_to_result_s": 0.6500281939988781,
+        "feedback_age_s": 0.014533401998050977,
+        "human_age_at_capture_s": 0.006875757000671001,
+        "human_age_at_result_s": 0.6569039509995491
+      },
+      {
+        "kind": "validate",
+        "worker_pid": 1066,
+        "reason": "NONE",
+        "scene_revision": 5,
+        "points": 4,
+        "elapsed_s": 0.03320444999917527,
+        "event": "RESULT",
+        "attempt": 1,
+        "observation_only": true,
+        "candidate_points": 0,
+        "capture_to_result_s": 0.049949329000810394,
+        "feedback_age_s": 0.006207340000401018,
+        "human_age_at_capture_s": 0.016737988000386395,
+        "human_age_at_result_s": 0.06668731700119679,
+        "disposition": "VALID_FOR_CURRENT_SCENE_NO_DISPATCH"
+      }
+    ],
+    "parent_pid": 1040,
+    "feedback_updates_while_worker_active": 36,
+    "human_updates_while_worker_active": 36,
+    "max_spin_once_s": 0.007703170002059778,
+    "elapsed_s": 0.7078834769999958,
+    "motion_commands": [],
+    "normal_astar_timer_cancelled": true,
+    "marker_points_received": {
+      "start_tree": 1,
+      "goal_tree": 1,
+      "final_path": 2
+    },
+    "scene_change_deletes": {
+      "start_tree": true,
+      "goal_tree": true,
+      "final_path": true
+    },
+    "source_sha256": {
+      "src/planning/test/verify_rrt_shadow_ros.py": "da357de779a64e0e5c884775a31ebcd37708d960719180aeeb60134215099348",
+      "src/cra/config/robot.yaml": "2aa84934ad230034e9735e86579e07fb376e8e134db43713e9f3a9411cf51031",
+      "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+      "src/planning/planning/rrt_shadow.py": "f7f581a5df20cb3c13e51a89c7ff923145ca35377108e2a270b46e2e218a864c",
+      "src/planning/planning/planning_node.py": "b4abbc9c31896e29f9c75ac725d09840bdf4934009fb1e974e31130232b93343",
+      "src/planning/planning/planning_manager.py": "3d2f814808fddb23337a329d7b85da02e75a41e8e5697199391067e2cc644dcf",
+      "src/planning/planning/rrt_trace.py": "b0f8ac17d9107fd0487f01db1e6c20c829d206780d3999e32a980f8dc7349b7a",
+      "src/planning/planning/algorithms/rrt_connect.py": "1bee16fa39dbc3476d151e7660b098235a04f092b99fcc3c79ad9685f80d1731",
+      "src/planning/planning/visualization/rrt_display.py": "2678f721671a5a6c0c6a14eb87da5d68fc5c14964fa6d5148123eebc3eb63b7d",
+      "src/planning/planning/visualization/projection.py": "c089af2853f69b3c12ae11c741f3350eb573abbf8f2fea564a74226df37646a6"
+    }
+  },
+  "original_filtered_graph_ros": {
+    "scope": "Headless DDS probe for optional filtered graph markers; never execute motion.\n\nA small synthetic joint graph keeps the probe bounded. Raw GNG data is kept.\nThe normal planning timer is cancelled; this is not a moving-robot experiment.\n",
+    "stages": [
+      {
+        "stage": "far_human",
+        "shown_nodes": 3,
+        "status": "Filtered OBSERVED: checked nodes 3/3, edges 3/3\nValid: 3 nodes, 3 edges; shown 3",
+        "elapsed_s": 0.6037005599973782
+      },
+      {
+        "stage": "blocking_human",
+        "shown_nodes": 2,
+        "status": "Filtered OBSERVED: checked nodes 3/3, edges 3/3\nValid: 2 nodes, 0 edges; shown 0",
+        "elapsed_s": 0.14902960299878032
+      },
+      {
+        "stage": "human_away_again",
+        "shown_nodes": 3,
+        "status": "Filtered OBSERVED: checked nodes 3/3, edges 3/3\nValid: 3 nodes, 3 edges; shown 3",
+        "elapsed_s": 0.14977099600218935
+      },
+      {
+        "stage": "unknown_human",
+        "shown_nodes": null,
+        "status": "Human data UNKNOWN: filtered graph hidden",
+        "elapsed_s": 0.10194562499964377
+      }
+    ],
+    "joint_updates": 20,
+    "motion_commands": [],
+    "normal_planning_timer_cancelled": true,
+    "source_sha256": {
+      "src/planning/test/verify_filtered_graph_ros.py": "2d18b55896d27024a033c7bdebc602a298ab218532fd1e68d47d4c37b9307b64",
+      "src/cra/config/robot.yaml": "2aa84934ad230034e9735e86579e07fb376e8e134db43713e9f3a9411cf51031",
+      "src/cra/config/cra.rviz": "d2f3c221d8e95f036b68c95851bdfd6dd730f56d82580bd7e4ebbb8d286edc72",
+      "src/planning/planning/filtered_graph_display.py": "241d61f1d24346d076310e778ab4282ca8ba48a1e19c506f5cfbbe37852d35ba",
+      "src/planning/planning/planning_node.py": "b4abbc9c31896e29f9c75ac725d09840bdf4934009fb1e974e31130232b93343",
+      "src/planning/planning/visualization/planning_visualizer.py": "05d60988d35f28723c7cd6150b5886d9e40c71a91e54c6a32982d194bdb98255"
+    }
+  },
+  "offline_replay_ros": {
+    "scope": "Headless replay transport check on domain 226; no Motion node or camera.",
+    "ros_domain": 226,
+    "marker_points_received": {
+      "start_tree": 142,
+      "goal_tree": 130,
+      "final_path": 44
+    },
+    "steps_seen": [
+      "CONNECT_ADVANCED",
+      "CONNECT_STARTED",
+      "EXTEND_ACCEPTED",
+      "EXTEND_REJECTED",
+      "NEAREST_SELECTED",
+      "PATH_FOUND",
+      "SAMPLE_GENERATED"
+    ],
+    "historical_label_seen": true,
+    "motion_commands": [],
+    "elapsed_s": 25.87591163199977
+  },
+  "offline_equal_endpoint_experiment": [
+    {
+      "scene": "without_human",
+      "seed": 9,
+      "reason": "NONE",
+      "statistics": {
+        "iterations": 0,
+        "nodes": 2,
+        "state_checks": 4,
+        "edge_checks": 2,
+        "waypoints": 2,
+        "path_length_rad": 1.9232369572445733,
+        "reason": "NONE",
+        "environment_revision": 3,
+        "elapsed_s": 0.006346715999825392,
+        "seed": 9
+      },
+      "accepted_nodes_displayed": {
+        "start": 1,
+        "goal": 1
+      },
+      "rejected_displayed": 0,
+      "recorded_events": 4,
+      "dropped_nodes": 0,
+      "dropped_events": 0,
+      "start": [
+        0.023162707686424255,
+        -1.3472504615783691,
+        1.1848934888839722,
+        -0.5477003455162048,
+        0.6865991950035095
+      ],
+      "goal": [
+        1.699122667312622,
+        -1.0410857200622559,
+        0.6139736175537109,
+        -1.2174338102340698,
+        0.8341435790061951
+      ],
+      "frozen_freshness": true,
+      "source_hashes": {
+        "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+        "src/planning/planning/algorithms/rrt_connect.py": "1bee16fa39dbc3476d151e7660b098235a04f092b99fcc3c79ad9685f80d1731",
+        "src/planning/planning/algorithms/collision_filter.py": "6127fe5937b66276e530104c387850354a653001425d8b934e7b5efc18cec2d0",
+        "src/planning/planning/rrt_trace.py": "b0f8ac17d9107fd0487f01db1e6c20c829d206780d3999e32a980f8dc7349b7a"
+      },
+      "replay_json": "/tmp/cra_rrt_replay_20261119/without_human.json"
+    },
+    {
+      "scene": "with_human",
+      "seed": 9,
+      "reason": "NONE",
+      "statistics": {
+        "iterations": 109,
+        "nodes": 92,
+        "state_checks": 244,
+        "edge_checks": 134,
+        "waypoints": 44,
+        "path_length_rad": 6.301670501998456,
+        "reason": "NONE",
+        "environment_revision": 2,
+        "elapsed_s": 0.3343186469974171,
+        "seed": 9
+      },
+      "accepted_nodes_displayed": {
+        "start": 48,
+        "goal": 44
+      },
+      "rejected_displayed": 64,
+      "recorded_events": 512,
+      "dropped_nodes": 0,
+      "dropped_events": 88,
+      "start": [
+        0.023162707686424255,
+        -1.3472504615783691,
+        1.1848934888839722,
+        -0.5477003455162048,
+        0.6865991950035095
+      ],
+      "goal": [
+        1.699122667312622,
+        -1.0410857200622559,
+        0.6139736175537109,
+        -1.2174338102340698,
+        0.8341435790061951
+      ],
+      "frozen_freshness": true,
+      "source_hashes": {
+        "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+        "src/planning/planning/algorithms/rrt_connect.py": "1bee16fa39dbc3476d151e7660b098235a04f092b99fcc3c79ad9685f80d1731",
+        "src/planning/planning/algorithms/collision_filter.py": "6127fe5937b66276e530104c387850354a653001425d8b934e7b5efc18cec2d0",
+        "src/planning/planning/rrt_trace.py": "b0f8ac17d9107fd0487f01db1e6c20c829d206780d3999e32a980f8dc7349b7a"
+      },
+      "replay_json": "/tmp/cra_rrt_replay_20261119/with_human.json"
+    }
+  ],
+  "limitations": [
+    "Human freshness deliberately frozen in geometric recording only",
+    "Normal Planning timers cancelled in live-node DDS probes",
+    "No live Kinect or moving-robot avoidance experiment",
+    "No interactive RViz rendering/checkbox verification",
+    "Recorded event prefixes may be truncated; terminal bounded snapshot shown",
+    "Displayed final path is certified RRT baseline, not clearance-preference replacement"
+  ],
+  "test_environment_note": "MuJoCo 3.1.6 STL descriptor retention reached OS limit in initial combined runs; new fixtures now reuse one model. Final regression passed without raising OS limits."
+}

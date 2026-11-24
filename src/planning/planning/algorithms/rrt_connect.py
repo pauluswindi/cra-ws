@@ -1,4 +1,4 @@
-"""Bounded geometric RRT-Connect prototype; not wired into the live manager.
+"""Bounded geometric RRT-Connect for shadow and simulation fallback workers.
 
 Both trees use the existing checker, finite five-joint bounds and linear joint
 segments. This does not predict obstacle motion or authorize margin recovery.
@@ -35,7 +35,7 @@ class RRTConnectPlanner:
     """
 
     def __init__(self, collision_filter, step_size=0.15, time_budget=0.5,
-                 max_iterations=1000, max_nodes=3000, clock=None):
+                 max_iterations=1000, max_nodes=3000, clock=None, trace=None):
         for name, value in [('step_size', step_size), ('time_budget', time_budget)]:
             if isinstance(value, bool) or not np.isfinite(value) or value <= 0.:
                 raise ValueError(f'{name} must be positive and finite')
@@ -58,6 +58,11 @@ class RRTConnectPlanner:
         self.last_plan_failure = 'NOT_RUN'
         self.last_error = None
         self.last_statistics = {}
+        self.trace = trace
+
+    def _event(self, event, **fields):
+        if self.trace is not None:
+            self.trace.emit(event, iteration=self.last_statistics['iterations'], **fields)
 
     def _stop(self, reason):
         self.last_plan_failure = reason
@@ -84,13 +89,24 @@ class RRTConnectPlanner:
         except Exception as error:
             self.last_error = f'{type(error).__name__}: {error}'
             return self._stop('COLLISION_CHECK_ERROR')
-        return self._alive() and valid
+        alive = self._alive()
+        if self.trace is not None and not (alive and valid):
+            failure = getattr(self.checker, 'last_' + kind + '_validation_failure', None) or {}
+            self.query_reason = (
+                self.last_plan_failure if not alive else failure.get('reason')
+                or (failure.get('state') or {}).get('reason')
+                or ('STATE_INVALID' if kind == 'state' else 'EDGE_INVALID'))
+        return alive and valid
 
     def _extend(self, tree, target):
         if not self._alive():
             return 'TRAPPED', None
         delta = tree.points[:tree.size] - target
         nearest = int(np.argmin(np.einsum('ij,ij->i', delta, delta)))
+        name = 'start' if tree.from_start else 'goal'
+        if self.trace is not None:
+            self._event('NEAREST_SELECTED', tree=name, q=tree.points[nearest].tolist(),
+                        node=nearest)
         difference = target - tree.points[nearest]
         distance = float(np.linalg.norm(difference))
         if distance <= 1e-12:
@@ -102,23 +118,41 @@ class RRTConnectPlanner:
         candidate = (target.copy() if reached else
                      tree.points[nearest] + difference * (self.step_size / distance))
         if not self._query('state', candidate):
+            self._rejection(name, candidate, tree.points[nearest], 'state')
             return 'TRAPPED', None
         # Goal-tree edges must be certified in execution order toward its root.
         edge = ((tree.points[nearest], candidate) if tree.from_start
                 else (candidate, tree.points[nearest]))
         if not self._query('edge', *edge):
+            self._rejection(name, candidate, tree.points[nearest], 'edge')
             return 'TRAPPED', None
         index = tree.size
         tree.points[index] = candidate
         tree.parents[index] = nearest
         tree.size += 1
         self.last_statistics['nodes'] += 1
+        if self.trace is not None:
+            self.trace.node(name, candidate, nearest, self.last_statistics['iterations'])
         return ('REACHED' if reached else 'ADVANCED'), index
 
+    def _rejection(self, tree, candidate, parent, check):
+        if self.trace is not None:
+            reason = (self.query_reason if self.last_plan_failure == 'SEARCHING'
+                      else self.last_plan_failure)
+            self.trace.reject(tree, candidate, parent, reason, check,
+                              self.last_statistics['iterations'])
+
     def _connect(self, tree, target):
+        name = 'start' if tree.from_start else 'goal'
+        if self.trace is not None:
+            self._event('CONNECT_STARTED', tree=name, q=target.tolist())
         status, index = self._extend(tree, target)
         while status == 'ADVANCED':
+            if self.trace is not None:
+                self._event('CONNECT_ADVANCED', tree=name, q=tree.points[index].tolist())
             status, index = self._extend(tree, target)
+        if status == 'REACHED' and self.trace is not None:
+            self._event('CONNECT_REACHED', tree=name, q=tree.points[index].tolist())
         return status, index
 
     def _finish(self, path):
@@ -128,11 +162,19 @@ class RRTConnectPlanner:
             if not self._query('state', point):
                 if self._alive():
                     self._stop('PATH_INVALID')
+                if self.trace is not None:
+                    self._event('PATH_REJECTED', reason=self.query_reason
+                                if self.last_plan_failure == 'PATH_INVALID'
+                                else self.last_plan_failure, check='state')
                 return None
         for a, b in zip(path[:-1], path[1:]):
             if not self._query('edge', a, b):
                 if self._alive():
                     self._stop('PATH_INVALID')
+                if self.trace is not None:
+                    self._event('PATH_REJECTED', reason=self.query_reason
+                                if self.last_plan_failure == 'PATH_INVALID'
+                                else self.last_plan_failure, check='edge')
                 return None
         if not self._alive():
             return None
@@ -140,6 +182,8 @@ class RRTConnectPlanner:
         self.last_statistics['waypoints'] = len(path)
         self.last_statistics['path_length_rad'] = float(
             np.linalg.norm(np.diff(path, axis=0), axis=1).sum())
+        if self.trace is not None:
+            self.trace.path = path.tolist()
         return path.copy()
 
     def plan(self, start, goal, seed=0):
@@ -157,6 +201,9 @@ class RRTConnectPlanner:
             'iterations': 0, 'nodes': 0, 'state_checks': 0, 'edge_checks': 0,
             'waypoints': 0, 'path_length_rad': None,
         }
+        if self.trace is not None:
+            self.trace.reset()
+        self._event('SEARCH_STARTED')
         try:
             try:
                 start = np.array(start, dtype=float, copy=True)
@@ -171,18 +218,25 @@ class RRTConnectPlanner:
                 self._stop('INVALID_INPUT')
                 return None
             if not self._query('state', start):
+                self._rejection('start', start, start, 'state')
                 if self._alive():
                     self._stop('START_INVALID')
                 return None
+            if self.trace is not None:
+                self.trace.node('start', start)
             if not self._query('state', goal):
+                self._rejection('goal', goal, goal, 'state')
                 if self._alive():
                     self._stop('GOAL_INVALID')
                 return None
+            if self.trace is not None:
+                self.trace.node('goal', goal)
             if np.array_equal(start, goal):
                 return self._finish(start[None, :])
             self.last_statistics['nodes'] = 2
             if self._query('edge', start, goal):
                 return self._finish(np.vstack((start, goal)))
+            self._rejection('start', goal, start, 'edge')
             if not self._alive():
                 return None
             first = _Tree(start, self.max_nodes, True)
@@ -193,6 +247,9 @@ class RRTConnectPlanner:
                     return None
                 self.last_statistics['iterations'] = iteration + 1
                 sample = random.uniform(self.lower, self.upper)
+                if self.trace is not None:
+                    self._event('SAMPLE_GENERATED', tree='start' if first.from_start else 'goal',
+                                q=sample.tolist())
                 status, index = self._extend(first, sample)
                 if status != 'TRAPPED':
                     status, other = self._connect(second, first.points[index])
@@ -205,6 +262,9 @@ class RRTConnectPlanner:
                 self._stop('ITERATION_LIMIT')
             return None
         finally:
+            if self.trace is not None:
+                self.trace.finish(self.trace.path if self.last_plan_failure == 'NONE' else None,
+                                  self.last_plan_failure)
             self.last_statistics.update(
                 reason=self.last_plan_failure, environment_revision=self.revision,
                 elapsed_s=float(self.clock() - began), seed=seed,

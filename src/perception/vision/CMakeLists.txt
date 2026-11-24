@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.8...3.22)
 project(vision)
 
+# Real-time image processing should not default to an unoptimized build.
+# Keep debug symbols and honor an explicitly selected build configuration.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Build configuration" FORCE)
+endif()
+
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -207,6 +213,31 @@ install(DIRECTORY launch/
 )
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  add_executable(vision_stream_probe test/vision_stream_probe.cpp)
+  find_package(trajectory_msgs REQUIRED)
+  ament_target_dependencies(vision_stream_probe rclcpp sensor_msgs visualization_msgs msgs
+    geometry_msgs std_msgs trajectory_msgs)
+  ament_add_gtest(test_preview_decode test/test_preview_decode.cpp)
+  target_link_libraries(test_preview_decode ${OpenCV_LIBS})
+  add_executable(benchmark_preview_decode test/benchmark_preview_decode.cpp)
+  target_link_libraries(benchmark_preview_decode ${OpenCV_LIBS})
+  ament_add_gtest(test_sparse_depth test/test_sparse_depth.cpp)
+  ament_target_dependencies(test_sparse_depth sensor_msgs geometry_msgs)
+  target_link_libraries(test_sparse_depth
+    depth_processor_lib human_segmenter_lib reconstruction_pipeline_lib)
+
+  ament_add_gtest(test_frame_batch test/test_frame_batch.cpp)
+  ament_target_dependencies(test_frame_batch rclcpp geometry_msgs tf2 tf2_ros)
+  target_link_libraries(test_frame_batch frame_transformer_lib)
+  set_tests_properties(test_frame_batch PROPERTIES
+    ENVIRONMENT "ROS_DOMAIN_ID=230;ROS_LOCALHOST_ONLY=1")
+
+  add_executable(benchmark_sparse_depth test/benchmark_sparse_depth.cpp)
+  ament_target_dependencies(benchmark_sparse_depth sensor_msgs geometry_msgs)
+  target_link_libraries(benchmark_sparse_depth
+    depth_processor_lib human_segmenter_lib reconstruction_pipeline_lib)
+
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()

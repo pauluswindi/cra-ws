@@ -5,6 +5,8 @@
 #define K4A_STREAM_CONTROL_H
 
 #include <atomic>
+#include <chrono>
+#include <cstdint>
 #include <exception>
 #include <initializer_list>
 #include <stdexcept>
@@ -12,6 +14,31 @@
 
 namespace k4a_driver
 {
+inline void validateTrackerEnqueueWait(int wait_ms, bool experimental = false)
+{
+  if (wait_ms != -1 && wait_ms != 5 && !(experimental && (wait_ms == 0 || wait_ms == 10)))
+  {
+    throw std::invalid_argument(experimental
+        ? "tracker_enqueue_wait_ms must be -1, 0, 5 or 10"
+        : "tracker_enqueue_wait_ms must be -1 (blocking) or 5");
+  }
+}
+
+// A busy SDK does not create a pending result;
+// actual SDK failures still propagate to the existing worker failure handler.
+template <typename Tracker, typename Capture>
+bool tryEnqueueTrackerCapture(Tracker& tracker, const Capture& capture,
+                              std::atomic_int16_t& pending,
+                              std::chrono::milliseconds wait)
+{
+  if (!tracker.enqueue_capture(capture, wait))
+  {
+    return false;
+  }
+  ++pending;
+  return true;
+}
+
 // A missing frame is not a failed device. Bound only consecutive timeouts;
 // receiving a real capture starts a new retry budget.
 class CaptureTimeoutPolicy

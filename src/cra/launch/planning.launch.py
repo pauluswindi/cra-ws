@@ -8,6 +8,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
+import yaml
 
 
 def generate_launch_description():
@@ -21,6 +22,13 @@ def generate_launch_description():
     )
 
     config_path = cra_share / "config/robot.yaml"
+    with config_path.open(encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+    data_dir = Path.home() / "living-lab/cra_ws/src/planning/data"
+    workspace_default = str(Path(config.get("workspace", {}).get(
+        "path", str(data_dir / "raw_workspace.npz"))).expanduser())
+    graph_default = str(Path(config.get("gng", {}).get(
+        "graph_path", str(data_dir / "workspace_graph.npz"))).expanduser())
 
     workspace_path = LaunchConfiguration(
         "workspace_path"
@@ -37,10 +45,12 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             "workspace_path",
+            default_value=workspace_default,
             description="Absolute path to raw_workspace.npz",
         ),
         DeclareLaunchArgument(
             "graph_path",
+            default_value=graph_default,
             description="Absolute path to workspace_graph.npz",
         ),
         DeclareLaunchArgument(

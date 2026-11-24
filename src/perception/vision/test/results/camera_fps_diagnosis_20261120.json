@@ -1,0 +1,325 @@
+{
+  "date": "2026-11-20",
+  "scope": "Camera loss/FPS diagnosis, applied preview optimization and passive instrumentation. Nonblocking tracker remains a proposal pending user decision.",
+  "nonblocking_tracker_applied": false,
+  "supplied_log": {
+    "source": "/home/lvinz/.codex/attachments/1dbaa711-b99b-4344-9be8-8d2bfcdf64f7/Pasted text.txt",
+    "sha256": "5f34fb9344db4d7b6ac84945b4fb4258aa3be8b5d05a2e69c4554c540b18d003",
+    "events": [
+      {
+        "line": 92,
+        "time_s": 1795160536.6834195,
+        "text": "[planning_node-5] [INFO] [1795160536.683419484] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=2, capsules=16"
+      },
+      {
+        "line": 95,
+        "time_s": 1795160537.885913,
+        "text": "[planning_node-5] [INFO] [1795160537.885912912] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      },
+      {
+        "line": 118,
+        "time_s": 1795160551.7342963,
+        "text": "[node-6] [WARN] [1795160551.734296358] [k4a_ros_device_node]: Capture timeout (1/5); retrying without publishing stale data"
+      },
+      {
+        "line": 127,
+        "time_s": 1795160552.0822651,
+        "text": "[planning_node-5] [INFO] [1795160552.082265051] [planning_node]: Human Vision: UNKNOWN (VISION_INVALID), humans=0, capsules=0"
+      },
+      {
+        "line": 141,
+        "time_s": 1795160552.39861,
+        "text": "[node-6] [ERROR] [1795160552.398610058] [k4a_ros_device_node]: No capture after 5 consecutive timeouts; stopping stream"
+      },
+      {
+        "line": 148,
+        "time_s": 1795160553.5245948,
+        "text": "[node-6] [INFO] [1795160553.524594754] [k4a_ros_device_node]: Camera stream workers stopped"
+      },
+      {
+        "line": 290,
+        "time_s": 1795160560.22522,
+        "text": "[node-6] [INFO] [1795160560.225220018] [k4a_ros_device_node]: Capture retry limit=5, regular wait=166 ms"
+      },
+      {
+        "line": 297,
+        "time_s": 1795160560.8823116,
+        "text": "[planning_node-5] [INFO] [1795160560.882311559] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      },
+      {
+        "line": 320,
+        "time_s": 1795160562.0832105,
+        "text": "[planning_node-5] [INFO] [1795160562.083210408] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=2, capsules=16"
+      },
+      {
+        "line": 322,
+        "time_s": 1795160562.6832945,
+        "text": "[planning_node-5] [INFO] [1795160562.683294481] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      },
+      {
+        "line": 326,
+        "time_s": 1795160564.0826607,
+        "text": "[planning_node-5] [INFO] [1795160564.082660646] [planning_node]: Human Vision: UNKNOWN (VISION_INVALID), humans=0, capsules=0"
+      },
+      {
+        "line": 331,
+        "time_s": 1795160564.2830622,
+        "text": "[planning_node-5] [INFO] [1795160564.283062186] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      }
+    ],
+    "verified": [
+      "A persistent SDK capture timeout ends the physical stream, followed by respawn",
+      "RGB+depth configurations request synchronized_images_only in GetDeviceConfig",
+      "Color SDK queue drops continue after the first missing capture",
+      "The long loss starts while Planning is COMPLETED",
+      "A later 0.2004 second VISION_INVALID episode has no matching SDK timeout in excerpt",
+      "GUI overlay previously measured successful image callbacks, not physical camera FPS",
+      "Existing launch preview target is 20 FPS; camera remains configured at 30 FPS"
+    ],
+    "unverified": [
+      "Initial reason for missing synchronized captures (depth/device/SDK/scheduling)",
+      "Cause of short reconstruction invalidation after restart",
+      "Whether the observed 13-18 FPS represents GUI overlay, actual render cadence or another measurement"
+    ]
+  },
+  "applied": [
+    "Native reduced JPEG preview decode at existing half scale; original JPEG and perception inputs untouched",
+    "RelWithDebInfo default for previously unoptimized Vision, honoring explicit build modes",
+    "Existing direct callback decode flow retained after timer experiment reduced measured view cadence",
+    "Separate Input/View FPS overlay and five-second preview stage counters",
+    "Passive SDK capture/process/enqueue timing; timeout policy unchanged",
+    "Reconstruction invalidation diagnostics with input ages, sync delta and last blocking reason"
+  ],
+  "tests": {
+    "vision_cpp_cases_passed": 17,
+    "driver_cpp_cases_passed": 12,
+    "native_startup_cases_passed": 4,
+    "reconstruction_watchdog_and_empty_probe_passed": true,
+    "build_passed": true
+  },
+  "benchmark": {
+    "scope": "Synthetic JPEG 2048x1536, 40 timed samples per branch after warm-up. Preview decode/resize only, not whole-system FPS.",
+    "rows": [
+      {
+        "jpeg_bytes": "1231696",
+        "full_decode_resize_median_ms": "16.52",
+        "reduced_decode_median_ms": "12.5735"
+      }
+    ]
+  },
+  "native_preview": {
+    "scope": "Native preview callbacks and counters on domain 232; synthetic JPEG only.\n\nA temporary, test-only interposer suppresses imshow/waitKey, keeping decode,\nresize, overlay and normal timers. No camera, Planning or Motion is started.\nThis cannot establish interactive GUI FPS under the complete CRA workload.\n",
+    "source_fps": 30,
+    "preview_target_fps": 20,
+    "scale": 0.5,
+    "source_width": 2048,
+    "source_height": 1536,
+    "frames_sent": 360,
+    "preview_profiles": [
+      {
+        "selected_rx_fps": 18.98,
+        "decoded_fps": 18.98,
+        "displayed_fps": 15.19,
+        "decode_resize_mean_ms": 19.325,
+        "decode_resize_max_ms": 30.409
+      },
+      {
+        "selected_rx_fps": 24.8,
+        "decoded_fps": 24.8,
+        "displayed_fps": 17.6,
+        "decode_resize_mean_ms": 17.685,
+        "decode_resize_max_ms": 26.208
+      },
+      {
+        "selected_rx_fps": 16.74,
+        "decoded_fps": 16.74,
+        "displayed_fps": 14.35,
+        "decode_resize_mean_ms": 10.259,
+        "decode_resize_max_ms": 27.018
+      }
+    ],
+    "camera_or_robot_started": false,
+    "gui_interposed": true,
+    "raw_priority_and_compressed_fallback_verified": true,
+    "process_survived_input_loss": true
+  },
+  "native_camera": {
+    "scope": "Native hardware and driver, synthetic-free input; isolated domain 229. No Planning/Motion/reconstruction/viewer; image payloads are not saved. Stream subscriptions exercise capture, tracker and publication, but do not reproduce the complete CRA workload.",
+    "requested_duration_s": 60.0,
+    "wall_s": 61.17977545100075,
+    "settings": {
+      "body_tracking_enabled": true,
+      "body_tracking_smoothing_factor": 0.6,
+      "depth_enabled": true,
+      "depth_mode": "WFOV_2X2BINNED",
+      "color_enabled": true,
+      "color_resolution": "1536P",
+      "color_format": "jpeg",
+      "fps": 30,
+      "point_cloud": false,
+      "rgb_point_cloud": false,
+      "point_cloud_in_depth_frame": true,
+      "rescale_ir_to_mono8": false,
+      "ir_mono8_scaling_factor": 1.0,
+      "imu_rate_target": 100,
+      "wired_sync_mode": 0,
+      "subordinate_delay_off_master_usec": 0,
+      "sensor_sn": "",
+      "recording_file": "",
+      "recording_loop_enabled": false
+    },
+    "natural_exit_code": null,
+    "streams": {
+      "/depth/image_raw": {
+        "count": 686,
+        "active_rate_hz": 13.082938948001075,
+        "max_callback_gap_s": 0.4079160660003254,
+        "median_capture_age_ms": 237.90418449999999,
+        "max_capture_age_ms": 289.700502
+      },
+      "/rgb/image_raw/compressed": {
+        "count": 559,
+        "active_rate_hz": 10.604654475208097,
+        "max_callback_gap_s": 0.5680709610023769,
+        "median_capture_age_ms": 274.41326,
+        "max_capture_age_ms": 337.700356
+      },
+      "/body_index_map/image_raw": {
+        "count": 1282,
+        "active_rate_hz": 24.33716133909355,
+        "max_callback_gap_s": 0.13234285499856924,
+        "median_capture_age_ms": 330.9775295,
+        "max_capture_age_ms": 435.416328
+      },
+      "/body_tracking_data": {
+        "count": 1283,
+        "active_rate_hz": 24.371082373305075,
+        "max_callback_gap_s": 0.12765208599739708,
+        "median_capture_age_ms": 331.100742,
+        "max_capture_age_ms": 428.869073
+      }
+    },
+    "capture_timeout_messages": 0,
+    "fatal_capture_timeout": false,
+    "sdk_color_queue_drops": 0,
+    "cleanup_completed": true,
+    "camera_launch_sha256": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628",
+    "diagnostic_sha256": "53c633f339c8eb1a914960fbdce9ed4c2c5741da7fa6ec18de0ec7eb5e575340",
+    "driver_log": "/tmp/cra_capture_fps_native_20261120.log",
+    "parameters_file": "/tmp/cra_capture_fps_native_20261120.params.yaml"
+  },
+  "capture_profiles": [
+    {
+      "capture_fps": 23.03,
+      "sdk_wait_mean_ms": 4.268,
+      "sdk_wait_max_ms": 469.605,
+      "process_mean_ms": 30.109,
+      "process_max_ms": 60.413,
+      "last_tracker_enqueue_ms": 22.506
+    },
+    {
+      "capture_fps": 24.52,
+      "sdk_wait_mean_ms": 0.003,
+      "sdk_wait_max_ms": 0.016,
+      "process_mean_ms": 33.2,
+      "process_max_ms": 65.287,
+      "last_tracker_enqueue_ms": 29.211
+    },
+    {
+      "capture_fps": 24.61,
+      "sdk_wait_mean_ms": 0.004,
+      "sdk_wait_max_ms": 0.023,
+      "process_mean_ms": 33.32,
+      "process_max_ms": 63.3,
+      "last_tracker_enqueue_ms": 36.599
+    },
+    {
+      "capture_fps": 24.48,
+      "sdk_wait_mean_ms": 0.004,
+      "sdk_wait_max_ms": 0.022,
+      "process_mean_ms": 34.724,
+      "process_max_ms": 62.253,
+      "last_tracker_enqueue_ms": 22.527
+    },
+    {
+      "capture_fps": 24.27,
+      "sdk_wait_mean_ms": 0.004,
+      "sdk_wait_max_ms": 0.018,
+      "process_mean_ms": 33.937,
+      "process_max_ms": 101.647,
+      "last_tracker_enqueue_ms": 36.763
+    },
+    {
+      "capture_fps": 24.92,
+      "sdk_wait_mean_ms": 0.003,
+      "sdk_wait_max_ms": 0.02,
+      "process_mean_ms": 32.667,
+      "process_max_ms": 70.572,
+      "last_tracker_enqueue_ms": 30.562
+    },
+    {
+      "capture_fps": 23.75,
+      "sdk_wait_mean_ms": 0.004,
+      "sdk_wait_max_ms": 0.024,
+      "process_mean_ms": 35.355,
+      "process_max_ms": 62.301,
+      "last_tracker_enqueue_ms": 42.098
+    },
+    {
+      "capture_fps": 24.65,
+      "sdk_wait_mean_ms": 0.004,
+      "sdk_wait_max_ms": 0.019,
+      "process_mean_ms": 34.092,
+      "process_max_ms": 69.23,
+      "last_tracker_enqueue_ms": 35.805
+    },
+    {
+      "capture_fps": 24.98,
+      "sdk_wait_mean_ms": 0.003,
+      "sdk_wait_max_ms": 0.017,
+      "process_mean_ms": 32.682,
+      "process_max_ms": 51.991,
+      "last_tracker_enqueue_ms": 36.294
+    },
+    {
+      "capture_fps": 24.22,
+      "sdk_wait_mean_ms": 0.003,
+      "sdk_wait_max_ms": 0.016,
+      "process_mean_ms": 34.704,
+      "process_max_ms": 74.238,
+      "last_tracker_enqueue_ms": 35.916
+    }
+  ],
+  "verified_bottleneck": "On real camera in isolated driver/tracker probe, SDK get_capture wait is about 0.003 ms while enqueue_capture often takes 30-42 ms; capture consumption about 24-25 Hz. Current enqueue_capture uses the SDK infinite timeout, serializing RGB/depth publication behind tracker admission.",
+  "proposed_change": "Use zero-timeout enqueue; skip only tracker submission on SDK TIMEOUT, preserve existing exception/fatal handling on SDK FAILED. Keep successful queue accounting, original body-result timestamps and all freshness/invalidity policies. Requires user decision; not implemented.",
+  "limits": [
+    "Live full CRA FPS improvement and original intermittent missing synchronized captures remain unproven",
+    "A 60-second isolated real-camera test did not reproduce capture loss",
+    "Headless preview bypasses only GUI display functions and uses synthetic images; interactive render speed is not established",
+    "Reduced JPEG preview can differ slightly in pixels from full-decode/bilinear resize, with same output size; original images and body geometry are unchanged",
+    "No timeout extension, human-safety relaxation, GPU/model/FPS/resolution or smoothing change"
+  ],
+  "settings_sha256": {
+    "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8",
+    "src/cra/config/reconstruction.yaml": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+    "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628"
+  },
+  "source_sha256": {
+    "src/perception/vision/src/nodes/visual_node.cpp": "479e1095b82536ab538317c171709da19f9a0fd324d7c7ec8fd32da727bcb886",
+    "src/perception/vision/src/nodes/reconstruction_node.cpp": "5799e4eb08c5c849af4e57a2d665ec138de971917aa727e9fb6ff82e628062c6",
+    "src/perception/vision/include/vision/frame/preview_decode.hpp": "a57c6e3738c7a32df4fd1211b5e5278929b84e3b339b5cc946ced66773f7e3f9",
+    "src/perception/vision/CMakeLists.txt": "9301a91624e694b02328a9c8335dbd474905a17da0693bcd6118ed891695e67f",
+    "src/azure_kinect_ros_driver/src/k4a_ros_device.cpp": "e9955538e42d434d323c1d296b4b00b6ff8a21de5b590bf9b03088b325f128c5",
+    "src/perception/vision/test/test_preview_decode.cpp": "4f625fa8dd9cd5128ad2bc9036ef326d0a153963c5be9eac5585c635e364efe9",
+    "src/perception/vision/test/benchmark_preview_decode.cpp": "f645108d957cdb4020f25ab0d55276ed2fa054c5c2a18e245d51259e7f2aa5d0",
+    "src/perception/vision/test/verify_preview_ros.py": "49ee5165631410fb229fe7f14078e24f42a9887199aba6a1854cb17668e645f6"
+  },
+  "proposal_tradeoffs": [
+    "RGB/depth publication can proceed while SDK tracker input queue is busy",
+    "Body tracker inference throughput is not increased; some tracker inputs may be skipped",
+    "Faster depth reception versus delayed body-index/skeleton results can exceed the unchanged 0.15 s synchronization allowance and increase invalid geometry events",
+    "Test camera plus reconstruction without Motion first; compare valid geometry rate, capture age and synchronization deltas before enabling normal runtime",
+    "Do not increase sync/freshness thresholds to hide pairing errors; bounded timestamp matching would require a separate reviewed change if needed",
+    "Original intermittent capture timeout may have an independent sensor/SDK cause"
+  ]
+}

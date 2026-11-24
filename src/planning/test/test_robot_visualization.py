@@ -25,7 +25,8 @@ class Point:
 
 
 class Marker:
-    CUBE, SPHERE, LINE_STRIP, LINE_LIST, POINTS, MESH_RESOURCE = 1, 2, 4, 5, 8, 10
+    CUBE, SPHERE, LINE_STRIP, LINE_LIST, POINTS, TEXT_VIEW_FACING, MESH_RESOURCE = (
+        1, 2, 4, 5, 8, 9, 10)
     ADD, DELETE = 0, 2
 
     def __init__(self):
@@ -35,6 +36,7 @@ class Marker:
         self.scale = Point()
         self.color = SimpleNamespace(r=0., g=0., b=0., a=0.)
         self.points = []
+        self.lifetime = SimpleNamespace(sec=0, nanosec=0)
 
 
 class MarkerArray:

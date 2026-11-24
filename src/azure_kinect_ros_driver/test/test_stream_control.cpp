@@ -9,6 +9,82 @@
 
 #include "azure_kinect_ros_driver/stream_control.h"
 
+namespace
+{
+struct TestTracker
+{
+  bool accepted = false;
+  bool failed = false;
+  std::chrono::milliseconds timeout{123};
+  bool enqueue_capture(int, std::chrono::milliseconds wait)
+  {
+    timeout = wait;
+    if (failed) { throw std::runtime_error("SDK FAILED"); }
+    return accepted;
+  }
+};
+}
+
+TEST(TrackerAdmission, BusyDoesNotInventAnOutstandingResult)
+{
+  TestTracker tracker;
+  std::atomic_int16_t pending{2};
+  for (const int wait_ms : {0, 5, 10})
+  {
+    EXPECT_FALSE(k4a_driver::tryEnqueueTrackerCapture(
+        tracker, 1, pending, std::chrono::milliseconds(wait_ms)));
+    EXPECT_EQ(tracker.timeout.count(), wait_ms);
+    EXPECT_EQ(pending.load(), 2);
+  }
+}
+
+TEST(TrackerAdmission, ProductionWaitPolicyIsRestrictedToBlockingOrFiveMilliseconds)
+{
+  EXPECT_NO_THROW(k4a_driver::validateTrackerEnqueueWait(-1));
+  EXPECT_NO_THROW(k4a_driver::validateTrackerEnqueueWait(5));
+  for (const int wait_ms : {-100, -2, 0, 1, 10, 1000})
+  {
+    EXPECT_THROW(k4a_driver::validateTrackerEnqueueWait(wait_ms), std::invalid_argument);
+  }
+  EXPECT_NO_THROW(k4a_driver::validateTrackerEnqueueWait(0, true));
+  EXPECT_NO_THROW(k4a_driver::validateTrackerEnqueueWait(10, true));
+}
+
+TEST(TrackerAdmission, OnlyAcceptedCapturesIncrementPending)
+{
+  TestTracker tracker;
+  tracker.accepted = true;
+  std::atomic_int16_t pending{1};
+  EXPECT_TRUE(k4a_driver::tryEnqueueTrackerCapture(
+      tracker, 1, pending, std::chrono::milliseconds(5)));
+  EXPECT_EQ(tracker.timeout.count(), 5);
+  EXPECT_EQ(pending.load(), 2);
+}
+
+TEST(TrackerAdmission, BlockingUsesSdkInfiniteWaitAndCountsAcceptedCaptureOnce)
+{
+  TestTracker tracker;
+  tracker.accepted = true;
+  std::atomic_int16_t pending{0};
+  EXPECT_TRUE(k4a_driver::tryEnqueueTrackerCapture(
+      tracker, 1, pending, std::chrono::milliseconds(-1)));
+  EXPECT_EQ(tracker.timeout.count(), -1);
+  EXPECT_EQ(pending.load(), 1);
+}
+
+TEST(TrackerAdmission, SdkFailureStillPropagatesWithoutInventingAResult)
+{
+  TestTracker tracker;
+  tracker.failed = true;
+  std::atomic_int16_t pending{1};
+  for (const int wait_ms : {-1, 5, 10})
+  {
+    EXPECT_THROW(k4a_driver::tryEnqueueTrackerCapture(
+        tracker, 1, pending, std::chrono::milliseconds(wait_ms)), std::runtime_error);
+  }
+  EXPECT_EQ(pending.load(), 1);
+}
+
 TEST(CaptureTimeout, TemporaryMissingCaptureDoesNotExhaustBudget)
 {
   k4a_driver::CaptureTimeoutPolicy policy(5);

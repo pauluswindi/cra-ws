@@ -1,0 +1,168 @@
+{
+  "scope": "Installed driver integration; automatic checks only, hardware opens denied",
+  "installed_binary_matches_build": true,
+  "installed_binary_resolved": "/home/lvinz/living-lab/cra_ws/build/azure_kinect_ros_driver/node",
+  "installed_binary_sha256": "6d3a5573d4362333313bc0318a512773a5e75f967834f8760b46df84eddc15dd",
+  "camera_workspace_calibration_unchanged": true,
+  "robot_and_reconstruction_yaml_unchanged": true,
+  "default_enqueue_wait_ms": -1,
+  "supported_enqueue_wait_ms": [
+    -1,
+    5
+  ],
+  "native_startup": {
+    "scope": "Native ROS binary on isolated localhost domain 223; test-only SDK shim denies every device open. No camera, frames, robot commands or live capture recovery are tested.",
+    "cases": [
+      {
+        "case": "no_device",
+        "returncode": 1,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true,
+          "unstarted_workers_cleaned_up": true
+        },
+        "output": "[INFO] [1795447506.918184118] [k4a_ros_device_node]: Tracker admission: mode=blocking enqueue_wait_ms=-1 (startup-only)\n[INFO] [1795447506.918377804] [k4a_ros_device_node]: K4A Parameters:\n[INFO] [1795447506.918385684] [k4a_ros_device_params_node]: sensor_sn - std::string : \n[INFO] [1795447506.918393058] [k4a_ros_device_params_node]: depth_enabled - bool : 1\n[INFO] [1795447506.918398411] [k4a_ros_device_params_node]: depth_unit - std::string : 16UC1\n[INFO] [1795447506.918402676] [k4a_ros_device_params_node]: depth_mode - std::string : \n[INFO] [1795447506.918406294] [k4a_ros_device_params_node]: color_enabled - bool : 1\n[INFO] [1795447506.918410060] [k4a_ros_device_params_node]: color_format - std::string : \n[INFO] [1795447506.918413465] [k4a_ros_device_params_node]: color_resolution - std::string : \n[INFO] [1795447506.918417509] [k4a_ros_device_params_node]: fps - int : 30\n[INFO] [1795447506.918421330] [k4a_ros_device_params_node]: point_cloud - bool : 1\n[INFO] [1795447506.918425057] [k4a_ros_device_params_node]: rgb_point_cloud - bool : 1\n[INFO] [1795447506.918428601] [k4a_ros_device_params_node]: point_cloud_in_depth_frame - bool : 1\n[INFO] [1795447506.918432428] [k4a_ros_device_params_node]: tf_prefix - std::string : \n[INFO] [1795447506.918435887] [k4a_ros_device_params_node]: recording_file - std::string : \n[INFO] [1795447506.918439660] [k4a_ros_device_params_node]: recording_loop_enabled - bool : 0\n[INFO] [1795447506.918443191] [k4a_ros_device_params_node]: body_tracking_enabled - bool : 0\n[INFO] [1795447506.918456780] [k4a_ros_device_params_node]: body_tracking_smoothing_factor - float : 0\n[INFO] [1795447506.918460988] [k4a_ros_device_params_node]: imu_rate_target - int : 0\n[INFO] [1795447506.918465674] [k4a_ros_device_params_node]: rescale_ir_to_mono8 - bool : 0\n[INFO] [1795447506.918469761] [k4a_ros_device_params_node]: ir_mono8_scaling_factor - float : 1\n[INFO] [1795447506.918474894] [k4a_ros_device_params_node]: wired_sync_mode - int : 0\n[INFO] [1795447506.918478632] [k4a_ros_device_params_node]: subordinate_delay_off_master_usec - int : 0\n[INFO] [1795447506.918486860] [k4a_ros_device_node]: Found 0 sensors\n[INFO] [1795447506.918490532] [k4a_ros_device_node]: No serial number provided: picking first sensor\n[ERROR] [1795447506.918493801] [k4a_ros_device_node]: Failed to open a K4A device. Cannot continue.\n[ERROR] [1795447506.918518949] [k4a_ros_device_node]: Cannot start cameras: no open device or recording\n[ERROR] [1795447506.918523400] [k4a_bridge]: Failed to start cameras\n[INFO] [1795447506.918528854] [k4a_ros_device_node]: Stopping camera streams and workers\n[INFO] [1795447506.918532959] [k4a_ros_device_node]: Camera stream workers stopped\n[INFO] [1795447506.920546851] [k4a_bridge]: ROS Exit\n[INFO] [1795447506.920691023] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447506.920693602] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "device_open_failed",
+        "returncode": 1,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true,
+          "unstarted_workers_cleaned_up": true
+        },
+        "output": "[INFO] [1795447507.124185829] [k4a_ros_device_node]: Tracker admission: mode=blocking enqueue_wait_ms=-1 (startup-only)\n[INFO] [1795447507.124395180] [k4a_ros_device_node]: K4A Parameters:\n[INFO] [1795447507.124403296] [k4a_ros_device_params_node]: sensor_sn - std::string : \n[INFO] [1795447507.124412793] [k4a_ros_device_params_node]: depth_enabled - bool : 1\n[INFO] [1795447507.124418172] [k4a_ros_device_params_node]: depth_unit - std::string : 16UC1\n[INFO] [1795447507.124422581] [k4a_ros_device_params_node]: depth_mode - std::string : \n[INFO] [1795447507.124426399] [k4a_ros_device_params_node]: color_enabled - bool : 1\n[INFO] [1795447507.124430244] [k4a_ros_device_params_node]: color_format - std::string : \n[INFO] [1795447507.124433790] [k4a_ros_device_params_node]: color_resolution - std::string : \n[INFO] [1795447507.124438183] [k4a_ros_device_params_node]: fps - int : 30\n[INFO] [1795447507.124442168] [k4a_ros_device_params_node]: point_cloud - bool : 1\n[INFO] [1795447507.124445924] [k4a_ros_device_params_node]: rgb_point_cloud - bool : 1\n[INFO] [1795447507.124449431] [k4a_ros_device_params_node]: point_cloud_in_depth_frame - bool : 1\n[INFO] [1795447507.124453407] [k4a_ros_device_params_node]: tf_prefix - std::string : \n[INFO] [1795447507.124456859] [k4a_ros_device_params_node]: recording_file - std::string : \n[INFO] [1795447507.124460584] [k4a_ros_device_params_node]: recording_loop_enabled - bool : 0\n[INFO] [1795447507.124464052] [k4a_ros_device_params_node]: body_tracking_enabled - bool : 0\n[INFO] [1795447507.124481185] [k4a_ros_device_params_node]: body_tracking_smoothing_factor - float : 0\n[INFO] [1795447507.124485452] [k4a_ros_device_params_node]: imu_rate_target - int : 0\n[INFO] [1795447507.124488905] [k4a_ros_device_params_node]: rescale_ir_to_mono8 - bool : 0\n[INFO] [1795447507.124493113] [k4a_ros_device_params_node]: ir_mono8_scaling_factor - float : 1\n[INFO] [1795447507.124497853] [k4a_ros_device_params_node]: wired_sync_mode - int : 0\n[INFO] [1795447507.124501701] [k4a_ros_device_params_node]: subordinate_delay_off_master_usec - int : 0\n[INFO] [1795447507.124510964] [k4a_ros_device_node]: Found 1 sensors\n[INFO] [1795447507.124514895] [k4a_ros_device_node]: No serial number provided: picking first sensor\nTEST_ONLY_DEVICE_OPEN_DENIED\n[ERROR] [1795447507.124542771] [k4a_ros_device_node]: Failed to open K4A device at index 0\n[ERROR] [1795447507.124573331] [k4a_ros_device_node]: Failed to open a K4A device. Cannot continue.\n[ERROR] [1795447507.124579889] [k4a_ros_device_node]: Cannot start cameras: no open device or recording\n[ERROR] [1795447507.124584698] [k4a_bridge]: Failed to start cameras\n[INFO] [1795447507.124591022] [k4a_ros_device_node]: Stopping camera streams and workers\n[INFO] [1795447507.124595578] [k4a_ros_device_node]: Camera stream workers stopped\n[INFO] [1795447507.126716123] [k4a_bridge]: ROS Exit\n[INFO] [1795447507.126936472] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447507.126939086] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "invalid_retry_budget",
+        "returncode": 3,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[ERROR] [1795447507.326430173] [k4a_bridge]: K4A initialization/runtime failure: capture_max_consecutive_timeouts must be positive\n[INFO] [1795447507.326665242] [k4a_bridge]: ROS Exit\n[INFO] [1795447507.326819740] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447507.326822361] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "recording_open_exception",
+        "returncode": 3,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[2026-11-23 22:25:07.541] [error] [t=3956] /__w/1/s/extern/Azure-Kinect-Sensor-SDK/src/record/sdk/playback.cpp (38): k4a_playback_open(). Unable to open file '/nonexistent/cra_test.mkv': basic_ios::clear: iostream error\n[INFO] [1795447507.541014916] [k4a_ros_device_node]: Tracker admission: mode=blocking enqueue_wait_ms=-1 (startup-only)\n[INFO] [1795447507.541227305] [k4a_ros_device_node]: Node is started in playback mode\n[INFO] [1795447507.541236550] [k4a_ros_device_node]: Try to open recording file /nonexistent/cra_test.mkv\n[ERROR] [1795447507.543419040] [k4a_bridge]: K4A initialization/runtime failure: Failed to open recording!\n[INFO] [1795447507.543464808] [k4a_bridge]: ROS Exit\n[INFO] [1795447507.543587586] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447507.543590243] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "default_blocking",
+        "returncode": 1,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[INFO] [1795447507.744162854] [k4a_ros_device_node]: Tracker admission: mode=blocking enqueue_wait_ms=-1 (startup-only)\n[INFO] [1795447507.744373784] [k4a_ros_device_node]: K4A Parameters:\n[INFO] [1795447507.744383216] [k4a_ros_device_params_node]: sensor_sn - std::string : \n[INFO] [1795447507.744390992] [k4a_ros_device_params_node]: depth_enabled - bool : 1\n[INFO] [1795447507.744396552] [k4a_ros_device_params_node]: depth_unit - std::string : 16UC1\n[INFO] [1795447507.744400979] [k4a_ros_device_params_node]: depth_mode - std::string : \n[INFO] [1795447507.744404693] [k4a_ros_device_params_node]: color_enabled - bool : 1\n[INFO] [1795447507.744408400] [k4a_ros_device_params_node]: color_format - std::string : \n[INFO] [1795447507.744411883] [k4a_ros_device_params_node]: color_resolution - std::string : \n[INFO] [1795447507.744416027] [k4a_ros_device_params_node]: fps - int : 30\n[INFO] [1795447507.744419936] [k4a_ros_device_params_node]: point_cloud - bool : 1\n[INFO] [1795447507.744423530] [k4a_ros_device_params_node]: rgb_point_cloud - bool : 1\n[INFO] [1795447507.744427188] [k4a_ros_device_params_node]: point_cloud_in_depth_frame - bool : 1\n[INFO] [1795447507.744431021] [k4a_ros_device_params_node]: tf_prefix - std::string : \n[INFO] [1795447507.744434762] [k4a_ros_device_params_node]: recording_file - std::string : \n[INFO] [1795447507.744438186] [k4a_ros_device_params_node]: recording_loop_enabled - bool : 0\n[INFO] [1795447507.744441968] [k4a_ros_device_params_node]: body_tracking_enabled - bool : 0\n[INFO] [1795447507.744457195] [k4a_ros_device_params_node]: body_tracking_smoothing_factor - float : 0\n[INFO] [1795447507.744461368] [k4a_ros_device_params_node]: imu_rate_target - int : 0\n[INFO] [1795447507.744472132] [k4a_ros_device_params_node]: rescale_ir_to_mono8 - bool : 0\n[INFO] [1795447507.744480908] [k4a_ros_device_params_node]: ir_mono8_scaling_factor - float : 1\n[INFO] [1795447507.744485921] [k4a_ros_device_params_node]: wired_sync_mode - int : 0\n[INFO] [1795447507.744489546] [k4a_ros_device_params_node]: subordinate_delay_off_master_usec - int : 0\n[INFO] [1795447507.744498186] [k4a_ros_device_node]: Found 0 sensors\n[INFO] [1795447507.744502066] [k4a_ros_device_node]: No serial number provided: picking first sensor\n[ERROR] [1795447507.744505464] [k4a_ros_device_node]: Failed to open a K4A device. Cannot continue.\n[ERROR] [1795447507.744532641] [k4a_ros_device_node]: Cannot start cameras: no open device or recording\n[ERROR] [1795447507.744537824] [k4a_bridge]: Failed to start cameras\n[INFO] [1795447507.744543926] [k4a_ros_device_node]: Stopping camera streams and workers\n[INFO] [1795447507.744547992] [k4a_ros_device_node]: Camera stream workers stopped\n[INFO] [1795447507.746581029] [k4a_bridge]: ROS Exit\n[INFO] [1795447507.746747438] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447507.746749887] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "explicit_blocking",
+        "returncode": 1,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[INFO] [1795447507.967367311] [k4a_ros_device_node]: Tracker admission: mode=blocking enqueue_wait_ms=-1 (startup-only)\n[INFO] [1795447507.967569185] [k4a_ros_device_node]: K4A Parameters:\n[INFO] [1795447507.967576502] [k4a_ros_device_params_node]: sensor_sn - std::string : \n[INFO] [1795447507.967586290] [k4a_ros_device_params_node]: depth_enabled - bool : 1\n[INFO] [1795447507.967590429] [k4a_ros_device_params_node]: depth_unit - std::string : 16UC1\n[INFO] [1795447507.967594402] [k4a_ros_device_params_node]: depth_mode - std::string : \n[INFO] [1795447507.967598266] [k4a_ros_device_params_node]: color_enabled - bool : 1\n[INFO] [1795447507.967601637] [k4a_ros_device_params_node]: color_format - std::string : \n[INFO] [1795447507.967605941] [k4a_ros_device_params_node]: color_resolution - std::string : \n[INFO] [1795447507.967609581] [k4a_ros_device_params_node]: fps - int : 30\n[INFO] [1795447507.967613320] [k4a_ros_device_params_node]: point_cloud - bool : 1\n[INFO] [1795447507.967617086] [k4a_ros_device_params_node]: rgb_point_cloud - bool : 1\n[INFO] [1795447507.967620450] [k4a_ros_device_params_node]: point_cloud_in_depth_frame - bool : 1\n[INFO] [1795447507.967624257] [k4a_ros_device_params_node]: tf_prefix - std::string : \n[INFO] [1795447507.967627615] [k4a_ros_device_params_node]: recording_file - std::string : \n[INFO] [1795447507.967631328] [k4a_ros_device_params_node]: recording_loop_enabled - bool : 0\n[INFO] [1795447507.967634790] [k4a_ros_device_params_node]: body_tracking_enabled - bool : 0\n[INFO] [1795447507.967650015] [k4a_ros_device_params_node]: body_tracking_smoothing_factor - float : 0\n[INFO] [1795447507.967654007] [k4a_ros_device_params_node]: imu_rate_target - int : 0\n[INFO] [1795447507.967658736] [k4a_ros_device_params_node]: rescale_ir_to_mono8 - bool : 0\n[INFO] [1795447507.967662606] [k4a_ros_device_params_node]: ir_mono8_scaling_factor - float : 1\n[INFO] [1795447507.967666405] [k4a_ros_device_params_node]: wired_sync_mode - int : 0\n[INFO] [1795447507.967669768] [k4a_ros_device_params_node]: subordinate_delay_off_master_usec - int : 0\n[INFO] [1795447507.967678375] [k4a_ros_device_node]: Found 0 sensors\n[INFO] [1795447507.967682011] [k4a_ros_device_node]: No serial number provided: picking first sensor\n[ERROR] [1795447507.967685221] [k4a_ros_device_node]: Failed to open a K4A device. Cannot continue.\n[ERROR] [1795447507.967709146] [k4a_ros_device_node]: Cannot start cameras: no open device or recording\n[ERROR] [1795447507.967714012] [k4a_bridge]: Failed to start cameras\n[INFO] [1795447507.967719840] [k4a_ros_device_node]: Stopping camera streams and workers\n[INFO] [1795447507.967723908] [k4a_ros_device_node]: Camera stream workers stopped\n[INFO] [1795447507.969698532] [k4a_bridge]: ROS Exit\n[INFO] [1795447507.969850622] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447507.969853346] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "bounded_five_ms",
+        "returncode": 1,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[INFO] [1795447508.168802864] [k4a_ros_device_node]: Tracker admission: mode=bounded enqueue_wait_ms=5 (startup-only)\n[INFO] [1795447508.169007869] [k4a_ros_device_node]: K4A Parameters:\n[INFO] [1795447508.169015576] [k4a_ros_device_params_node]: sensor_sn - std::string : \n[INFO] [1795447508.169024235] [k4a_ros_device_params_node]: depth_enabled - bool : 1\n[INFO] [1795447508.169028511] [k4a_ros_device_params_node]: depth_unit - std::string : 16UC1\n[INFO] [1795447508.169032780] [k4a_ros_device_params_node]: depth_mode - std::string : \n[INFO] [1795447508.169041868] [k4a_ros_device_params_node]: color_enabled - bool : 1\n[INFO] [1795447508.169045293] [k4a_ros_device_params_node]: color_format - std::string : \n[INFO] [1795447508.169049667] [k4a_ros_device_params_node]: color_resolution - std::string : \n[INFO] [1795447508.169053424] [k4a_ros_device_params_node]: fps - int : 30\n[INFO] [1795447508.169057362] [k4a_ros_device_params_node]: point_cloud - bool : 1\n[INFO] [1795447508.169060946] [k4a_ros_device_params_node]: rgb_point_cloud - bool : 1\n[INFO] [1795447508.169064871] [k4a_ros_device_params_node]: point_cloud_in_depth_frame - bool : 1\n[INFO] [1795447508.169068443] [k4a_ros_device_params_node]: tf_prefix - std::string : \n[INFO] [1795447508.169072269] [k4a_ros_device_params_node]: recording_file - std::string : \n[INFO] [1795447508.169075708] [k4a_ros_device_params_node]: recording_loop_enabled - bool : 0\n[INFO] [1795447508.169079929] [k4a_ros_device_params_node]: body_tracking_enabled - bool : 0\n[INFO] [1795447508.169094361] [k4a_ros_device_params_node]: body_tracking_smoothing_factor - float : 0\n[INFO] [1795447508.169098506] [k4a_ros_device_params_node]: imu_rate_target - int : 0\n[INFO] [1795447508.169103272] [k4a_ros_device_params_node]: rescale_ir_to_mono8 - bool : 0\n[INFO] [1795447508.169107495] [k4a_ros_device_params_node]: ir_mono8_scaling_factor - float : 1\n[INFO] [1795447508.169111043] [k4a_ros_device_params_node]: wired_sync_mode - int : 0\n[INFO] [1795447508.169114709] [k4a_ros_device_params_node]: subordinate_delay_off_master_usec - int : 0\n[INFO] [1795447508.169122980] [k4a_ros_device_node]: Found 0 sensors\n[INFO] [1795447508.169126674] [k4a_ros_device_node]: No serial number provided: picking first sensor\n[ERROR] [1795447508.169130071] [k4a_ros_device_node]: Failed to open a K4A device. Cannot continue.\n[ERROR] [1795447508.169155515] [k4a_ros_device_node]: Cannot start cameras: no open device or recording\n[ERROR] [1795447508.169160547] [k4a_bridge]: Failed to start cameras\n[INFO] [1795447508.169165897] [k4a_ros_device_node]: Stopping camera streams and workers\n[INFO] [1795447508.169170099] [k4a_ros_device_node]: Camera stream workers stopped\n[INFO] [1795447508.171150397] [k4a_bridge]: ROS Exit\n[INFO] [1795447508.171299387] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447508.171301782] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "invalid_tracker_wait_-2",
+        "returncode": 3,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[ERROR] [1795447508.384908092] [k4a_bridge]: K4A initialization/runtime failure: tracker_enqueue_wait_ms must be -1 (blocking) or 5\n[INFO] [1795447508.385160013] [k4a_bridge]: ROS Exit\n[INFO] [1795447508.385341958] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447508.385344459] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "invalid_tracker_wait_0",
+        "returncode": 3,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[ERROR] [1795447508.596003034] [k4a_bridge]: K4A initialization/runtime failure: tracker_enqueue_wait_ms must be -1 (blocking) or 5\n[INFO] [1795447508.596230217] [k4a_bridge]: ROS Exit\n[INFO] [1795447508.596401791] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447508.596404422] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "invalid_tracker_wait_1",
+        "returncode": 3,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[ERROR] [1795447508.800900584] [k4a_bridge]: K4A initialization/runtime failure: tracker_enqueue_wait_ms must be -1 (blocking) or 5\n[INFO] [1795447508.801126185] [k4a_bridge]: ROS Exit\n[INFO] [1795447508.801308554] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447508.801310806] [k4a_bridge]: Finished ros bridge main\n"
+      },
+      {
+        "case": "invalid_tracker_wait_10",
+        "returncode": 3,
+        "checks": {
+          "expected_exit_code": true,
+          "expected_reason": true,
+          "no_unhandled_exception": true,
+          "tracker_not_created_without_calibration": true,
+          "device_open_is_fake": true
+        },
+        "output": "[ERROR] [1795447509.004019235] [k4a_bridge]: K4A initialization/runtime failure: tracker_enqueue_wait_ms must be -1 (blocking) or 5\n[INFO] [1795447509.004271489] [k4a_bridge]: ROS Exit\n[INFO] [1795447509.004403259] [k4a_bridge]: ROS Shutdown complete\n[INFO] [1795447509.004405852] [k4a_bridge]: Finished ros bridge main\n"
+      }
+    ]
+  },
+  "cpp_reports": [
+    {
+      "file": "build/azure_kinect_ros_driver/test_results/azure_kinect_ros_driver/test_stream_control.gtest.xml",
+      "tests": "17"
+    }
+  ],
+  "python_checks": {
+    "launch_tracker": 3,
+    "launch_dataset_paths": 5,
+    "comparison_runner": 6,
+    "motion_scenario": 14
+  },
+  "limitations": [
+    "No new live Kinect or MuJoCo trial after promoting the parameter",
+    "Earlier human blockage trial did not exercise obstruction during active target motion"
+  ]
+}

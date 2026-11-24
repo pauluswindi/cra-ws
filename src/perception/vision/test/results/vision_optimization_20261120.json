@@ -1,0 +1,141 @@
+{
+  "date": "2026-11-20",
+  "scope": "User-authorized code optimization; YAML and camera settings unchanged.",
+  "implementation": [
+    "Row-major runs represent every selected body pixel without a full-size binary mask or subsampling",
+    "Depth projection/calibration/ROI/voxel/capsule math and original point order preserved",
+    "Original mask-based C++ entry point retained; no ROS topic or message changes",
+    "One current TF snapshot per skeleton batch in display instead of repeated joint lookups",
+    "Display suppresses projection when TF is missing rather than plotting source-frame coordinates as target-frame points"
+  ],
+  "cpp_tests": {
+    "suites": [
+      "test_sparse_depth",
+      "test_frame_batch"
+    ],
+    "cases": 13,
+    "passed": 13,
+    "includes": [
+      "U16/F32/padded rows",
+      "empty/sparse/dense/fragmented masks",
+      "identity modulo",
+      "distortion/rotation/translation/ROI",
+      "invalid data and selections",
+      "calibration cache invalidation",
+      "exact capsule and voxel equality",
+      "96 joint-point transforms and missing TF"
+    ]
+  },
+  "build": {
+    "packages": [
+      "vision"
+    ],
+    "passed": true,
+    "last_elapsed_s": 2.05,
+    "cmake_build_type": "",
+    "compiler_flags": "Existing -Wall -Wextra -Wpedantic; no optimization-level change"
+  },
+  "benchmark": {
+    "scope": "Synthetic 512x512 images; 20 timed samples per method/density after warm-up. Alternating evaluation order, same compiler flags, cached calibration. Stage includes body-pixel selection and depth extraction, not complete Vision or camera FPS.",
+    "reference_commit": "ba5b07283b1bb4d3852ed582de9228b8449ad88d",
+    "reference_depth_sha256": "5fcc24d880925e6e78da63a74970ed7155100a4c03a9026208562a439b1c546a",
+    "independent_reference": "Original committed DepthProcessor compiled as ReferenceDepthProcessor in a separate class; original binary-mask route compared to current pixel runs. Exact point-vector equality required.",
+    "rows": [
+      {
+        "density_percent": 0.0,
+        "selected_pixels": 0.0,
+        "points": 0.0,
+        "mask_median_ms": 0.830996,
+        "runs_median_ms": 0.425115,
+        "stage_time_reduction_percent": 48.84271404435159
+      },
+      {
+        "density_percent": 1.0,
+        "selected_pixels": 2622.0,
+        "points": 2622.0,
+        "mask_median_ms": 1.065,
+        "runs_median_ms": 0.717794,
+        "stage_time_reduction_percent": 32.601502347417835
+      },
+      {
+        "density_percent": 10.0,
+        "selected_pixels": 26220.0,
+        "points": 26220.0,
+        "mask_median_ms": 2.75601,
+        "runs_median_ms": 2.09397,
+        "stage_time_reduction_percent": 24.02168352074193
+      },
+      {
+        "density_percent": 35.0,
+        "selected_pixels": 91770.0,
+        "points": 91770.0,
+        "mask_median_ms": 7.30521,
+        "runs_median_ms": 5.66917,
+        "stage_time_reduction_percent": 22.395523195089527
+      },
+      {
+        "density_percent": 50.0,
+        "selected_pixels": 131094.0,
+        "points": 131094.0,
+        "mask_median_ms": 10.9838,
+        "runs_median_ms": 7.72372,
+        "stage_time_reduction_percent": 29.68080263661028
+      },
+      {
+        "density_percent": 100.0,
+        "selected_pixels": 262144.0,
+        "points": 262144.0,
+        "mask_median_ms": 17.7393,
+        "runs_median_ms": 14.5119,
+        "stage_time_reduction_percent": 18.193502562107856
+      }
+    ]
+  },
+  "native_ros_probe": {
+    "scope": "Installed reconstruction and watchdog on isolated DDS; synthetic images only.\n\nUses the shipped reconstruction YAML unchanged. No camera, Planning, Motion\nor GUI is started. This verifies transport/freshness, not live Kinect speed.\n",
+    "ros_domain": 231,
+    "capsules": 8,
+    "output_frame": "base_link",
+    "watchdog_invalid_after_s": 0.568789683000432,
+    "fresh_empty_verified": true,
+    "config_sha256": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+    "executable": "/home/lvinz/living-lab/cra_ws/install/vision/lib/vision/reconstruction_node",
+    "executable_sha256": "34a04c03c40a89581ca8a145f20cfcf7ce5d568be9335dd486707a4b7c4bcf6d"
+  },
+  "preserved_settings_sha256": {
+    "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8",
+    "src/cra/config/reconstruction.yaml": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+    "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628"
+  },
+  "preserved": [
+    "30 FPS, RGB 1536P, depth mode, smoothing, TF calibration",
+    "voxel size, radius/percentile/minimum voxel/smoothing parameters",
+    "Vision timeout 0.5 s and sync allowance 0.15 s",
+    "Planning/Motion, RRT, collision checks and driver implementation"
+  ],
+  "limits": [
+    "Controlled synthetic benchmark, not whole-pipeline live performance",
+    "Savings depend on body-mask shape, density, hardware and build mode; no universal speedup guarantee",
+    "No real Kinect/full CRA moving-human trial in this optimization run",
+    "GUI projection math tested through DDS TF; interactive rendering not visually inspected",
+    "Earlier intermittent capture failure remains unresolved; no camera timeout policy change",
+    "Only relevant C++ tests and probe style checks run; repository-wide preexisting lint not claimed"
+  ],
+  "source_sha256": {
+    "src/perception/vision/include/vision/segmentation/pixel_run.hpp": "6c3992ae6b00c0bd7bd7cd0d10db36de4ebac8eb6636d208066b02991a11ee90",
+    "src/perception/vision/include/vision/segmentation/human_segmenter.hpp": "ca1e07dd3f113044d879225ebc22694e90b201af6624605aeeb62bfadeb8ce2f",
+    "src/perception/vision/src/segmentation/human_segmenter.cpp": "9fb9f2405a0943a4a952ae9d508e48308383f208be4d34c4bb02bc7f9f0759d1",
+    "src/perception/vision/include/vision/reconstruction/depth_processor.hpp": "51d141fd6f612c5b1d7da27bc7a6d9a8abe4dca48983fb0749b3abf67f38ce1d",
+    "src/perception/vision/src/reconstruction/depth_processor.cpp": "bacdc240f9c50854e8ca6d3b9a8edfdb4b638e7dbd5bd9a081d85580da584a2d",
+    "src/perception/vision/src/reconstruction/reconstruction_pipeline.cpp": "ddc774d741890190f8aedef5865941326823f8cf5ffc85ddcf52a372adc71673",
+    "src/perception/vision/include/vision/frame/frame_transformer.hpp": "d4d973efb13a9fc23e0ce978db0b877c8c5807d172e2f780f1d3d6223768ec56",
+    "src/perception/vision/src/nodes/visual_node.cpp": "74a3c75c95a77f6885ecc879183eca126592560d678dfad3dd443a6fa02dabc6",
+    "src/perception/vision/test/vision_fixture.hpp": "2272b4c2cd0d012b984af4e89c8aed79381e8cbf8e6920962390b6e4493feb90",
+    "src/perception/vision/test/test_sparse_depth.cpp": "5900af5029e324128d67b9deb95e67a395260f8b9dc66490bc29be98ee5cf9ca",
+    "src/perception/vision/test/test_frame_batch.cpp": "1c7f81c6493ecb311cf498957df1f68a10fee314be839eb4e9b4c87737150e16",
+    "src/perception/vision/test/benchmark_sparse_depth.cpp": "0a72dce64a2e02d8f761727f9038494272a274b7e853d7fcb1119dc66f16b89f",
+    "src/perception/vision/test/verify_reconstruction_ros.py": "1f455221bb1f2730f207725ae9921a191329399b7a7fc23103ba292cc9281f3f",
+    "src/perception/vision/CMakeLists.txt": "bc4f7d5daf34cdd04228f6a8af22b81cae2dd58267d51ffa680756c0b3795a82",
+    "src/perception/vision/package.xml": "9f661a7217fa0445498313d20f9ddf0b275ff2149fb0c7cc504ae075330e1924"
+  }
+}

@@ -1,9 +1,9 @@
 {
   "metadata": {
     "document_name": "CRA_PROJECT_CONTEXT.json",
-    "version": "1.28",
+    "version": "1.34",
     "created_date": "2026-11-12",
-    "last_updated": "2026-11-18",
+    "last_updated": "2026-11-20",
     "project_name": "Cognitive Robotic Arm",
     "purpose": "Maintain shared project context for ChatGPT and Codex development.",
     "source_of_truth": "Actual repository source code, configuration, and reproducible test results.",
@@ -177,6 +177,38 @@
         ]
       },
 
+      "tracker_admission_experiment_2026_11_20": {
+        "status": "USER_AUTHORIZED_ISOLATED_EXPERIMENT_COMPLETE_NOT_PROMOTED",
+        "implementation": "BUILD_TESTING-only tracker_nonblocking_probe, EXCLUDE_FROM_ALL and not installed; normal node remains blocking. Zero-timeout SDK admission treats TIMEOUT as a skipped tracker input, only accepted work increments pending results, and SDK failures still propagate. No new ROS/YAML setting or launch default.",
+        "scope": "Real Kinect plus unchanged original TF/workspace/skeleton/reconstruction pipeline on isolated localhost domain 221. No GUI, Planning or Motion. Native monitor saves only headers/statistics, not images or pose/capsule payloads. Four trials in A/B and B/A order, each 15 s warm-up and 30 s measured; a real person is active in the original workspace throughout all 120 measured seconds.",
+        "results": "Blocking vs nonblocking repeated ranges: SDK capture about 24.7-25.0 vs 30.0 Hz; received RGB 8.4-9.9 vs 17.2-19.1 Hz; observed geometry 11.4-11.7 vs 18.2-20.4 Hz. Median skeleton capture age 318-322 vs 80-83 ms; geometry depth-stamp age about 241 vs 30-31 ms. No invalid-state period in warmed measurement windows; children remain alive, no fatal capture timeout and cleanup completes.",
+        "tradeoff": "Skeleton updates decline 24.5-25.1 to 14.7-14.8 Hz. A pose may be reused across fresh depth frames under existing sync rules; higher geometry output Hz is not a higher independent human-measurement rate. Freshness improves, but controlled fast-motion/occlusion tracking quality remains unverified.",
+        "verification": "15 driver C++ policy/shutdown tests and four native startup cases pass. Busy submission does not invent pending work; SDK failures propagate. Empty-domain native sampler check, live A/B/B/A, Flake8 and whitespace pass. Configuration, reconstruction and Planning hashes unchanged; experiment not in install manifest.",
+        "decision": "Normal launch stays blocking. Keep experimental mode separate until controlled human-motion, occlusion, longer stream stability and full CRA validation support promotion. No timeout/sync/smoothing/calibration, camera FPS/resolution, margin, Motion or Planning-policy change.",
+        "artifact": "src/perception/vision/test/results/tracker_admission_ab_20261120.json"
+      },
+
+      "camera_fps_diagnosis_2026_11_20": {
+        "status": "PREVIEW_AND_DIAGNOSTICS_BUILT_TESTED_NONBLOCKING_TRACKER_AWAITING_USER_DECISION",
+        "evidence": "Supplied log has five-timeout SDK shutdown during Planning COMPLETED, then respawn; a later 0.200 s VISION_INVALID has no SDK timeout. Real-camera unchanged-setting 60 s probe measures complete captures ~24-25 Hz, SDK wait ~0.003 ms, process ~33-35 ms and tracker enqueue often 30-42 ms. Current infinite enqueue blocks the same RGB/depth publication thread. Intermittent capture failure not reproduced or proven fixed.",
+        "applied": "Preview-only native reduced JPEG decoding at existing half size, RelWithDebInfo default for previously empty Vision build type, separate Input/View FPS, five-second capture/decode/process/enqueue counters and reconstruction invalidation diagnostics. Original direct callbacks retained after timer-decode experiment lowered view cadence. YAML, resolution/FPS, smoothing/calibration, human geometry, synchronization, freshness and retry policy unchanged.",
+        "verification": "17 Vision C++ tests, 12 driver tests and four native startup cases pass. Decode/resize synthetic median 16.52->12.57 ms; not whole-system FPS. Native reconstruction yields eight base_link capsules, stale invalidation and fresh EMPTY. Headless synthetic native preview verifies raw priority/compressed fallback and input-loss survival. All settings hashes unchanged. No universal live FPS guarantee; preview pixels can differ slightly from full decode/resize.",
+        "proposal_not_applied": "Zero-timeout tracker submission. Busy/TIMEOUT skips only that frame's tracker input and continues RGB/depth publication; successful queue accounting, original body-result timestamps and existing invalidity handling preserved. SDK FAILED still stops. Tracker inference rate is not increased; fast motion may have sparser observations. Faster depth versus delayed tracker results may exceed the unchanged 0.15 s sync allowance; first compare geometry continuity/ages in Vision-only tests without Motion. User requested explanation of pros/cons before deciding.",
+        "artifact": "src/perception/vision/test/results/camera_fps_diagnosis_20261120.json"
+      },
+
+      "optimization_2026_11_20": {
+        "status": "USER_AUTHORIZED_IMPLEMENTED_BUILT_13_CPP_CASES_AND_NATIVE_DDS_PASSED",
+        "request": "Optimize Vision without changing YAML or existing camera settings.",
+        "implementation": "HumanSegmenter returns ordered row-major runs of every matching body pixel, avoiding a full-size binary mask and the repeated depth-wide mask scan. DepthProcessor preserves the original point order and projection/ROI math; original mask API retained. No subsampling or geometric approximation. VisualNode reuses one current TF per skeleton batch and skips projection if TF is unavailable.",
+        "preserved": "Hashes confirm robot.yaml, reconstruction.yaml and body_tracking.launch.py unchanged from pre-optimization. Keep 30 FPS, RGB 1536P, depth mode, smoothing and calibration; voxel size, capsule fitting/filter parameters, 0.15 s sync and 0.5 s Vision timeout unchanged. No driver, Planning/Motion, RRT or collision changes in this optimization.",
+        "verification": "13 C++ tests pass: exact ordered depth points for U16/F32, padded and fragmented masks, distortion/ROI/transforms/calibration changes, invalid data rejection, exact voxel/capsule equality and 96 per-joint/batch TF comparisons. Installed reconstruction DDS domain 231 publishes eight base_link capsules, becomes invalid after input loss (0.569 s observed), and accepts fresh EMPTY, with unchanged YAML. Vision build and diagnostic Flake8 pass.",
+        "benchmark": "Independent original committed DepthProcessor compiled separately under identical compiler settings and synthetic 512x512 inputs. Every point vector must be exactly equal. At 35% selection, stage median 7.305->5.669 ms (22.4%); tested nonempty densities show 18.2-32.6% selection/extraction savings. Existing compiler optimization level unchanged. Not a whole-Vision FPS result.",
+        "limits": "Savings depend on mask shape, density, hardware and build mode. Full CRA/live Kinect/moving-human run and interactive rendering remain unverified in this optimization. Prior intermittent camera capture failure is not declared fixed. Only relevant C++ tests and probe style were checked; no whole-repository lint claim.",
+        "artifact": "src/perception/vision/test/results/vision_optimization_20261120.json",
+        "run": "Vision build installed; restart ordinary ros2 launch cra cra.launch.py rviz:=true. No extra configuration flags needed."
+      },
+
       "capture_recovery_2026_11_17": {
         "status": "USER_AUTHORIZED_IMPLEMENTED_BUILT_TESTED_LIVE_CAMERA_PENDING",
         "driver": "src/azure_kinect_ros_driver/",
@@ -203,7 +235,57 @@
       "package": "src/planning/",
       "status": "ACTIVE",
 
-      "role": "Generate and validate robot-arm paths using GNG and A*.",
+      "role": "Generate and validate robot-arm paths using primary GNG+A*, with an eligible RRT-Connect fallback in simulation.",
+
+      "retreat_debug_2026_11_20": {
+        "status": "USER_AUTHORIZED_LOCAL_RETREAT_CORRECTION_AND_NATIVE_CAMERA_DIAGNOSTICS",
+        "evidence": "Supplied 23:46 log loads rrt_mode=fallback; all 85 Planning profiles say NOT_TRIED, six A* PATH_FOUND, no NO_GRAPH_PATH or executed RRT. HUMAN_RETREAT_BLOCKED includes 0.01812 m/0.00747 m clearance below 0.05 m margin. Retreat SEARCH_BUDGET_EXHAUSTED means the existing 32-step bound. Logged search stages average 273.0 ms and peak at 439.786 ms. First capture timeout precedes heavy retreat; queue drops follow the first timeout. Exact capsule geometry is absent.",
+        "correction": "Rank improving endpoints before full transition checks, retaining maximum-gain valid choice and stable ties. Local dead ends now consider the existing staged-progress contract also used at the step limit: >=0.005 m gain, complete monotonic straight-segment certificate, same freshness/revision/contact/pair constraints and normal Manager RELEASE/final validation. No relaxed margins, RRT invalid-start escape, new worker, larger step count or new Motion behavior added.",
+        "diagnostics": "Existing Planning profiles report bounded retreat statistics only on cycles that searched: steps, endpoint/transition checks, clearance/gain, required gain, final certificate verdict, stop condition and duration. A real-camera probe reads existing launch camera parameters verbatim, refuses another driver and runs isolated domain 229 without Planning/Motion or saved image payloads.",
+        "camera_preference": "User explicitly declined a lighter camera profile. Keep 30 FPS, 1536P RGB, smoothing and calibration unchanged. Driver implementation/retry policy and human freshness limit remain unchanged.",
+        "verification": "296/296 Planning tests pass in 29.836 s, including 10 new retreat controls; Planning build passes in 0.98 s; Flake8 and whitespace pass. Twelve frozen native MuJoCo scenes preserve all 10 previously successful paths, with transition calls 346->228; two scenes remain blocked. Plateau control reproduces old discard/new certified 6 mm staged progress. Native camera runs of 25 s and 60 s have no capture timeout/color queue drop and finish cleanup at unchanged settings. The 60 s run receives 1375 skeleton messages, max measured capture age 421.84 ms. Installed-package RRT/C++ Motion/MuJoCo regression again reaches goal (max joint error 0.019752 rad), then synthetic invalid camera produces STOP with no further EXECUTE/RELEASE. Source hashes recorded.",
+        "limits": "Greedy coordinate retreat remains synchronous and incomplete for coordinated multi-joint escapes. Controlled plateau proves a code defect, not the original failure cause. Native benchmark scenes use synthetic capsules; live full-scene retreat execution is unverified. A successful isolated camera run does not establish intermittent failure cause or prove full CRA stability.",
+        "documentation": "src/planning/test/HUMAN_RETREAT_DEBUG.md",
+        "artifact": "src/planning/test/results/retreat_debug_20261120.json"
+      },
+
+      "rrt_fallback_2026_11_19": {
+        "status": "USER_AUTHORIZED_ACTIVE_SIMULATION_FALLBACK_BUILT_286_TESTS_NATIVE_EXECUTION_PASSED",
+        "supersedes": "Observation-only default in rrt_shadow_observation_2026_11_18; shadow remains available as a separate mode.",
+        "admission": "After GNG+A* and configured alternative joint goals fail with NO_GRAPH_PATH, before existing safe-position recovery. Requires valid start/goal, fresh feedback/static obstacles, fresh OBSERVED or EMPTY human data, idle/completed/Planning-owned STOPPED Motion and no recovery/fault. Invalid-start escape and manual STOP release are not added.",
+        "implementation": "RRTFallbackCoordinator reuses one isolated worker/model with no backlog. Baseline RRT search uses ordinary CollisionFilter state/edge checks, then actual PathPlanner.prepare_execution_path certifies a new scene snapshot. A private mailbox carries bounded prepared paths to the regular PlanningManager step. Target/attempt/start/revision/freshness/deadline checks precede adoption as RRT_PATH_READY, source RRT_CONNECT. Normal execution preparation, final collision validation and RELEASE acknowledgement remain mandatory.",
+        "freshness": "Fallback never accepts UNKNOWN. Active RRT trajectory camera loss/expiry requests STOP. New observations cannot extend an outstanding request deadline. Primary execute_path=True and simulation_only_ignore_unknown=True remain unchanged, as do the 0.05 m human margin and 2 s timeout.",
+        "configuration": "planning.rrt.mode=fallback by default; off/shadow modes supported. Physical fallback rejected before node/model creation. One 1.5 s admission-to-handoff budget includes startup, capped by original human expiry; search <=0.5 s, latest validation <=0.5 s, retry interval >=3 s. Fallback omits extra clearance-preference search. Legacy rrt_shadow YAML remains supported when the new block is absent.",
+        "diagnostics": "Mode-tagged /planning/rrt/events and legacy /planning/rrt_shadow; trajectory source=RRT_CONNECT. RViz trace/FK work only with marker subscribers. Expiring trees are snapshots; normal Planned path follows the manager. Workspace XYZ mask remains visual-only.",
+        "verification": "286/286 Planning tests pass in 30.006 s, including 38 fallback and 19 RRT marker tests; 5 launch-default tests pass. planning/cra build, Flake8 and whitespace checks pass. CollisionFilter, PathPlanner, Motion, MuJoCo model/control and legacy sources unchanged. Installed-package native domain 228 runs real Planning/C++ Motion/MuJoCo physics with synthetic vision and headless viewer on a temporary two-node/zero-edge roadmap: first goal COMPLETED, max joint error 0.0194753 rad in 4.01995 s; return attempt camera invalidation produces STOPPED and no later EXECUTE/RELEASE while invalid. All three marker layers received. Shadow domain 224 compatibility probe passes with zero Motion commands. Source hashes recorded.",
+        "limits": "Native execution uses a deliberately disconnected small roadmap and directly free RRT edge. Live Kinect, moving-human detours during execution, production full-graph failures, interactive RViz and physical execution remain unverified. Existing A*/human monitoring/final execution validation remain synchronous. Cooperative deadlines reject late results but cannot interrupt native collision calls; discarded jobs drain before reuse.",
+        "run": "Installed and built; restart old launch, then ros2 launch cra cra.launch.py rviz:=true. Dataset paths come from YAML.",
+        "next_step": "Observe ordinary graph failures and rejection reasons under normal MuJoCo operation, then test moving-human detours with measured geometry freshness and stop latency before any physical activation.",
+        "documentation": "src/planning/test/RRT_FALLBACK.md",
+        "artifact": "src/planning/test/results/rrt_fallback_20261119.json"
+      },
+
+      "workspace_graph_mask_2026_11_19": {
+        "status": "IMPLEMENTED_BUILT_247_PLANNING_AND_5_LAUNCH_TESTS_NATIVE_DDS_PASSED",
+        "request": "Replace heavy whole-arm filtered visualization with an XYZ mask of the same stored workspace GNG; remove the graph-filter worker.",
+        "rviz": "Workspace graph - obstacle mask on /planning/workspace_graph_mask defaults on. GNG - original defaults off to avoid covering hidden elements. Both use the same stored 1000 points and 4453 edges. Joint graph - filtered and its publishers are removed.",
+        "implementation": "Cached static endpoints; exact finite-segment/capsule intersections and rotated-box distances with bounding-box rejection. Uses validated base_link capsules and existing compiled simulation box poses. No FK, CollisionFilter queries or additional workers. Recalculate only for changed geometry; publish only for changed visibility/status.",
+        "freshness": "Graph colors/opacity remain unchanged without a camera. UNKNOWN/expired human data removes only human masks; independently fresh target/simulation boxes remain masked. Stale simulation poses do not disable fresh human capsule masks. Partial inputs are labelled in text and never authorize Motion. Persistent markers avoid repeated publication; blocked callbacks may retain the last snapshot.",
+        "verification": "247 Planning tests plus 5 launch-default tests pass. Native domain 227 starts without camera messages: 999/1000 GNG nodes remain bright (one is masked by the target); a moving box still changes visibility to 998. Human blocking/away, EMPTY, UNKNOWN and expiry preserve expected masking. No unchanged-scene repeats, extra workers or Motion commands. planning/cra build, installed launch defaults and Flake8 pass. Interactive RViz rendering remains unverified.",
+        "preserved": "Display masks never feed Planning. GNG/A*, full-arm collision checks, mandatory margins, execution flags, RRT and Motion interfaces unchanged. Graph assets remain unchanged.",
+        "documentation": "src/planning/test/WORKSPACE_GRAPH_MASK.md",
+        "artifact": "src/planning/test/results/camera_absent_mask_20261119.json",
+        "data_defaults": "workspace.path and gng.graph_path in robot.yaml supply defaults to main, Planning and Simulation launches. CLI overrides remain optional; normal run: ros2 launch cra cra.launch.py rviz:=true.",
+        "user_log_diagnosis": "Supplied 2026-11-19 excerpt has RRT enabled but zero RRT events, seven A* PATH_FOUND and zero A* NO_PATH. No evidence of shadow admission; observer never dispatches robot motion. HUMAN_RETREAT states are existing recovery behavior.",
+        "log_artifact": "src/planning/test/results/camera_absent_log_diagnosis_20261119.json"
+      },
+
+      "filtered_graph_display_2026_11_18": {
+        "status": "RETIRED_2026_11_19_AT_USER_REQUEST",
+        "replacement": "workspace_graph_mask_2026_11_19",
+        "reason": "Extra whole-arm display filtering was too expensive and different from the requested XYZ workspace mask. Runtime worker, publishers and RViz display removed; offline PathPlanner filtering retained.",
+        "historical_artifact": "src/planning/test/results/filtered_graph_ros_20261118.json"
+      },
 
       "rrt_shadow_observation_2026_11_18": {
         "status": "USER_AUTHORIZED_OBSERVATION_ONLY_BUILT_NATIVE_ROS_PROBE_PASSED",

@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-19",
+  "scope": "Diagnosis of supplied launch excerpt only; not a new live experiment",
+  "input_sha256": "b572aaa3e3cfc564d3b34bcdd30423466448dde4eef14819cc694ec939b29205",
+  "lines": 827,
+  "counts": {
+    "astar_path_found": 7,
+    "astar_no_path": 0,
+    "rrt_events": 0,
+    "mask_errors": 0,
+    "human_vision": 8,
+    "rrt_enabled": 1
+  },
+  "evidence": {
+    "astar_path_found": [
+      {
+        "line": 184,
+        "text": "[planning_node-5] [A*] PATH_FOUND: 3 waypoints"
+      },
+      {
+        "line": 234,
+        "text": "[planning_node-5] [A*] PATH_FOUND: 8 waypoints"
+      },
+      {
+        "line": 336,
+        "text": "[planning_node-5] [A*] PATH_FOUND: 5 waypoints"
+      },
+      {
+        "line": 493,
+        "text": "[planning_node-5] [A*] PATH_FOUND: 3 waypoints"
+      },
+      {
+        "line": 713,
+        "text": "[planning_node-5] [A*] PATH_FOUND: 9 waypoints"
+      },
+      {
+        "line": 759,
+        "text": "[planning_node-5] [A*] PATH_FOUND: 9 waypoints"
+      },
+      {
+        "line": 811,
+        "text": "[planning_node-5] [A*] PATH_FOUND: 2 waypoints"
+      }
+    ],
+    "astar_no_path": [],
+    "rrt_events": [],
+    "mask_errors": [],
+    "human_vision": [
+      {
+        "line": 177,
+        "text": "[planning_node-5] [INFO] [1795031831.543927798] [planning_node]: Human Vision: UNKNOWN (NO_DATA), humans=0, capsules=0"
+      },
+      {
+        "line": 206,
+        "text": "[planning_node-5] [INFO] [1795031833.745121534] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      },
+      {
+        "line": 217,
+        "text": "[planning_node-5] [INFO] [1795031837.943826998] [planning_node]: Human Vision: UNKNOWN (VISION_INVALID), humans=0, capsules=0"
+      },
+      {
+        "line": 221,
+        "text": "[planning_node-5] [INFO] [1795031838.144807703] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      },
+      {
+        "line": 309,
+        "text": "[planning_node-5] [INFO] [1795031859.943345566] [planning_node]: Human Vision: UNKNOWN (VISION_INVALID), humans=0, capsules=0"
+      },
+      {
+        "line": 317,
+        "text": "[planning_node-5] [INFO] [1795031861.143466515] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      },
+      {
+        "line": 531,
+        "text": "[planning_node-5] [INFO] [1795031895.743550012] [planning_node]: Human Vision: UNKNOWN (VISION_INVALID), humans=0, capsules=0"
+      },
+      {
+        "line": 700,
+        "text": "[planning_node-5] [INFO] [1795031903.743723027] [planning_node]: Human Vision: OBSERVED (CAPSULES_PRESENT), humans=1, capsules=8"
+      }
+    ],
+    "rrt_enabled": [
+      {
+        "line": 174,
+        "text": "[planning_node-5] [INFO] [1795031831.354660744] [planning_node]: PlanningNode initialized; execute_path=True, human_avoidance=True, human_data_timeout=2.000s, human_safety_margin=0.050m, human_geometry_cache=256, profile_planning=True, rrt_shadow=True, segment_progress=True, progress_corridor=0.04rad, simulation_only_ignore_unknown=True, human_margin_recovery=True"
+      }
+    ]
+  },
+  "profile_action_status_counts": {
+    "NONE:PATH_READY": 6,
+    "EXECUTE:TRAJECTORY_SENT": 7,
+    "NONE:EXECUTING": 28,
+    "NONE:COMPLETED": 5,
+    "NONE:HUMAN_VISION_UNKNOWN": 3,
+    "STOP:HUMAN_TOO_CLOSE": 4,
+    "NONE:HUMAN_RETREAT_BLOCKED": 21,
+    "NONE:HUMAN_RETREAT_DATA_UNKNOWN": 1,
+    "RELEASE:WAITING_FOR_RELEASE": 10,
+    "NONE:HUMAN_RETREAT_READY": 6,
+    "STOP:HUMAN_RETREAT_UNSAFE": 4,
+    "EXECUTE:HUMAN_RETREAT_SENT": 4,
+    "STOP:HUMAN_PATH_BLOCKED": 1,
+    "NONE:RECOVERY_SETTLING": 1
+  },
+  "findings": [
+    "RRT configured on, but no shadow search events appear in supplied excerpt",
+    "Seven A* PATH_FOUND and no A* NO_PATH entries; shadow graph-failure trigger not shown",
+    "RRT observer never dispatches Motion; HUMAN_RETREAT statuses are existing recovery",
+    "No mask error is logged; rendering loss itself is not established by these logs",
+    "Old UNKNOWN visual style reduces graph contrast; corrected without weakening robot checks"
+  ]
+}

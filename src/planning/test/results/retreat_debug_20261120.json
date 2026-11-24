@@ -1,0 +1,1183 @@
+{
+  "date": "2026-11-20",
+  "scope": "User-requested debug/correction of blocked retreat and camera timeout; user requires original camera settings.",
+  "corrections": [
+    "Rank endpoint gains before complete transition checks without changing the highest-gain valid choice",
+    "Consider existing certified staged progress at local dead ends as well as step exhaustion",
+    "Keep the 0.005 m minimum gain, full straight-transition certificate, pair constraints, freshness, static contact and normal execution gates",
+    "Bounded passive retreat statistics in existing Planning profile; no extra workers or marker streams"
+  ],
+  "planning_regression": {
+    "passed": 296,
+    "total": 296,
+    "new_retreat_tests": 10,
+    "elapsed_s": 29.836
+  },
+  "targeted_regression": {
+    "passed": 109,
+    "total": 109,
+    "elapsed_s": 22.24
+  },
+  "build": {
+    "packages": [
+      "planning"
+    ],
+    "passed": true,
+    "elapsed_s": 0.98,
+    "warnings": "Python byte compilation intentionally disabled for tests; no build failure"
+  },
+  "style": {
+    "flake8_passed": true,
+    "whitespace_passed": true
+  },
+  "supplied_log_analysis": {
+    "source": "/home/lvinz/.codex/attachments/54e85cc1-9946-4b55-ac99-c876a1f3718d/Pasted text.txt",
+    "source_sha256": "6d573f8167c922bbc7f617138ae5adae0946dedad6e18542868050afc3d400c3",
+    "line_count": 650,
+    "matches": {
+      "rrt_mode=fallback": 1,
+      "RRT fallback:": 0,
+      "RRT_SEARCHING": 0,
+      "RRT_PATH_READY": 0,
+      "source=RRT_CONNECT": 0,
+      "NO_GRAPH_PATH": 0,
+      "[A*] PATH_FOUND": 6,
+      "No capture after": 2,
+      "capturesync_drop": 33
+    },
+    "profiles": 85,
+    "rrt_results": {
+      "NOT_TRIED": 85
+    },
+    "planner_sources": {
+      "GNG_ASTAR": 41,
+      "None": 42,
+      "HUMAN_RETREAT": 2
+    },
+    "statuses": {
+      "PATH_READY": 6,
+      "TRAJECTORY_SENT": 7,
+      "EXECUTING": 20,
+      "COMPLETED": 2,
+      "HUMAN_VISION_UNKNOWN": 5,
+      "HUMAN_TOO_CLOSE": 1,
+      "HUMAN_RETREAT_BLOCKED": 34,
+      "HUMAN_RETREAT_READY": 2,
+      "WAITING_FOR_RELEASE": 4,
+      "HUMAN_RETREAT_SENT": 1,
+      "HUMAN_RETREAT_CLEAR": 1,
+      "HUMAN_PATH_BLOCKED": 2
+    },
+    "stage_timings": {
+      "human_guard": {
+        "count": 85,
+        "mean_ms": 24.390164705882356,
+        "max_ms": 207.484
+      },
+      "manager_step": {
+        "count": 85,
+        "mean_ms": 138.67208235294117,
+        "max_ms": 445.236
+      },
+      "graph_visualization": {
+        "count": 85,
+        "mean_ms": 25.216682352941177,
+        "max_ms": 104.015
+      },
+      "retreat_preparation": {
+        "count": 36,
+        "mean_ms": 242.92494444444446,
+        "max_ms": 439.915
+      },
+      "retreat_search": {
+        "count": 32,
+        "mean_ms": 273.00228125,
+        "max_ms": 439.786
+      }
+    },
+    "evidence": [
+      {
+        "line": 51,
+        "text": "[planning_node-5] [INFO] [1795106784.673862945] [planning_node]: PlanningNode initialized; execute_path=True, human_avoidance=True, human_data_timeout=2.000s, human_safety_margin=0.050m, human_geometry_cache=256, profile_planning=True, rrt_shadow=True, rrt_mode=fallback, segment_progress=True, progress_corridor=0.04rad, simulation_only_ignore_unknown=True, human_margin_recovery=True"
+      },
+      {
+        "line": 177,
+        "text": "[node-6] [WARN] [1795106790.349460343] [k4a_ros_device_node]: Capture timeout (1/5); retrying without publishing stale data"
+      },
+      {
+        "line": 200,
+        "text": "[node-6] [ERROR] [1795106791.013814513] [k4a_ros_device_node]: No capture after 5 consecutive timeouts; stopping stream"
+      },
+      {
+        "line": 512,
+        "text": "[planning_node-5] [INFO] [1795106816.972096920] [planning_node]: Human collision: detection=OBSERVED, revision=102, q=[1.62350120219812, -0.8895556763787911, 1.926384895847176, -0.1385219668203575, -1.2522302134801178], status=NEAR, reason=None, retreat_reason=SEARCH_BUDGET_EXHAUSTED, clearance=0.018121395574876145, geometry_model=SPHERE_AND_MESH_BOX, sphere_clearance=-0.04297762782494671, box_clearance=0.018121395574876145, robot_geom=link2_visual, robot_radius=0.19917140571734454, body_id=1, segment_id=6, human_radius=0.06832254254604866, safety_margin=0.05"
+      },
+      {
+        "line": 525,
+        "text": "[planning_node-5] [INFO] [1795106821.148490821] [planning_node]: Human collision: detection=OBSERVED, revision=116, q=[1.623303445155699, -0.8896212545437404, 1.9263564826198702, -0.1385226743773401, -1.2522302883269525], status=NEAR, reason=None, retreat_reason=SEARCH_BUDGET_EXHAUSTED, clearance=0.007465116410426055, geometry_model=SPHERE_AND_MESH_BOX, sphere_clearance=-0.036829726433855604, box_clearance=0.007465116410426055, robot_geom=link2_visual, robot_radius=0.19917140571734454, body_id=1, segment_id=6, human_radius=0.05930199789783739, safety_margin=0.05"
+      },
+      {
+        "line": 571,
+        "text": "[planning_node-5] [INFO] [1795106834.970366976] [planning_node]: Human collision: detection=OBSERVED, revision=161, q=[1.6233034451556914, -0.8896212545441776, 1.9263564826197397, -0.13852267437734195, -1.2522302883269525], status=NEAR, reason=None, retreat_reason=SEARCH_BUDGET_EXHAUSTED, clearance=0.029738968076852133, geometry_model=SPHERE_AND_MESH_BOX, sphere_clearance=-0.011568937299184352, box_clearance=0.029738968076852133, robot_geom=link2_visual, robot_radius=0.19917140571734454, body_id=1, segment_id=6, human_radius=0.058589951706400224, safety_margin=0.05"
+      },
+      {
+        "line": 612,
+        "text": "[node-6] [WARN] [1795106842.608676051] [k4a_ros_device_node]: Capture timeout (1/5); retrying without publishing stale data"
+      },
+      {
+        "line": 638,
+        "text": "[node-6] [ERROR] [1795106843.273346434] [k4a_ros_device_node]: No capture after 5 consecutive timeouts; stopping stream"
+      }
+    ],
+    "findings": [
+      "RRT enabled in fallback mode; no admitted search or executed RRT path in supplied excerpt",
+      "SEARCH_BUDGET_EXHAUSTED is the 32-step retreat search bound, not a measured wall-clock deadline",
+      "Exact failed-scene geometry is absent; a feasible certified retreat is not established",
+      "First camera timeout precedes heavy retreat search, so causation is not established",
+      "Color queue drops begin after the first reported timeout, before driver shutdown; original cause remains unverified"
+    ]
+  },
+  "native_retreat_comparison": {
+    "scope": "Compare bounded retreat queries on fixed native MuJoCo geometry.\n\nScenes are synthetic capsules, not reconstructed live camera observations.\nFrozen observation time isolates algorithmic work; measured timings use the\nreal perf_counter. This is not a live latency or moving-human safety claim.\n",
+    "reference_commit": "ba5b07283b1bb4d3852ed582de9228b8449ad88d",
+    "reference_method_sha256": "4b7dd41a55155a1bcc8be2bdfd6cd4cd7c020d82d64a8d9e367366aaf4b8d475",
+    "native_scenes": [
+      {
+        "scene": "link5_fixture",
+        "direction": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.01800000001564442,
+        "reference": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.0831362616291125,
+              -0.8816884074291264,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.11314674199820729,
+          "state_calls": 321,
+          "edge_calls": 31
+        },
+        "current": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.0831362616291125,
+              -0.8816884074291264,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.10176310400129296,
+          "state_calls": 275,
+          "edge_calls": 18,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 17,
+            "endpoint_checks": 171,
+            "transition_checks": 18,
+            "screened_candidates": 69,
+            "initial_clearance_m": 0.01800000001564442,
+            "final_clearance_m": 0.05529865460707127,
+            "gain_m": 0.03729865459142685,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 101.749
+          }
+        }
+      },
+      {
+        "scene": "link5_fixture",
+        "direction": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.01800000000895914,
+        "reference": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.2031362616291126,
+              -0.8016884074291263,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.12643273700086866,
+          "state_calls": 357,
+          "edge_calls": 31
+        },
+        "current": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.2031362616291126,
+              -0.8016884074291263,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.1159069549976266,
+          "state_calls": 321,
+          "edge_calls": 22,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 21,
+            "endpoint_checks": 211,
+            "transition_checks": 22,
+            "screened_candidates": 56,
+            "initial_clearance_m": 0.01800000000895914,
+            "final_clearance_m": 0.056420867889985446,
+            "gain_m": 0.038420867881026305,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 132.748
+          }
+        }
+      },
+      {
+        "scene": "link5_fixture",
+        "direction": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.017999999989679244,
+        "reference": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.0831362616291125,
+              -0.8016884074291263,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.06199515699699987,
+          "state_calls": 175,
+          "edge_calls": 17
+        },
+        "current": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.0831362616291125,
+              -0.8016884074291263,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.054492203998961486,
+          "state_calls": 147,
+          "edge_calls": 10,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 9,
+            "endpoint_checks": 91,
+            "transition_checks": 10,
+            "screened_candidates": 34,
+            "initial_clearance_m": 0.017999999989679244,
+            "final_clearance_m": 0.05944100458475392,
+            "gain_m": 0.041441004595074674,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 54.481
+          }
+        }
+      },
+      {
+        "scene": "link5_fixture",
+        "direction": [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.01799999999060553,
+        "reference": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.0831362616291125,
+              -0.5916884074291261,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.07860060099483235,
+          "state_calls": 219,
+          "edge_calls": 19
+        },
+        "current": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.0831362616291125,
+              -0.5916884074291261,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.07208897399686975,
+          "state_calls": 195,
+          "edge_calls": 13,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 12,
+            "endpoint_checks": 121,
+            "transition_checks": 13,
+            "screened_candidates": 30,
+            "initial_clearance_m": 0.01799999999060553,
+            "final_clearance_m": 0.05759902911374423,
+            "gain_m": 0.0395990291231387,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 92.03
+          }
+        }
+      },
+      {
+        "scene": "link5_fixture",
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "initial_clearance_m": 0.01799999999778573,
+        "reference": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              0.9831362616291124,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.059569917000771966,
+          "state_calls": 163,
+          "edge_calls": 11
+        },
+        "current": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              0.9831362616291124,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.059971287999360356,
+          "state_calls": 163,
+          "edge_calls": 11,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 10,
+            "endpoint_checks": 101,
+            "transition_checks": 11,
+            "screened_candidates": 22,
+            "initial_clearance_m": 0.01799999999778573,
+            "final_clearance_m": 0.05900783164078349,
+            "gain_m": 0.04100783164299776,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 59.171
+          }
+        }
+      },
+      {
+        "scene": "link5_fixture",
+        "direction": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "initial_clearance_m": 0.018000000013906267,
+        "reference": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.1731362616291126,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.05416873699869029,
+          "state_calls": 147,
+          "edge_calls": 10
+        },
+        "current": {
+          "path": [
+            [
+              1.0831362616291125,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ],
+            [
+              1.1731362616291126,
+              -0.7116884074291262,
+              1.2431678147673046,
+              -0.15903829199563738,
+              0.3179308568765186
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.05457682000269415,
+          "state_calls": 147,
+          "edge_calls": 10,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 9,
+            "endpoint_checks": 91,
+            "transition_checks": 10,
+            "screened_candidates": 45,
+            "initial_clearance_m": 0.018000000013906267,
+            "final_clearance_m": 0.057605425185688244,
+            "gain_m": 0.03960542517178198,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 54.565
+          }
+        }
+      },
+      {
+        "scene": "log_joint_pose_synthetic_capsule",
+        "direction": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.01800000001040082,
+        "reference": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              2.1763848958471725,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.19607144400652032,
+          "state_calls": 577,
+          "edge_calls": 74
+        },
+        "current": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              2.1763848958471725,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.1540553290033131,
+          "state_calls": 385,
+          "edge_calls": 26,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 25,
+            "endpoint_checks": 251,
+            "transition_checks": 26,
+            "screened_candidates": 75,
+            "initial_clearance_m": 0.01800000001040082,
+            "final_clearance_m": 0.055863931642985976,
+            "gain_m": 0.037863931632585154,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 171.903
+          }
+        }
+      },
+      {
+        "scene": "log_joint_pose_synthetic_capsule",
+        "direction": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.017999999995534532,
+        "reference": {
+          "path": null,
+          "reason": "SEARCH_BUDGET_EXHAUSTED",
+          "median_s": 0.1862838430024567,
+          "state_calls": 533,
+          "edge_calls": 53
+        },
+        "current": {
+          "path": null,
+          "reason": "SEARCH_BUDGET_EXHAUSTED",
+          "median_s": 0.16591377499571536,
+          "state_calls": 449,
+          "edge_calls": 32,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 32,
+            "endpoint_checks": 321,
+            "transition_checks": 32,
+            "screened_candidates": 64,
+            "initial_clearance_m": 0.017999999995534532,
+            "final_clearance_m": 0.021701082635600416,
+            "gain_m": 0.0037010826400658836,
+            "required_gain_m": 0.005,
+            "final_transition_valid": null,
+            "stop_condition": "STEP_LIMIT",
+            "reason": "SEARCH_BUDGET_EXHAUSTED",
+            "returned_path": false,
+            "elapsed_ms": 195.757
+          }
+        }
+      },
+      {
+        "scene": "log_joint_pose_synthetic_capsule",
+        "direction": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.018000000014628398,
+        "reference": {
+          "path": null,
+          "reason": "NO_MONOTONIC_STEP",
+          "median_s": 0.030062899997574277,
+          "state_calls": 81,
+          "edge_calls": 5
+        },
+        "current": {
+          "path": null,
+          "reason": "NO_MONOTONIC_STEP",
+          "median_s": 0.0315152639959706,
+          "state_calls": 81,
+          "edge_calls": 5,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 5,
+            "endpoint_checks": 61,
+            "transition_checks": 5,
+            "screened_candidates": 5,
+            "initial_clearance_m": 0.018000000014628398,
+            "final_clearance_m": 0.019316802954284035,
+            "gain_m": 0.0013168029396556369,
+            "required_gain_m": 0.005,
+            "final_transition_valid": null,
+            "stop_condition": "NO_MONOTONIC_STEP",
+            "reason": "NO_MONOTONIC_STEP",
+            "returned_path": false,
+            "elapsed_ms": 33.544
+          }
+        }
+      },
+      {
+        "scene": "log_joint_pose_synthetic_capsule",
+        "direction": [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "initial_clearance_m": 0.01799999999896504,
+        "reference": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.62350120219812,
+              -0.749555676378791,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.10620639800617937,
+          "state_calls": 283,
+          "edge_calls": 29
+        },
+        "current": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.62350120219812,
+              -0.749555676378791,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.08986013299727347,
+          "state_calls": 227,
+          "edge_calls": 15,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 14,
+            "endpoint_checks": 141,
+            "transition_checks": 15,
+            "screened_candidates": 28,
+            "initial_clearance_m": 0.01799999999896504,
+            "final_clearance_m": 0.055986958711325724,
+            "gain_m": 0.037986958712360686,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "MARGIN_CLEARED",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 89.845
+          }
+        }
+      },
+      {
+        "scene": "log_joint_pose_synthetic_capsule",
+        "direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "initial_clearance_m": 0.017999999989122606,
+        "reference": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.3035012021981198,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.20624572300584987,
+          "state_calls": 515,
+          "edge_calls": 33
+        },
+        "current": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.3035012021981198,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.2001190980008687,
+          "state_calls": 515,
+          "edge_calls": 33,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 32,
+            "endpoint_checks": 321,
+            "transition_checks": 33,
+            "screened_candidates": 63,
+            "initial_clearance_m": 0.017999999989122606,
+            "final_clearance_m": 0.04530532155606787,
+            "gain_m": 0.027305321566945262,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "STEP_LIMIT",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 229.578
+          }
+        }
+      },
+      {
+        "scene": "log_joint_pose_synthetic_capsule",
+        "direction": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "initial_clearance_m": 0.01800000000862023,
+        "reference": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.9435012021981204,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.1893213889998151,
+          "state_calls": 515,
+          "edge_calls": 33
+        },
+        "current": {
+          "path": [
+            [
+              1.62350120219812,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ],
+            [
+              1.9435012021981204,
+              -0.8895556763787911,
+              1.926384895847176,
+              -0.1385219668203575,
+              -1.2522302134801178
+            ]
+          ],
+          "reason": "NONE",
+          "median_s": 0.18949953799892683,
+          "state_calls": 515,
+          "edge_calls": 33,
+          "statistics": {
+            "step_limit": 32,
+            "steps": 32,
+            "endpoint_checks": 321,
+            "transition_checks": 33,
+            "screened_candidates": 64,
+            "initial_clearance_m": 0.01800000000862023,
+            "final_clearance_m": 0.04222003557603285,
+            "gain_m": 0.024220035567412618,
+            "required_gain_m": 0.005,
+            "final_transition_valid": true,
+            "stop_condition": "STEP_LIMIT",
+            "reason": "NONE",
+            "returned_path": true,
+            "elapsed_ms": 234.713
+          }
+        }
+      }
+    ],
+    "synthetic_dead_end": {
+      "reference": {
+        "path": null,
+        "reason": "NO_MONOTONIC_STEP"
+      },
+      "current": {
+        "path": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.060000000000000005,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "reason": "NONE"
+      }
+    },
+    "source_sha256": {
+      "src/planning/test/benchmark_human_retreat.py": "270cbaa11d7b5e36117bc64c26bedf1702061a42b185acb5fccad791e62e8816",
+      "src/planning/planning/path_planner.py": "2b7a701fd611d656811db10b4880d7e9188490b0c646d92f6b59e1d21d5f8c90",
+      "src/planning/planning/algorithms/collision_filter.py": "6127fe5937b66276e530104c387850354a653001425d8b934e7b5efc18cec2d0",
+      "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8"
+    }
+  },
+  "native_camera_probe": {
+    "scope": "Native hardware and driver, synthetic-free input; isolated domain 229. No Planning/Motion/reconstruction/viewer; image payloads are not saved. Stream subscriptions exercise capture, tracker and publication, but do not reproduce the complete CRA workload.",
+    "requested_duration_s": 60.0,
+    "wall_s": 61.15208605999942,
+    "settings": {
+      "body_tracking_enabled": true,
+      "body_tracking_smoothing_factor": 0.6,
+      "depth_enabled": true,
+      "depth_mode": "WFOV_2X2BINNED",
+      "color_enabled": true,
+      "color_resolution": "1536P",
+      "color_format": "jpeg",
+      "fps": 30,
+      "point_cloud": false,
+      "rgb_point_cloud": false,
+      "point_cloud_in_depth_frame": true,
+      "rescale_ir_to_mono8": false,
+      "ir_mono8_scaling_factor": 1.0,
+      "imu_rate_target": 100,
+      "wired_sync_mode": 0,
+      "subordinate_delay_off_master_usec": 0,
+      "sensor_sn": "",
+      "recording_file": "",
+      "recording_loop_enabled": false
+    },
+    "natural_exit_code": null,
+    "streams": {
+      "/depth/image_raw": {
+        "count": 728,
+        "active_rate_hz": 13.11819495365639,
+        "max_callback_gap_s": 0.4021460250005475,
+        "median_capture_age_ms": 239.8842645,
+        "max_capture_age_ms": 285.219147
+      },
+      "/rgb/image_raw/compressed": {
+        "count": 585,
+        "active_rate_hz": 10.556910027941168,
+        "max_callback_gap_s": 0.4935606619983446,
+        "median_capture_age_ms": 272.750694,
+        "max_capture_age_ms": 349.0559
+      },
+      "/body_index_map/image_raw": {
+        "count": 1378,
+        "active_rate_hz": 24.862862466384655,
+        "max_callback_gap_s": 0.15227615000185324,
+        "median_capture_age_ms": 327.303905,
+        "max_capture_age_ms": 422.815078
+      },
+      "/body_tracking_data": {
+        "count": 1375,
+        "active_rate_hz": 24.791621189513496,
+        "max_callback_gap_s": 0.1063930390009773,
+        "median_capture_age_ms": 327.32327,
+        "max_capture_age_ms": 421.838266
+      }
+    },
+    "capture_timeout_messages": 0,
+    "fatal_capture_timeout": false,
+    "sdk_color_queue_drops": 0,
+    "cleanup_completed": true,
+    "camera_launch_sha256": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628",
+    "diagnostic_sha256": "53c633f339c8eb1a914960fbdce9ed4c2c5741da7fa6ec18de0ec7eb5e575340",
+    "driver_log": "/tmp/cra_capture_probe_20261120.log",
+    "parameters_file": "/tmp/cra_capture_probe_20261120.params.yaml"
+  },
+  "native_rrt_motion_mujoco_regression": {
+    "scope": "Native Planning -> C++ Motion -> MuJoCo test on isolated domain 228.\n\nUse a temporary disconnected two-node roadmap and real physics/controller.\nOnly the interactive viewer is replaced with a headless context. Vision\ngeometry is synthetic; this is not live Kinect or dynamic-human validation.\n",
+    "ros_domain": 228,
+    "roadmap_nodes": 2,
+    "roadmap_edges": 0,
+    "fixture_start": [
+      0.023162707686424255,
+      -1.3472504615783691,
+      1.1848934888839722,
+      -0.5477003455162048,
+      0.6865991950035095
+    ],
+    "fixture_goal": [
+      0.9231627076864243,
+      -1.3472504615783691,
+      1.1848934888839722,
+      -0.5477003455162048,
+      0.6865991950035095
+    ],
+    "path_source": "RRT_CONNECT",
+    "first_goal_max_error_rad": 0.01975163114015599,
+    "first_goal_duration_s": 4.0157362339959946,
+    "trajectory_messages": 2,
+    "rrt_events": [
+      {
+        "event": "SEARCH_SUBMITTED",
+        "mode": "fallback",
+        "observation_only": false,
+        "attempt": 1,
+        "scene_revision": 6
+      },
+      {
+        "event": "LATEST_VALIDATION_SUBMITTED",
+        "mode": "fallback",
+        "observation_only": false,
+        "attempt": 1,
+        "kind": "search",
+        "reason": "NONE",
+        "worker_pid": 2907,
+        "elapsed_s": 0.0206668430037098,
+        "capture_to_result_s": 0.4498905369982822
+      },
+      {
+        "event": "FALLBACK_VALIDATED",
+        "mode": "fallback",
+        "observation_only": false,
+        "attempt": 1,
+        "kind": "validate",
+        "reason": "NONE",
+        "worker_pid": 2907,
+        "elapsed_s": 0.025278635002905503,
+        "capture_to_result_s": 0.05056294500536751,
+        "points": 3,
+        "delivered_to_planning": true
+      },
+      {
+        "event": "SEARCH_SUBMITTED",
+        "mode": "fallback",
+        "observation_only": false,
+        "attempt": 2,
+        "scene_revision": 7
+      },
+      {
+        "event": "LATEST_VALIDATION_SUBMITTED",
+        "mode": "fallback",
+        "observation_only": false,
+        "attempt": 2,
+        "kind": "search",
+        "reason": "NONE",
+        "worker_pid": 2907,
+        "elapsed_s": 0.035972106001281645,
+        "capture_to_result_s": 0.049891440001374576
+      },
+      {
+        "event": "FALLBACK_VALIDATED",
+        "mode": "fallback",
+        "observation_only": false,
+        "attempt": 2,
+        "kind": "validate",
+        "reason": "NONE",
+        "worker_pid": 2907,
+        "elapsed_s": 0.02195228100026725,
+        "capture_to_result_s": 0.05008485099824611,
+        "points": 3,
+        "delivered_to_planning": true
+      }
+    ],
+    "rrt_marker_points": {
+      "start_tree": 1,
+      "goal_tree": 1,
+      "final_path": 2
+    },
+    "planning_statuses": [
+      "WAITING_FOR_FEEDBACK",
+      "RRT_SEARCHING",
+      "RRT_PATH_READY",
+      "TRAJECTORY_SENT",
+      "EXECUTING",
+      "RRT_SEARCHING",
+      "RRT_PATH_READY",
+      "TRAJECTORY_SENT",
+      "RRT_HUMAN_VISION_UNKNOWN",
+      "HUMAN_VISION_UNKNOWN"
+    ],
+    "motion_statuses": [
+      "IDLE",
+      "EXECUTING",
+      "COMPLETED",
+      "EXECUTING",
+      "STOPPED"
+    ],
+    "camera_loss_caused_stop": true,
+    "no_execute_or_release_after_camera_loss": true,
+    "measured_q_after_stop": [
+      0.874574562769732,
+      -1.3669502198910335,
+      1.1821438428743374,
+      -0.5477579314703986,
+      0.6866707337187189
+    ],
+    "native_mujoco_physics": true,
+    "native_cpp_motion": true,
+    "interactive_viewer": false,
+    "synthetic_human_input": true,
+    "loaded_package_paths": {
+      "planning_node": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/planning_node.py",
+      "planning_manager": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/planning_manager.py",
+      "rrt_shadow": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/rrt_shadow.py",
+      "rrt_fallback": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/rrt_fallback.py",
+      "algorithms.rrt_connect": "/home/lvinz/living-lab/cra_ws/install/planning/lib/python3.10/site-packages/planning/algorithms/rrt_connect.py"
+    },
+    "source_sha256": {
+      "src/planning/test/verify_rrt_fallback_simulation.py": "6fc0980f92202f5c5f1095f7cb00980cd0da9d2c4e34fcdc634cd5ec1f813422",
+      "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8",
+      "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+      "src/planning/planning/planning_manager.py": "880ae8436b84c20b3cb34815fac1d53e130254b66622595dc6cdfbe3388baad8",
+      "src/planning/planning/planning_node.py": "0238a7c16a6b78f300875c2c207042c5dd2bb6ed74bcf0e52248f4f50c837a95",
+      "src/planning/planning/algorithms/rrt_connect.py": "dc24405f3dc6233ee68767f77673a5e95d14b784e6501f1db813d352f26ef3cb",
+      "src/planning/planning/algorithms/collision_filter.py": "6127fe5937b66276e530104c387850354a653001425d8b934e7b5efc18cec2d0",
+      "src/planning/planning/path_planner.py": "2b7a701fd611d656811db10b4880d7e9188490b0c646d92f6b59e1d21d5f8c90",
+      "src/planning/planning/rrt_fallback.py": "b02f1aadceec1164b738bbde95419a20e4d0b9f85ed055f8494bc9da391127f9",
+      "src/planning/planning/rrt_shadow.py": "8ce39728c458a6c6580a65f6cc2360a4885760416b5a108ceb35a0953e58271e"
+    }
+  },
+  "preserved": [
+    "Camera FPS=30, RGB=1536P, smoothing=0.6 and existing calibration",
+    "Camera driver source, retry policy and timeout limit",
+    "Human margin=0.05 m, freshness=2 s, execute_path=True, simulation_only_ignore_unknown=True",
+    "CollisionFilter certification and Motion implementation/interfaces",
+    "Primary GNG+A*, RRT admission and worker algorithms",
+    "MuJoCo model/control, stored graph assets and workspace mask",
+    "Legacy workspace_planning untouched"
+  ],
+  "limits": [
+    "Exact failed-scene human geometry was not available in supplied log",
+    "Local plateau defect reproduced in a deterministic control; not proven to explain the logged 32-step failure",
+    "Native retreat comparison freezes observation time and uses synthetic capsules; no live dynamic-human retreat execution claim",
+    "Greedy coordinate retreat remains synchronous and incomplete; two of twelve native scenes remain blocked",
+    "Native RRT regression uses a deliberately disconnected small roadmap and synthetic vision",
+    "Camera probe uses actual hardware but no full CRA workload; intermittent capture failure is not proven fixed",
+    "Received stream rates include possible DDS/subscriber loss and are not sensor FPS",
+    "No physical robot commanded; no image payloads saved"
+  ],
+  "source_sha256": {
+    "src/planning/planning/path_planner.py": "2b7a701fd611d656811db10b4880d7e9188490b0c646d92f6b59e1d21d5f8c90",
+    "src/planning/planning/planning_node.py": "0238a7c16a6b78f300875c2c207042c5dd2bb6ed74bcf0e52248f4f50c837a95",
+    "src/planning/test/test_human_retreat_search.py": "014a3fca8e4c22021c1c8fad8a87f53218f1f9676ade0544bbad2dc94ae4bcc9",
+    "src/planning/test/benchmark_human_retreat.py": "270cbaa11d7b5e36117bc64c26bedf1702061a42b185acb5fccad791e62e8816",
+    "src/azure_kinect_ros_driver/test/probe_capture_stream.py": "53c633f339c8eb1a914960fbdce9ed4c2c5741da7fa6ec18de0ec7eb5e575340",
+    "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8",
+    "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628"
+  }
+}

@@ -18,6 +18,10 @@ def generate_launch_description():
     if not isinstance(gui_enabled, bool):
         raise ValueError("simulation.target_gui.enabled must be a YAML boolean")
 
+    data_dir = Path.home() / "living-lab/cra_ws/src/planning/data"
+    workspace_default = str(Path(config.get("workspace", {}).get(
+        "path", str(data_dir / "raw_workspace.npz"))).expanduser())
+
     simulation_node = Node(
         package="simulation",
         executable="robot_simulation",
@@ -28,10 +32,7 @@ def generate_launch_description():
     actions = [
         DeclareLaunchArgument(
             "workspace_path",
-            default_value=str(
-                Path.home()
-                / "living-lab/cra_ws/src/planning/data/raw_workspace.npz"
-            ),
+            default_value=workspace_default,
             description="Workspace samples shared by Target GUI and Planning",
         ),
         simulation_node,

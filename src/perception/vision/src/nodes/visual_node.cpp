@@ -19,6 +19,7 @@
 #include "opencv2/opencv.hpp"
 
 #include "vision/frame/frame_transformer.hpp"
+#include "vision/frame/preview_decode.hpp"
 
 using namespace std::chrono_literals;
 
@@ -191,16 +192,25 @@ public:
     }
 
 private:
+    void recordInput(double received) {
+        ++profile_input_frames_;
+        if (last_input_time_s_ > 0.) {
+            const double dt = received - last_input_time_s_;
+            if (dt > 1e-6) { fps_ = .9 * fps_ + .1 / dt; }
+        }
+        last_input_time_s_ = received;
+    }
+
     void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg) {
         const double now_s = now().seconds();
-
+        recordInput(now_s);
+        const auto decode_began = std::chrono::steady_clock::now();
         cv::Mat frame;
         try {
-            if (msg->encoding == "jpeg" || msg->encoding == "mjpeg" ||
-                msg->encoding == "mjpg" || msg->encoding == "jpg") {
-                const cv::Mat buf(1, static_cast<int>(msg->data.size()), CV_8UC1,
-                                  const_cast<uint8_t*>(msg->data.data()));
-                frame = cv::imdecode(buf, cv::IMREAD_COLOR);
+            const bool jpeg = msg->encoding == "jpeg" || msg->encoding == "mjpeg" ||
+                              msg->encoding == "mjpg" || msg->encoding == "jpg";
+            if (jpeg) {
+                frame = vision::frame::decodePreview(msg->data, display_scale_);
                 if (frame.empty()) {
                     RCLCPP_ERROR(get_logger(), "Failed to decode jpeg color image");
                     return;
@@ -208,7 +218,7 @@ private:
             } else {
                 frame = cv_bridge::toCvCopy(msg, "bgr8")->image;
             }
-            if (display_scale_ < 1.0 && !frame.empty()) {
+            if (!jpeg && display_scale_ < 1.0 && !frame.empty()) {
                 const int target_w = static_cast<int>(frame.cols * display_scale_);
                 const int target_h = static_cast<int>(frame.rows * display_scale_);
                 cv::resize(frame, frame, cv::Size(target_w, target_h));
@@ -216,7 +226,11 @@ private:
         } catch (const cv_bridge::Exception& e) {
             RCLCPP_ERROR(get_logger(), "cv_bridge exception: %s", e.what());
             return;
+        } catch (const cv::Exception& e) {
+            RCLCPP_ERROR(get_logger(), "preview decode exception: %s", e.what());
+            return;
         }
+        recordDecode(decode_began);
 
         std::lock_guard<std::mutex> lock(mutex_);
         last_raw_msg_time_s_ = now_s;
@@ -227,32 +241,20 @@ private:
         current_image_ = frame;
         has_image_ = true;
         last_image_size_ = frame.size();
-        if (last_image_time_s_ > 0.0) {
-            const double dt = now_s - last_image_time_s_;
-            if (dt > 1e-6) {
-                fps_ = 0.9 * fps_ + 0.1 / dt;
-            }
-        }
         last_image_time_s_ = now_s;
     }
 
     void compressedImageCallback(const sensor_msgs::msg::CompressedImage::SharedPtr msg) {
-        // Automatic source switch: accept compressed frames only while the raw
-        // topic has been silent, so a stray compressed duplicate in bgra mode
-        // is ignored with a single time comparison and no decode cost.
         const double now_s = now().seconds();
         {
             std::lock_guard<std::mutex> lock(mutex_);
-            if ((now_s - last_raw_msg_time_s_) < kRawSourceTimeoutS) {
-                return;
-            }
+            if (now_s - last_raw_msg_time_s_ < kRawSourceTimeoutS) { return; }
         }
-
+        recordInput(now_s);
+        const auto decode_began = std::chrono::steady_clock::now();
         cv::Mat frame;
         try {
-            const cv::Mat buf(1, static_cast<int>(msg->data.size()), CV_8UC1,
-                              const_cast<uint8_t*>(msg->data.data()));
-            frame = cv::imdecode(buf, cv::IMREAD_COLOR);
+            frame = vision::frame::decodePreview(msg->data, display_scale_);
         } catch (const cv::Exception& e) {
             RCLCPP_ERROR(get_logger(), "compressed decode exception: %s", e.what());
             return;
@@ -261,11 +263,7 @@ private:
             RCLCPP_ERROR(get_logger(), "Failed to decode compressed color image");
             return;
         }
-        if (display_scale_ < 1.0) {
-            const int target_w = static_cast<int>(frame.cols * display_scale_);
-            const int target_h = static_cast<int>(frame.rows * display_scale_);
-            cv::resize(frame, frame, cv::Size(target_w, target_h));
-        }
+        recordDecode(decode_began);
 
         std::lock_guard<std::mutex> lock(mutex_);
         if (!using_compressed_) {
@@ -275,12 +273,6 @@ private:
         current_image_ = frame;
         has_image_ = true;
         last_image_size_ = frame.size();
-        if (last_image_time_s_ > 0.0) {
-            const double dt = now_s - last_image_time_s_;
-            if (dt > 1e-6) {
-                fps_ = 0.9 * fps_ + 0.1 / dt;
-            }
-        }
         last_image_time_s_ = now_s;
     }
 
@@ -310,18 +302,23 @@ private:
         const double cy = camera_info_.k[5];
         const std::string target_frame = camera_info_.header.frame_id;
 
+        tf2::Transform camera_to_rgb;
+        if (!tf_transformer_->lookupTransform(target_frame, camera_frame_id_, camera_to_rgb)) {
+            return;
+        }
+
         for (const auto& person : camera_people_) {
             for (const auto& joint : person.second) {
-                const geometry_msgs::msg::Point p = tf_transformer_->transformPoint(
-                    joint.second, target_frame, camera_frame_id_);
-                if (p.z <= kMinValidDepthM) {
+                const auto& point = joint.second;
+                const auto p = camera_to_rgb * tf2::Vector3(point.x, point.y, point.z);
+                if (p.z() <= kMinValidDepthM) {
                     projected_people_[person.first][joint.first] = cv::Point(-1, -1);
                     continue;
                 }
                 // Scale projection to match downscaled display
                 projected_people_[person.first][joint.first] =
-                    cv::Point(static_cast<int>((p.x * fx / p.z + cx) * display_scale_),
-                              static_cast<int>((p.y * fy / p.z + cy) * display_scale_));
+                    cv::Point(static_cast<int>((p.x() * fx / p.z() + cx) * display_scale_),
+                              static_cast<int>((p.y() * fy / p.z() + cy) * display_scale_));
             }
         }
     }
@@ -353,6 +350,7 @@ private:
     }
 
     void displayCallback() {
+        reportPreviewProfile();
         cv::Mat display;
         bool signal_lost = false;
         {
@@ -379,6 +377,38 @@ private:
 
         cv::imshow("Azure Kinect FPV - Robot POV", display);
         cv::waitKey(1);
+        if (!signal_lost) {
+            ++profile_display_frames_;
+            const double current = now().seconds();
+            if (last_display_time_s_ > 0. && current > last_display_time_s_) {
+                view_fps_ = .9 * view_fps_ + .1 / (current - last_display_time_s_);
+            }
+            last_display_time_s_ = current;
+        }
+    }
+
+    void recordDecode(std::chrono::steady_clock::time_point began) {
+        const double ms = std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - began).count();
+        ++profile_decoded_frames_;
+        profile_decode_ms_ += ms;
+        profile_decode_max_ms_ = std::max(profile_decode_max_ms_, ms);
+    }
+
+    void reportPreviewProfile() {
+        const auto now = std::chrono::steady_clock::now();
+        const double elapsed = std::chrono::duration<double>(now - profile_started_).count();
+        if (elapsed < 5.) { return; }
+        RCLCPP_INFO(get_logger(),
+            "Preview profile: selected_rx_fps=%.2f decoded_fps=%.2f displayed_fps=%.2f "
+            "decode_resize_mean_ms=%.3f decode_resize_max_ms=%.3f",
+            profile_input_frames_ / elapsed, profile_decoded_frames_ / elapsed,
+            profile_display_frames_ / elapsed,
+            profile_decoded_frames_ ? profile_decode_ms_ / profile_decoded_frames_ : 0.,
+            profile_decode_max_ms_);
+        profile_started_ = now;
+        profile_input_frames_ = profile_decoded_frames_ = profile_display_frames_ = 0;
+        profile_decode_ms_ = profile_decode_max_ms_ = 0.;
     }
 
     void drawSkeletons(cv::Mat& img) {
@@ -450,7 +480,8 @@ private:
         std::lock_guard<std::mutex> lock(mutex_);
 
         const cv::Scalar fps_color = (fps_ >= 10.0) ? cv::Scalar(0, 255, 0) : cv::Scalar(0, 255, 255);
-        cv::putText(img, "FPS: " + std::to_string(static_cast<int>(fps_)),
+        cv::putText(img, "Input: " + std::to_string(static_cast<int>(fps_)) +
+                    " FPS | View: " + std::to_string(static_cast<int>(view_fps_)) + " FPS",
                     cv::Point(x, y), font, 0.6, fps_color, 2);
         y += 35;
 
@@ -508,6 +539,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 
     std::mutex mutex_;
+    double last_input_time_s_ = 0., last_display_time_s_ = 0., view_fps_ = 0.;
     cv::Mat current_image_;
     bool has_image_ = false;
     cv::Size last_image_size_ = cv::Size(640, 480);
@@ -528,6 +560,9 @@ private:
     double last_image_time_s_ = 0.0;
     std::map<int, cv::Scalar> joint_colors_;
     double display_scale_ = 1.0;
+    std::chrono::steady_clock::time_point profile_started_ = std::chrono::steady_clock::now();
+    std::size_t profile_input_frames_ = 0, profile_decoded_frames_ = 0, profile_display_frames_ = 0;
+    double profile_decode_ms_ = 0., profile_decode_max_ms_ = 0.;
 };
 
 int main(int argc, char* argv[]) {

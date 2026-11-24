@@ -16,6 +16,7 @@ from sensor_msgs.msg import JointState
 from visualization_msgs.msg import Marker, MarkerArray
 
 from planning.algorithms.human_collision import mesh_local_box
+from planning.visualization.projection import project_configuration
 from simulation.frame_transform import FrameTransform
 
 
@@ -87,12 +88,6 @@ class PlanningVisualizer:
             for name in self.joint_names
         ]
 
-        # This limit affects RViz only, not A* planning.
-        self.max_visible_joint_edges = 2000
-
-        self.joint_graph_positions = None
-        self.joint_graph_revision = None
-
         marker_qos = QoSProfile(
             depth=1,
             reliability=ReliabilityPolicy.RELIABLE,
@@ -116,18 +111,10 @@ class PlanningVisualizer:
             "/planning/gng_edges",
             marker_qos,
         )
-
-        self.joint_nodes_pub = node.create_publisher(
-            Marker,
-            "/planning/joint_graph_nodes",
-            marker_qos,
-        )
-
-        self.joint_edges_pub = node.create_publisher(
-            Marker,
-            "/planning/joint_graph_edges",
-            marker_qos,
-        )
+        self.gng_graph_pub = node.create_publisher(
+            MarkerArray, '/planning/gng_graph', marker_qos)
+        self.workspace_mask_pub = node.create_publisher(
+            MarkerArray, '/planning/workspace_graph_mask', marker_qos)
 
         self.eof_pub = node.create_publisher(
             Marker,
@@ -308,6 +295,7 @@ class PlanningVisualizer:
         ]
 
         self.gng_nodes_pub.publish(marker)
+        return marker
 
     def publish_gng_edges(self):
         marker = self.make_marker(
@@ -327,11 +315,13 @@ class PlanningVisualizer:
             )
 
         self.gng_edges_pub.publish(marker)
+        return marker
 
     def publish_static(self):
         self.publish_workspace()
-        self.publish_gng_nodes()
-        self.publish_gng_edges()
+        markers = MarkerArray()
+        markers.markers = [self.publish_gng_nodes(), self.publish_gng_edges()]
+        self.gng_graph_pub.publish(markers)
 
         self.node.get_logger().info(
             "Workspace GNG published: "
@@ -340,37 +330,8 @@ class PlanningVisualizer:
         )
 
     def forward_kinematics(self, joints):
-        joints = np.asarray(joints, dtype=float)
-
-        if (
-            joints.shape != (5,)
-            or not np.isfinite(joints).all()
-        ):
-            raise ValueError("Invalid joint configuration")
-
-        self.data.qpos[self.qpos_ids] = joints
-
-        mujoco.mj_forward(self.model, self.data)
-
-        base_position = self.data.xpos[self.base_id]
-
-        base_rotation = self.data.xmat[
-            self.base_id
-        ].reshape(3, 3)
-
-        eof_position = self.data.xpos[self.eof_id]
-
-        position_mujoco_base = (
-            base_rotation.T
-            @ (eof_position - base_position)
-        )
-
-        return np.asarray(
-            FrameTransform.mujoco_base_to_robot_base(
-                position_mujoco_base
-            ),
-            dtype=float,
-        )
+        return project_configuration(self.model, self.data, self.qpos_ids,
+                                     self.base_id, self.eof_id, joints)
 
     def joint_state_callback(self, message):
         if len(message.name) != len(message.position):
@@ -488,154 +449,45 @@ class PlanningVisualizer:
 
         self.eof_pub.publish(marker)
 
-    def publish_filtered_graph(self, filtered_graph):
-        joint_q = np.asarray(
-            filtered_graph["joint_q"],
-            dtype=float,
-        )
+    def publish_workspace_graph_mask(self, result):
+        """Draw the stored GNG with XYZ occlusions, never motion certificates."""
+        known = result['known']
+        nodes = self.make_marker('workspace_mask_nodes', Marker.POINTS, .008,
+                                 (0., 1., 0.), .85)
+        nodes.scale.y = .008
+        nodes.points = [self.make_point(p) for p in
+                        self.gng_nodes[result['visible_node_mask']]]
+        edges = self.make_marker('workspace_mask_edges', Marker.LINE_LIST, .0015,
+                                 (1., .45, 0.), .35)
+        visible_edges = self.gng_edges[result['visible_edge_mask']]
+        edges.points = [self.make_point(p) for p in self.gng_nodes[visible_edges].reshape(-1, 3)]
+        status = result['status'] if known else result['status'] + ' (partial obstacle data)'
+        text = (f"Workspace XYZ mask: {status}\n"
+                f"Hidden: {len(self.gng_nodes) - len(nodes.points)}/{len(self.gng_nodes)} nodes, "
+                f"{len(self.gng_edges) - len(visible_edges)}/{len(self.gng_edges)} edges\n"
+                'Display only; whole-arm validity is checked by Planning')
+        array = MarkerArray()
+        array.markers = [nodes, edges, self.workspace_mask_status_marker(text)]
+        # Keep the stored graph visible even without a camera. Freshness affects
+        # available masks and their status text, never the graph's visibility.
+        self.workspace_mask_pub.publish(array)
 
-        joint_edges = np.asarray(
-            filtered_graph["joint_edges"],
-            dtype=np.int64,
-        ).reshape(-1, 2)
+    def workspace_mask_status_marker(self, text):
+        marker = self.make_marker('workspace_mask_status', Marker.TEXT_VIEW_FACING,
+                                  .025, (.8, .9, .9), 1.)
+        marker.scale.z = .025
+        marker.pose.position.z = .65
+        marker.text = text
+        return marker
 
-        valid_nodes = np.asarray(
-            filtered_graph["valid_node_mask"],
-            dtype=bool,
-        )
-
-        valid_edges = np.asarray(
-            filtered_graph["valid_edge_mask"],
-            dtype=bool,
-        )
-
-        revision = filtered_graph["environment_revision"]
-
-        if (
-            joint_q.ndim != 2
-            or joint_q.shape[1] != 5
-            or not np.isfinite(joint_q).all()
-        ):
-            raise ValueError("Invalid joint graph")
-
-        if (
-            valid_nodes.shape != (len(joint_q),)
-            or valid_edges.shape != (len(joint_edges),)
-        ):
-            raise ValueError("Invalid graph validity masks")
-
-        if len(joint_edges) and (
-            joint_edges.min() < 0
-            or joint_edges.max() >= len(joint_q)
-        ):
-            raise ValueError("Invalid joint edge indices")
-
-        if len(joint_edges):
-            a = joint_edges[:, 0]
-            b = joint_edges[:, 1]
-
-            valid_edges = (
-                valid_edges
-                & valid_nodes[a]
-                & valid_nodes[b]
-            )
-
-        if (
-            self.joint_graph_positions is None
-            or len(self.joint_graph_positions) != len(joint_q)
-        ):
-            self.joint_graph_positions = np.asarray(
-                [
-                    self.forward_kinematics(joints)
-                    for joints in joint_q
-                ],
-                dtype=float,
-            )
-
-        self.publish_joint_graph_nodes(
-            self.joint_graph_positions,
-            valid_nodes,
-        )
-
-        self.publish_joint_graph_edges(
-            self.joint_graph_positions,
-            joint_edges,
-            valid_edges,
-        )
-
-        self.joint_graph_revision = revision
-
-        self.node.get_logger().info(
-            "Filtered joint graph updated: "
-            f"{np.count_nonzero(valid_nodes)} valid nodes, "
-            f"{np.count_nonzero(valid_edges)} valid edges"
-        )
-
-    def publish_joint_graph_nodes(
-        self,
-        positions,
-        valid_nodes,
-    ):
-        marker = self.make_marker(
-            namespace="joint_graph_nodes",
-            marker_type=Marker.POINTS,
-            size=0.005,
-            color=(0.0, 1.0, 0.0),
-            alpha=0.65,
-        )
-
-        marker.scale.y = 0.005
-
-        marker.points = [
-            self.make_point(position)
-            for position in positions[valid_nodes]
-        ]
-
-        self.joint_nodes_pub.publish(marker)
-
-    def publish_joint_graph_edges(
-        self,
-        positions,
-        edges,
-        valid_edges,
-    ):
-        marker = self.make_marker(
-            namespace="joint_graph_edges",
-            marker_type=Marker.LINE_LIST,
-            size=0.001,
-            color=(1.0, 0.45, 0.0),
-            alpha=0.30,
-        )
-
-        visible_edges = edges[valid_edges]
-
-        if (
-            len(visible_edges) >
-            self.max_visible_joint_edges
-        ):
-            indices = np.linspace(
-                0,
-                len(visible_edges) - 1,
-                self.max_visible_joint_edges,
-                dtype=int,
-            )
-
-            visible_edges = visible_edges[indices]
-
-        for a, b in visible_edges:
-            marker.points.append(
-                self.make_point(positions[a])
-            )
-            marker.points.append(
-                self.make_point(positions[b])
-            )
-
-        self.joint_edges_pub.publish(marker)
-
-        self.node.get_logger().info(
-            f"Joint edges in RViz: {len(visible_edges)} "
-            f"of {np.count_nonzero(valid_edges)} valid"
-        )
+    def clear_workspace_graph_mask(self, status):
+        array = MarkerArray()
+        for namespace in ('workspace_mask_nodes', 'workspace_mask_edges'):
+            marker = self.make_marker(namespace, Marker.POINTS, .008, (.5, .5, .5))
+            marker.action = Marker.DELETE
+            array.markers.append(marker)
+        array.markers.append(self.workspace_mask_status_marker(status))
+        self.workspace_mask_pub.publish(array)
 
     def joint_path_to_xyz(
         self,

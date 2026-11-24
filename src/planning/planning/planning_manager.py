@@ -59,10 +59,19 @@ class PlanningManager:
         self.path_failure_sequence = 0
         self.execution_path_id = 0
         self.execution_progress_reason = "NO_EXECUTION"
-        # Read-only observation hook; never used to choose Motion decisions.
+        # Each failed primary attempt can optionally request one bounded fallback.
         self.target_generation = 0
         self.graph_attempt_sequence = 0
         self.last_graph_failure = None
+        self.rrt_fallback_enabled = False
+        self.rrt_wait_timeout = 1.2
+        self.rrt_fallback_pending = False
+        self.rrt_fallback_attempt = None
+        self.rrt_fallback_result = None
+        self.rrt_refresh_attempt = None
+        self.rrt_block_reason = None
+        self.rrt_last_reason = 'NOT_TRIED'
+        self.path_source = None
         self.segment_progress = None
         self.segment_progress_path = None
         self.human_revision = None
@@ -460,6 +469,7 @@ class PlanningManager:
             # NEAR is itself an invalid start under the existing human margin.
             # Only the dedicated margin certificate can authorize a retreat.
             self.human_path_validation_reason = "CURRENT_CLEARANCE"
+            self._cancel_rrt_refresh('HUMAN_TOO_CLOSE')
             self.invalidate_path()
             self._remember_human_block()
             return "HUMAN_TOO_CLOSE"
@@ -740,6 +750,7 @@ class PlanningManager:
 
         self.target_base = target_base.copy()
         self.target_generation += 1
+        self._cancel_rrt_refresh('TARGET_CHANGED')
         self.last_graph_failure = None
 
         if not self.safe_recovery_active:
@@ -855,6 +866,7 @@ class PlanningManager:
         self.obstacle_time = time.monotonic()
 
         if changed_names:
+            self._cancel_rrt_refresh('OBSTACLES_CHANGED')
             self.safe_recovery_attempted = False
             self.recovery_blocked = False
 
@@ -1238,6 +1250,10 @@ class PlanningManager:
         return False
 
     def invalidate_path(self):
+        self._cancel_rrt_refresh('CONTEXT_INVALIDATED')
+        self.rrt_fallback_pending = False
+        self.rrt_fallback_attempt = self.rrt_fallback_result = None
+        self.path_source = None
         self.segment_progress = None
         self.segment_progress_path = None
         self.goal_q = None
@@ -1284,6 +1300,12 @@ class PlanningManager:
             self.stop_owned = True
 
         elif action == "EXECUTE":
+            if self.human_margin_recovery_active:
+                self.path_source = 'HUMAN_RETREAT'
+            elif self.safe_recovery_active:
+                self.path_source = 'SAFE_RECOVERY'
+            elif self.safe_position_active:
+                self.path_source = 'SAFE_POSITION'
             self.segment_progress = None
             self.segment_progress_path = None
             self.execution_path_id += 1
@@ -1305,10 +1327,242 @@ class PlanningManager:
             or self.motion_status == "EXECUTING"
         )
 
+    def rrt_human_ready(self):
+        """Fallback never borrows the ordinary simulation UNKNOWN override."""
+        checker = self.planner.collision_filter
+        return self.human_avoidance_enabled and (
+            (self.human_status == 'OBSERVED' and checker.human_obstacles_enabled
+             and checker.human_data_ready())
+            or (self.human_status == 'EMPTY' and self.human_empty_until is not None
+                and time.monotonic() < self.human_empty_until))
+
+    def _rrt_admission_reason(self):
+        if not self.rrt_fallback_enabled:
+            return 'DISABLED'
+        if not self.execute_path:
+            return 'EXECUTION_DISABLED'
+        if self.last_graph_failure is None:
+            return 'NO_GRAPH_FAILURE'
+        if self.fault:
+            return 'MOTION_FAULT'
+        if (self.recovery_pending or self.resume_after_fault or self.safe_recovery_active
+                or self.safe_position_active or self.human_margin_recovery_active):
+            return 'RECOVERY_ACTIVE'
+        if self.motion_status == 'STOPPED' and not self.stop_owned:
+            return 'EXTERNAL_STOP'
+        if (self.pending_action is not None or self._stop_required()
+                or self.motion_status not in ('IDLE', 'COMPLETED', 'STOPPED')):
+            return 'MOTION_CONTEXT_CHANGED'
+        if not self.rrt_human_ready():
+            return 'HUMAN_VISION_UNKNOWN'
+        if not self.feedback_ready():
+            return 'FEEDBACK_STALE'
+        if not self.obstacle_data_ready():
+            return 'OBSTACLES_STALE'
+        return None
+
+    def _request_rrt_fallback(self, deadline=None):
+        self.rrt_block_reason = self._rrt_admission_reason()
+        if self.rrt_block_reason is not None:
+            return False
+        now = time.monotonic()
+        deadline = min(now + self.rrt_wait_timeout, deadline) if deadline is not None \
+            else now + self.rrt_wait_timeout
+        if now >= deadline:
+            self.rrt_block_reason = 'HANDOFF_EXPIRED'
+            return False
+        self.rrt_fallback_attempt = dict(
+            self.last_graph_failure, deadline=deadline)
+        self.rrt_refresh_attempt = None
+        self.rrt_fallback_pending = True
+        self.rrt_fallback_result = None
+        self.rrt_last_reason = 'WAITING'
+        self.current_path = self.goal_q = None
+        self.path_source = None
+        # New human frames may be used for validation, not automatic duplicate
+        # primary attempts while this one request is still pending.
+        self.human_replan_blocked = False
+        self.planning_required = False
+        return True
+
+    def _defer_rrt_for_inputs(self):
+        if self.rrt_block_reason not in ('FEEDBACK_STALE', 'OBSTACLES_STALE'):
+            return False
+        self.rrt_refresh_attempt = dict(
+            self.last_graph_failure, deadline=time.monotonic() + self.rrt_wait_timeout)
+        self.current_path = self.goal_q = None
+        self.path_source = None
+        self.path_sent = False
+        self.planning_required = self.human_replan_blocked = False
+        self.rrt_last_reason = 'WAITING_FOR_INPUT_REFRESH'
+        return True
+
+    def _cancel_rrt_refresh(self, reason):
+        if self.rrt_refresh_attempt is not None:
+            self.rrt_refresh_attempt = None
+            self.rrt_block_reason = reason
+            self.rrt_last_reason = 'CANCELLED_' + reason
+            self.planning_required = True
+
+    def _rrt_refresh_context_reason(self, now):
+        attempt = self.rrt_refresh_attempt
+        if attempt is None:
+            return None
+        if now >= attempt['deadline']:
+            return 'HANDOFF_EXPIRED'
+        if self.target_base is None or attempt['target_generation'] != self.target_generation:
+            return 'TARGET_CHANGED'
+        if self.current_q is None or np.max(np.abs(self.current_q - attempt['start'])) > .01:
+            return 'START_MOVED'
+        # Expired input may wait; recovery, faults and external motion cannot.
+        reason = self._rrt_admission_reason()
+        return None if reason in (None, 'FEEDBACK_STALE', 'OBSTACLES_STALE') else reason
+
+    def _rrt_refresh_wait(self):
+        reason = self._rrt_admission_reason()
+        self.rrt_block_reason = reason
+        if reason not in ('FEEDBACK_STALE', 'OBSTACLES_STALE'):
+            self._cancel_rrt_refresh(reason or 'CONTEXT_CHANGED')
+            return self._decision(status='RRT_REPLANNING')
+        self.planning_required = False
+        self.rrt_last_reason = 'WAITING_FOR_INPUT_REFRESH'
+        return self._decision(status=('RRT_WAITING_FOR_FEEDBACK' if reason == 'FEEDBACK_STALE'
+                                      else 'RRT_WAITING_FOR_OBSTACLES'))
+
+    def _poll_rrt_refresh(self):
+        attempt = self.rrt_refresh_attempt
+        reason = self._rrt_refresh_context_reason(time.monotonic())
+        if reason is not None:
+            self._cancel_rrt_refresh(reason)
+            return self._decision(status='RRT_REPLANNING')
+        if not self.feedback_ready() or not self.obstacle_data_ready():
+            return self._rrt_refresh_wait()
+        checker = self.planner.collision_filter
+        revision = checker.environment_revision
+        try:
+            start_valid = checker.is_state_valid(self.current_q)
+            goal_valid = start_valid and checker.is_state_valid(attempt['goal'])
+        except Exception as error:
+            self._record_error('RRT input refresh validation', error)
+            start_valid = goal_valid = False
+        if not start_valid or not goal_valid:
+            reason = 'START_INVALID' if not start_valid else 'GOAL_INVALID'
+        elif checker.environment_revision != revision:
+            reason = 'ENVIRONMENT_CHANGED'
+        else:
+            reason = self._rrt_refresh_context_reason(time.monotonic())
+        if reason is not None:
+            self._cancel_rrt_refresh(reason)
+            return self._decision(status='RRT_REPLANNING')
+        # This is a new search on current input, not reuse of a path certificate.
+        # Its original handoff deadline is retained even after fresh callbacks.
+        if self._request_rrt_fallback(deadline=attempt['deadline']):
+            return self._decision(status='RRT_SEARCHING')
+        if self.rrt_block_reason in ('FEEDBACK_STALE', 'OBSTACLES_STALE'):
+            return self._rrt_refresh_wait()
+        self._cancel_rrt_refresh(self.rrt_block_reason or 'CONTEXT_CHANGED')
+        return self._decision(status='RRT_REPLANNING')
+
+    def offer_rrt_result(self, result):
+        """Mailbox only. The regular manager step owns adoption and commands."""
+        if not isinstance(result, dict) or not isinstance(result.get('reason'), str):
+            return False
+        request = self.rrt_fallback_attempt
+        if (not self.rrt_fallback_pending or request is None
+                or result.get('sequence') != request['sequence']
+                or result.get('target_generation') != self.target_generation
+                or self.rrt_fallback_result is not None):
+            return False
+        self.rrt_fallback_result = deepcopy(result)
+        if result.get('reason') == 'NONE':
+            required = {'expires_at', 'scene_revision', 'prepared_path', 'start'}
+            try:
+                expiry = float(result['expires_at'])
+                if not required.issubset(result) or not np.isfinite(expiry):
+                    raise ValueError('Incomplete worker certificate')
+                self.rrt_fallback_result['expires_at'] = expiry
+            except (KeyError, TypeError, ValueError):
+                self.rrt_fallback_result = dict(
+                    sequence=request['sequence'], target_generation=self.target_generation,
+                    reason='INVALID_WORKER_PATH')
+        return True
+
+    def _poll_rrt_fallback(self):
+        request = self.rrt_fallback_attempt
+        result = self.rrt_fallback_result
+        now = time.monotonic()
+        if result is None and now < request['deadline']:
+            return self._decision(status='RRT_SEARCHING')
+        self.rrt_fallback_pending = False
+        self.rrt_fallback_attempt = self.rrt_fallback_result = None
+        reason = 'TIME_BUDGET_EXHAUSTED' if result is None else result['reason']
+        if reason == 'NONE':
+            checker = self.planner.collision_filter
+            if (now >= request['deadline'] or now >= result['expires_at']):
+                reason = 'VALIDATION_SNAPSHOT_EXPIRED'
+            elif result['scene_revision'] != checker.environment_revision:
+                reason = 'ENVIRONMENT_CHANGED'
+            elif (request['target_generation'] != self.target_generation
+                  or self.target_base is None):
+                reason = 'TARGET_CHANGED'
+            elif (not self.rrt_human_ready() or not self.feedback_ready()
+                  or not self.obstacle_data_ready()):
+                reason = 'INPUTS_STALE'
+            elif (self._stop_required() or self.pending_action is not None or self.fault
+                  or self.safe_recovery_active or self.safe_position_active
+                  or self.human_margin_recovery_active or self.recovery_pending
+                  or self.motion_status not in ('IDLE', 'COMPLETED', 'STOPPED')
+                  or (self.motion_status == 'STOPPED' and not self.stop_owned)):
+                reason = 'MOTION_CONTEXT_CHANGED'
+            else:
+                try:
+                    path = np.asarray(result['prepared_path'], dtype=float)
+                    start = np.asarray(result['start'], dtype=float)
+                    if (path.ndim != 2 or path.shape[1] != 5 or not 2 <= len(path) <= 10000
+                            or start.shape != (5,) or not np.isfinite(path).all()
+                            or not np.isfinite(start).all()
+                            or not np.array_equal(path[0], start)
+                            or not np.array_equal(path[-1], request['goal'])
+                            or np.any(path < checker.lower) or np.any(path > checker.upper)
+                            or np.max(np.abs(np.diff(path, axis=0)))
+                            > self.planner.max_segment_delta + 1e-9):
+                        reason = 'INVALID_WORKER_PATH'
+                    elif (np.max(np.abs(self.current_q - start)) > .01
+                          or np.max(np.abs(self.current_q - request['start'])) > .01):
+                        reason = 'START_MOVED'
+                except (TypeError, ValueError, KeyError):
+                    reason = 'INVALID_WORKER_PATH'
+        self.rrt_last_reason = reason
+        if reason == 'NONE':
+            self.current_path = path.copy()
+            self.goal_q = request['goal'].copy()
+            self.planner.current_path = path.copy()
+            self.planner.goal_q = self.goal_q.copy()
+            self.planner.last_plan_failure = 'NONE'
+            self.path_source = 'RRT_CONNECT'
+            self.path_sent = False
+            self.human_retry_count = 0
+            self.human_replan_blocked = self.recovery_blocked = False
+            self.last_graph_failure = None
+            return self._decision(status='RRT_PATH_READY')
+        if reason in ('ENVIRONMENT_CHANGED', 'TARGET_CHANGED', 'START_MOVED',
+                      'MOTION_CONTEXT_CHANGED', 'INPUTS_STALE'):
+            self.invalidate_path()
+            return self._decision(status='RRT_REPLANNING')
+        self._remember_human_block()
+        if self._prepare_safe_position():
+            return self._decision(status='SAFE_POSITION_READY')
+        return self._decision(status='RRT_FAILED')
+
     @profiled("manager_step", new_cycle=True)
     def step(self):
         now = time.monotonic()
         self.last_error = None
+        if self.rrt_refresh_attempt is None and not self.rrt_fallback_pending:
+            self.rrt_block_reason = None
+        refresh_cancelled = self._rrt_refresh_context_reason(now)
+        if refresh_cancelled is not None:
+            self._cancel_rrt_refresh(refresh_cancelled)
 
         if self.pending_action == "STOP":
             if now - self.pending_since > self.command_timeout:
@@ -1317,10 +1571,26 @@ class PlanningManager:
 
             return self._decision(status="WAITING_FOR_STOP")
 
+        # An RRT trajectory needs currently observed humans or a fresh EMPTY
+        # observation even when ordinary simulation paths can ignore UNKNOWN.
+        if (self.path_source == 'RRT_CONNECT' and self.current_path is not None
+                and (not self.path_sent or self._stop_required()
+                     or self.pending_action == 'RELEASE') and not self.rrt_human_ready()):
+            self.invalidate_path()
+            if self._stop_required() or self.pending_action == 'RELEASE':
+                return self._send('STOP', 'RRT_HUMAN_VISION_UNKNOWN')
+            return self._decision(status='RRT_HUMAN_VISION_UNKNOWN')
+
         if self.human_avoidance_enabled:
             problem = self._human_guard()
 
             if problem is not None:
+                if self.rrt_fallback_enabled:
+                    self.rrt_block_reason = problem
+                if self.rrt_refresh_attempt is not None:
+                    if problem == 'WAITING_FOR_FEEDBACK':
+                        return self._rrt_refresh_wait()
+                    self._cancel_rrt_refresh(problem)
                 if (
                     problem == "HUMAN_TOO_CLOSE" and self.human_margin_recovery_enabled
                     and self.execute_path and not self.fault
@@ -1366,6 +1636,8 @@ class PlanningManager:
                 )
 
         if not self.feedback_ready():
+            if self.rrt_refresh_attempt is not None:
+                return self._rrt_refresh_wait()
             if self._stop_required():
                 return self._send(
                     "STOP",
@@ -1377,6 +1649,8 @@ class PlanningManager:
             )
 
         if not self.obstacle_data_ready():
+            if self.rrt_refresh_attempt is not None:
+                return self._rrt_refresh_wait()
             if self._stop_required():
                 return self._send(
                     "STOP",
@@ -1437,6 +1711,15 @@ class PlanningManager:
             if not state_safe:
                 self.fault = True
                 return self._decision(status="RECOVERY_UNSAFE")
+
+        if refresh_cancelled is not None:
+            return self._decision(status='RRT_REPLANNING')
+
+        if self.rrt_refresh_attempt is not None:
+            return self._poll_rrt_refresh()
+
+        if self.rrt_fallback_pending:
+            return self._poll_rrt_fallback()
 
         if self.planning_required:
             if self._stop_required():
@@ -1507,6 +1790,10 @@ class PlanningManager:
                         )
 
                     if self.planner.last_plan_failure == "NO_GRAPH_PATH":
+                        if self._request_rrt_fallback():
+                            return self._decision(status='RRT_SEARCHING')
+                        if self._defer_rrt_for_inputs():
+                            return self._rrt_refresh_wait()
                         # One failed batch already exhausted all configured goal
                         # alternatives. Waiting for an identical second batch
                         # conflicts with the unchanged-environment retry cache.
@@ -1532,6 +1819,7 @@ class PlanningManager:
                 self.current_path = (
                     self.planner.current_path.copy()
                 )
+                self.path_source = 'GNG_ASTAR'
 
                 self.path_sent = False
                 self.human_replan_blocked = False
@@ -1721,6 +2009,12 @@ class PlanningManager:
             return self._decision(status="WAITING_FOR_FEEDBACK")
         if not self.obstacle_data_ready():
             return self._decision(status="WAITING_FOR_OBSTACLES")
+
+        if self.path_source == 'RRT_CONNECT' and not self.rrt_human_ready():
+            if self.motion_status == 'STOPPED':
+                return self._decision(status='RRT_HUMAN_VISION_UNKNOWN')
+            self.invalidate_path()
+            return self._decision(status='RRT_HUMAN_VISION_UNKNOWN')
 
         if self.motion_status == "STOPPED" or (
             self.resume_after_fault and self.motion_status == "CONTROL_ERROR"

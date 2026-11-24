@@ -1,0 +1,1108 @@
+{
+  "scope": "Real-camera tracker enqueue comparison without Planning or Motion.\n\nUses existing camera/workspace/calibration settings and reconstruction YAML.\nThe nonblocking executable is a BUILD_TESTING-only target, never installed.\nNo images, skeleton positions or capsule geometry are saved; only metadata.\n",
+  "domain": 221,
+  "guided": true,
+  "configuration": {
+    "kinect_config": {
+      "body_tracking_enabled": true,
+      "body_tracking_smoothing_factor": 0.6,
+      "depth_enabled": true,
+      "depth_mode": "WFOV_2X2BINNED",
+      "color_enabled": true,
+      "color_resolution": "1536P",
+      "color_format": "jpeg",
+      "fps": 30,
+      "point_cloud": false,
+      "rgb_point_cloud": false,
+      "point_cloud_in_depth_frame": true,
+      "rescale_ir_to_mono8": false,
+      "ir_mono8_scaling_factor": 1.0,
+      "imu_rate_target": 100,
+      "wired_sync_mode": 0,
+      "subordinate_delay_off_master_usec": 0,
+      "sensor_sn": "",
+      "recording_file": "",
+      "recording_loop_enabled": false
+    },
+    "tf_arguments": [
+      "0.0",
+      "0.0",
+      "0.2",
+      "0.0",
+      "0.5881759579220891",
+      "0.0",
+      "base_link",
+      "camera_base"
+    ],
+    "workspace_params": {
+      "workspace_polygon": [
+        0.0,
+        -0.7,
+        0.8,
+        -0.7,
+        0.8,
+        0.7,
+        0.0,
+        0.7
+      ],
+      "workspace_z": [
+        -0.7,
+        0.7
+      ],
+      "exit_timeout_s": 0.5
+    }
+  },
+  "configuration_sha256": {
+    "src/perception/vision/launch/body_tracking.launch.py": "bf45f6e26c9a7b5bdf312b0bdf50d31976444f06956d565474f6b7aab31e2628",
+    "src/cra/config/reconstruction.yaml": "11310c5522597630c698127a40256408e4136050890760c4059633c491eee308",
+    "src/cra/config/robot.yaml": "ea9dc2fdd48140d0626d9a88388522d59736e9581f421e506e5a537ad53942d8"
+  },
+  "trials": [
+    {
+      "warmup_s": 15,
+      "measured_s": 40,
+      "body_packets_with_people": 1024,
+      "active_zone_s": 40,
+      "observed_while_zone_active_s": 40,
+      "geometry_state_seconds": {
+        "invalid": 0,
+        "observed": 40
+      },
+      "streams": {
+        "body_index": {
+          "count": 1023,
+          "received_hz": 25.575,
+          "max_callback_gap_s": 0.0807664,
+          "age_samples": 1023,
+          "max_age_ms": 370.313048,
+          "median_age_ms": 321.233333,
+          "p95_age_ms": 351.891629
+        },
+        "body_packets": {
+          "count": 1024,
+          "received_hz": 25.6,
+          "max_callback_gap_s": 0.094246222,
+          "age_samples": 1024,
+          "max_age_ms": 367.524858,
+          "median_age_ms": 316.746638,
+          "p95_age_ms": 344.216227
+        },
+        "depth": {
+          "count": 514,
+          "received_hz": 12.85,
+          "max_callback_gap_s": 0.435859874,
+          "age_samples": 514,
+          "max_age_ms": 261.00622,
+          "median_age_ms": 239.638286,
+          "p95_age_ms": 254.152478
+        },
+        "geometry_observed": {
+          "count": 581,
+          "received_hz": 14.525,
+          "max_callback_gap_s": 0.432233346,
+          "age_samples": 581,
+          "max_age_ms": 269.351434,
+          "median_age_ms": 242.125896,
+          "p95_age_ms": 256.971903
+        },
+        "rgb": {
+          "count": 398,
+          "received_hz": 9.95,
+          "max_callback_gap_s": 0.616199403,
+          "age_samples": 398,
+          "max_age_ms": 311.213161,
+          "median_age_ms": 271.397095,
+          "p95_age_ms": 290.521436
+        },
+        "skeleton": {
+          "count": 1020,
+          "received_hz": 25.5,
+          "max_callback_gap_s": 0.086597656,
+          "age_samples": 1020,
+          "max_age_ms": 367.555062,
+          "median_age_ms": 317.75487,
+          "p95_age_ms": 346.114898
+        },
+        "zone": {
+          "count": 1020,
+          "received_hz": 25.5,
+          "max_callback_gap_s": 0.085519873,
+          "age_samples": 1020,
+          "max_age_ms": 368.737635,
+          "median_age_ms": 318.633156,
+          "p95_age_ms": 346.670214
+        }
+      },
+      "observer_latest_depth_body_delta": {
+        "count": 1023,
+        "received_hz": 25.575,
+        "max_callback_gap_s": 0,
+        "age_samples": 1023,
+        "max_age_ms": 332.74459,
+        "median_age_ms": 66.574666,
+        "p95_age_ms": 100.330509
+      },
+      "observer_nearest_depth_body_delta": {
+        "count": 1023,
+        "received_hz": 25.575,
+        "max_callback_gap_s": 0,
+        "age_samples": 1023,
+        "max_age_ms": 332.74459,
+        "median_age_ms": 32.903755,
+        "p95_age_ms": 100.330509
+      },
+      "phases": [
+        {
+          "index": 0,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 255,
+              "received_hz": 25.5,
+              "max_callback_gap_s": 0.074056974,
+              "age_samples": 255,
+              "max_age_ms": 368.72172,
+              "median_age_ms": 321.740494,
+              "p95_age_ms": 351.541759
+            },
+            "body_packets": {
+              "count": 256,
+              "received_hz": 25.6,
+              "max_callback_gap_s": 0.075564216,
+              "age_samples": 256,
+              "max_age_ms": 367.524858,
+              "median_age_ms": 317.339106,
+              "p95_age_ms": 344.053966
+            },
+            "depth": {
+              "count": 124,
+              "received_hz": 12.4,
+              "max_callback_gap_s": 0.38385019,
+              "age_samples": 124,
+              "max_age_ms": 257.845891,
+              "median_age_ms": 236.455581,
+              "p95_age_ms": 253.06673
+            },
+            "geometry_observed": {
+              "count": 134,
+              "received_hz": 13.4,
+              "max_callback_gap_s": 0.330777278,
+              "age_samples": 134,
+              "max_age_ms": 263.543956,
+              "median_age_ms": 242.923306,
+              "p95_age_ms": 256.592455
+            },
+            "rgb": {
+              "count": 99,
+              "received_hz": 9.9,
+              "max_callback_gap_s": 0.367178194,
+              "age_samples": 99,
+              "max_age_ms": 298.627048,
+              "median_age_ms": 270.400828,
+              "p95_age_ms": 290.008138
+            },
+            "skeleton": {
+              "count": 257,
+              "received_hz": 25.7,
+              "max_callback_gap_s": 0.071577028,
+              "age_samples": 257,
+              "max_age_ms": 367.555062,
+              "median_age_ms": 318.551529,
+              "p95_age_ms": 346.136549
+            },
+            "zone": {
+              "count": 257,
+              "received_hz": 25.7,
+              "max_callback_gap_s": 0.071573479,
+              "age_samples": 257,
+              "max_age_ms": 368.737635,
+              "median_age_ms": 319.452797,
+              "p95_age_ms": 347.266833
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.071577028,
+            "geometry_observed": 0.330777278
+          },
+          "name": "still",
+          "instruction": "Hadap kamera dan diam di titik yang sama."
+        },
+        {
+          "index": 1,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 259,
+              "received_hz": 25.9,
+              "max_callback_gap_s": 0.072488735,
+              "age_samples": 259,
+              "max_age_ms": 364.159312,
+              "median_age_ms": 319.769784,
+              "p95_age_ms": 349.748416
+            },
+            "body_packets": {
+              "count": 259,
+              "received_hz": 25.9,
+              "max_callback_gap_s": 0.06144226,
+              "age_samples": 259,
+              "max_age_ms": 352.712466,
+              "median_age_ms": 315.879175,
+              "p95_age_ms": 341.348079
+            },
+            "depth": {
+              "count": 128,
+              "received_hz": 12.8,
+              "max_callback_gap_s": 0.337098783,
+              "age_samples": 128,
+              "max_age_ms": 261.00622,
+              "median_age_ms": 236.90641,
+              "p95_age_ms": 252.404184
+            },
+            "geometry_observed": {
+              "count": 141,
+              "received_hz": 14.1,
+              "max_callback_gap_s": 0.432233346,
+              "age_samples": 141,
+              "max_age_ms": 263.566391,
+              "median_age_ms": 238.672729,
+              "p95_age_ms": 254.402619
+            },
+            "rgb": {
+              "count": 100,
+              "received_hz": 10,
+              "max_callback_gap_s": 0.607487453,
+              "age_samples": 100,
+              "max_age_ms": 308.895748,
+              "median_age_ms": 268.998982,
+              "p95_age_ms": 290.361891
+            },
+            "skeleton": {
+              "count": 257,
+              "received_hz": 25.7,
+              "max_callback_gap_s": 0.079619601,
+              "age_samples": 257,
+              "max_age_ms": 354.12228,
+              "median_age_ms": 316.76878,
+              "p95_age_ms": 343.74138
+            },
+            "zone": {
+              "count": 257,
+              "received_hz": 25.7,
+              "max_callback_gap_s": 0.079617869,
+              "age_samples": 257,
+              "max_age_ms": 354.157227,
+              "median_age_ms": 317.261878,
+              "p95_age_ms": 344.197549
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.079619601,
+            "geometry_observed": 0.432233346
+          },
+          "name": "arm_motion",
+          "instruction": "Ayunkan satu lengan ke samping lalu kembali, sekitar satu kali per detik."
+        },
+        {
+          "index": 2,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 255,
+              "received_hz": 25.5,
+              "max_callback_gap_s": 0.070560057,
+              "age_samples": 255,
+              "max_age_ms": 366.322491,
+              "median_age_ms": 322.737378,
+              "p95_age_ms": 351.202115
+            },
+            "body_packets": {
+              "count": 254,
+              "received_hz": 25.4,
+              "max_callback_gap_s": 0.074048637,
+              "age_samples": 254,
+              "max_age_ms": 363.241114,
+              "median_age_ms": 318.593183,
+              "p95_age_ms": 346.061954
+            },
+            "depth": {
+              "count": 130,
+              "received_hz": 13,
+              "max_callback_gap_s": 0.435859874,
+              "age_samples": 130,
+              "max_age_ms": 259.85973,
+              "median_age_ms": 244.606699,
+              "p95_age_ms": 254.287563
+            },
+            "geometry_observed": {
+              "count": 153,
+              "received_hz": 15.3,
+              "max_callback_gap_s": 0.398849715,
+              "age_samples": 153,
+              "max_age_ms": 263.981179,
+              "median_age_ms": 247.202809,
+              "p95_age_ms": 258.607897
+            },
+            "rgb": {
+              "count": 91,
+              "received_hz": 9.1,
+              "max_callback_gap_s": 0.433961725,
+              "age_samples": 91,
+              "max_age_ms": 311.213161,
+              "median_age_ms": 276.593713,
+              "p95_age_ms": 290.542203
+            },
+            "skeleton": {
+              "count": 251,
+              "received_hz": 25.1,
+              "max_callback_gap_s": 0.083215849,
+              "age_samples": 251,
+              "max_age_ms": 365.067362,
+              "median_age_ms": 319.637362,
+              "p95_age_ms": 346.077091
+            },
+            "zone": {
+              "count": 251,
+              "received_hz": 25.1,
+              "max_callback_gap_s": 0.083228674,
+              "age_samples": 251,
+              "max_age_ms": 366.364365,
+              "median_age_ms": 319.936116,
+              "p95_age_ms": 346.816747
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.083215849,
+            "geometry_observed": 0.398849715
+          },
+          "name": "partial_occlusion",
+          "instruction": "Putar badan sedikit dan sembunyikan lengan itu di balik torso."
+        },
+        {
+          "index": 3,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 254,
+              "received_hz": 25.4,
+              "max_callback_gap_s": 0.0807664,
+              "age_samples": 254,
+              "max_age_ms": 370.313048,
+              "median_age_ms": 319.345409,
+              "p95_age_ms": 353.507779
+            },
+            "body_packets": {
+              "count": 255,
+              "received_hz": 25.5,
+              "max_callback_gap_s": 0.094246222,
+              "age_samples": 255,
+              "max_age_ms": 360.714001,
+              "median_age_ms": 314.00557,
+              "p95_age_ms": 344.723662
+            },
+            "depth": {
+              "count": 132,
+              "received_hz": 13.2,
+              "max_callback_gap_s": 0.3226282,
+              "age_samples": 132,
+              "max_age_ms": 258.844176,
+              "median_age_ms": 234.079264,
+              "p95_age_ms": 253.745495
+            },
+            "geometry_observed": {
+              "count": 153,
+              "received_hz": 15.3,
+              "max_callback_gap_s": 0.344452171,
+              "age_samples": 153,
+              "max_age_ms": 269.351434,
+              "median_age_ms": 236.574114,
+              "p95_age_ms": 255.9263
+            },
+            "rgb": {
+              "count": 108,
+              "received_hz": 10.8,
+              "max_callback_gap_s": 0.616199403,
+              "age_samples": 108,
+              "max_age_ms": 295.715899,
+              "median_age_ms": 270.539451,
+              "p95_age_ms": 290.231331
+            },
+            "skeleton": {
+              "count": 255,
+              "received_hz": 25.5,
+              "max_callback_gap_s": 0.086597656,
+              "age_samples": 255,
+              "max_age_ms": 365.449987,
+              "median_age_ms": 315.290799,
+              "p95_age_ms": 346.396375
+            },
+            "zone": {
+              "count": 255,
+              "received_hz": 25.5,
+              "max_callback_gap_s": 0.085519873,
+              "age_samples": 255,
+              "max_age_ms": 365.495055,
+              "median_age_ms": 316.178036,
+              "p95_age_ms": 346.761719
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.086597656,
+            "geometry_observed": 0.344452171
+          },
+          "name": "recovery",
+          "instruction": "Hadap kamera kembali, perlihatkan kedua lengan, lalu diam."
+        }
+      ],
+      "pair_delta_note": "Observer receipt ordering; authoritative validity remains in ReconstructionNode",
+      "observed_in_still_and_recovery": true,
+      "mode": "blocking",
+      "enqueue_wait_ms": null,
+      "wall_s": 56.741620826000144,
+      "exits_before_cleanup": {
+        "tf": null,
+        "skeleton": null,
+        "zone": null,
+        "reconstruction": null,
+        "monitor": 0,
+        "driver": null
+      },
+      "capture_profiles": [
+        {
+          "capture_fps": 24.91,
+          "sdk_wait_mean_ms": 3.962,
+          "sdk_wait_max_ms": 470.658,
+          "process_mean_ms": 29.243,
+          "process_max_ms": 46.868,
+          "last_tracker_enqueue_ms": 36.605
+        },
+        {
+          "capture_fps": 25.4,
+          "sdk_wait_mean_ms": 0.004,
+          "sdk_wait_max_ms": 0.055,
+          "process_mean_ms": 31.992,
+          "process_max_ms": 54.833,
+          "last_tracker_enqueue_ms": 32.772
+        },
+        {
+          "capture_fps": 25.25,
+          "sdk_wait_mean_ms": 0.003,
+          "sdk_wait_max_ms": 0.013,
+          "process_mean_ms": 33.181,
+          "process_max_ms": 58.415,
+          "last_tracker_enqueue_ms": 56.426
+        },
+        {
+          "capture_fps": 25.88,
+          "sdk_wait_mean_ms": 0.003,
+          "sdk_wait_max_ms": 0.026,
+          "process_mean_ms": 31.457,
+          "process_max_ms": 55.945,
+          "last_tracker_enqueue_ms": 38.585
+        },
+        {
+          "capture_fps": 26.38,
+          "sdk_wait_mean_ms": 0.003,
+          "sdk_wait_max_ms": 0.019,
+          "process_mean_ms": 30.166,
+          "process_max_ms": 60.81,
+          "last_tracker_enqueue_ms": 15.967
+        },
+        {
+          "capture_fps": 25.64,
+          "sdk_wait_mean_ms": 0.003,
+          "sdk_wait_max_ms": 0.028,
+          "process_mean_ms": 30.439,
+          "process_max_ms": 54.539,
+          "last_tracker_enqueue_ms": 33.735
+        },
+        {
+          "capture_fps": 25.16,
+          "sdk_wait_mean_ms": 0.004,
+          "sdk_wait_max_ms": 0.02,
+          "process_mean_ms": 31.663,
+          "process_max_ms": 66.198,
+          "last_tracker_enqueue_ms": 35.44
+        },
+        {
+          "capture_fps": 25.71,
+          "sdk_wait_mean_ms": 0.003,
+          "sdk_wait_max_ms": 0.016,
+          "process_mean_ms": 31.056,
+          "process_max_ms": 61.017,
+          "last_tracker_enqueue_ms": 3.869
+        },
+        {
+          "capture_fps": 26.28,
+          "sdk_wait_mean_ms": 0.002,
+          "sdk_wait_max_ms": 0.012,
+          "process_mean_ms": 29.283,
+          "process_max_ms": 65.752,
+          "last_tracker_enqueue_ms": 57.029
+        },
+        {
+          "capture_fps": 25.72,
+          "sdk_wait_mean_ms": 0.003,
+          "sdk_wait_max_ms": 0.017,
+          "process_mean_ms": 31.466,
+          "process_max_ms": 59.427,
+          "last_tracker_enqueue_ms": 38.309
+        }
+      ],
+      "sdk_busy_skips_reported": 0,
+      "fatal_capture_timeout": false,
+      "capture_timeout_warnings": 0,
+      "camera_cleanup_completed": true,
+      "invalid_diagnostics": [
+        "[WARN] [1795166418.779967415] [reconstruction_node]: Reconstruction invalid: last_block=INPUTS_STALE_OR_MISSING depth_rx_age_ms=561.2 body_index_rx_age_ms=587.6 skeleton_rx_age_ms=590.3 zone_rx_age_ms=587.5 last_success_age_ms=559.1 depth_body_sync_ms=100.1 active_bodies=1"
+      ],
+      "driver_sha256": "c752af800b2cbfc092deb6d9703e9c852940a78c36b91ce0a28057a49ce9bb76"
+    },
+    {
+      "warmup_s": 15,
+      "measured_s": 40,
+      "body_packets_with_people": 666,
+      "active_zone_s": 40,
+      "observed_while_zone_active_s": 40,
+      "geometry_state_seconds": {
+        "invalid": 0,
+        "observed": 40
+      },
+      "streams": {
+        "body_index": {
+          "count": 668,
+          "received_hz": 16.7,
+          "max_callback_gap_s": 0.148422803,
+          "age_samples": 668,
+          "max_age_ms": 130.050791,
+          "median_age_ms": 92.94732,
+          "p95_age_ms": 116.080825
+        },
+        "body_packets": {
+          "count": 666,
+          "received_hz": 16.65,
+          "max_callback_gap_s": 0.162397753,
+          "age_samples": 666,
+          "max_age_ms": 119.560185,
+          "median_age_ms": 86.340531,
+          "p95_age_ms": 106.236881
+        },
+        "depth": {
+          "count": 693,
+          "received_hz": 17.325,
+          "max_callback_gap_s": 0.699945398,
+          "age_samples": 693,
+          "max_age_ms": 44.180607,
+          "median_age_ms": 28.516796,
+          "p95_age_ms": 33.000198
+        },
+        "geometry_observed": {
+          "count": 749,
+          "received_hz": 18.725,
+          "max_callback_gap_s": 0.50051673,
+          "age_samples": 749,
+          "max_age_ms": 94.841204,
+          "median_age_ms": 31.949977,
+          "p95_age_ms": 43.471015
+        },
+        "rgb": {
+          "count": 590,
+          "received_hz": 14.75,
+          "max_callback_gap_s": 0.373235636,
+          "age_samples": 590,
+          "max_age_ms": 45.731784,
+          "median_age_ms": 33.856885,
+          "p95_age_ms": 37.61833
+        },
+        "skeleton": {
+          "count": 665,
+          "received_hz": 16.625,
+          "max_callback_gap_s": 0.164896568,
+          "age_samples": 665,
+          "max_age_ms": 133.868189,
+          "median_age_ms": 88.099807,
+          "p95_age_ms": 109.541847
+        },
+        "zone": {
+          "count": 665,
+          "received_hz": 16.625,
+          "max_callback_gap_s": 0.162637382,
+          "age_samples": 665,
+          "max_age_ms": 135.191836,
+          "median_age_ms": 88.722168,
+          "p95_age_ms": 110.83588
+        }
+      },
+      "observer_latest_depth_body_delta": {
+        "count": 668,
+        "received_hz": 16.7,
+        "max_callback_gap_s": 0,
+        "age_samples": 668,
+        "max_age_ms": 599.739334,
+        "median_age_ms": 33.344,
+        "p95_age_ms": 99.725783
+      },
+      "observer_nearest_depth_body_delta": {
+        "count": 668,
+        "received_hz": 16.7,
+        "max_callback_gap_s": 0,
+        "age_samples": 668,
+        "max_age_ms": 599.739334,
+        "median_age_ms": 33.198141,
+        "p95_age_ms": 99.634531
+      },
+      "phases": [
+        {
+          "index": 0,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 164,
+              "received_hz": 16.4,
+              "max_callback_gap_s": 0.104586874,
+              "age_samples": 164,
+              "max_age_ms": 124.878676,
+              "median_age_ms": 95.776902,
+              "p95_age_ms": 115.11653
+            },
+            "body_packets": {
+              "count": 162,
+              "received_hz": 16.2,
+              "max_callback_gap_s": 0.132478495,
+              "age_samples": 162,
+              "max_age_ms": 113.454337,
+              "median_age_ms": 87.252698,
+              "p95_age_ms": 104.626424
+            },
+            "depth": {
+              "count": 191,
+              "received_hz": 19.1,
+              "max_callback_gap_s": 0.200961858,
+              "age_samples": 191,
+              "max_age_ms": 44.180607,
+              "median_age_ms": 28.21916,
+              "p95_age_ms": 32.865973
+            },
+            "geometry_observed": {
+              "count": 200,
+              "received_hz": 20,
+              "max_callback_gap_s": 0.198995512,
+              "age_samples": 200,
+              "max_age_ms": 79.959293,
+              "median_age_ms": 32.653184,
+              "p95_age_ms": 43.639648
+            },
+            "rgb": {
+              "count": 150,
+              "received_hz": 15,
+              "max_callback_gap_s": 0.20029371,
+              "age_samples": 150,
+              "max_age_ms": 45.731784,
+              "median_age_ms": 33.856885,
+              "p95_age_ms": 37.561432
+            },
+            "skeleton": {
+              "count": 162,
+              "received_hz": 16.2,
+              "max_callback_gap_s": 0.150319282,
+              "age_samples": 162,
+              "max_age_ms": 120.8201,
+              "median_age_ms": 89.311981,
+              "p95_age_ms": 107.487563
+            },
+            "zone": {
+              "count": 162,
+              "received_hz": 16.2,
+              "max_callback_gap_s": 0.151480519,
+              "age_samples": 162,
+              "max_age_ms": 120.832215,
+              "median_age_ms": 89.897679,
+              "p95_age_ms": 109.345352
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.150319282,
+            "geometry_observed": 0.198995512
+          },
+          "name": "still",
+          "instruction": "Hadap kamera dan diam di titik yang sama."
+        },
+        {
+          "index": 1,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 172,
+              "received_hz": 17.2,
+              "max_callback_gap_s": 0.13258491,
+              "age_samples": 172,
+              "max_age_ms": 129.398565,
+              "median_age_ms": 86.553968,
+              "p95_age_ms": 115.646331
+            },
+            "body_packets": {
+              "count": 174,
+              "received_hz": 17.4,
+              "max_callback_gap_s": 0.091010799,
+              "age_samples": 174,
+              "max_age_ms": 114.884097,
+              "median_age_ms": 82.141529,
+              "p95_age_ms": 105.335273
+            },
+            "depth": {
+              "count": 152,
+              "received_hz": 15.2,
+              "max_callback_gap_s": 0.699945398,
+              "age_samples": 152,
+              "max_age_ms": 41.330468,
+              "median_age_ms": 28.421239,
+              "p95_age_ms": 32.563481
+            },
+            "geometry_observed": {
+              "count": 166,
+              "received_hz": 16.6,
+              "max_callback_gap_s": 0.50051673,
+              "age_samples": 166,
+              "max_age_ms": 48.280265,
+              "median_age_ms": 31.284941,
+              "p95_age_ms": 40.650784
+            },
+            "rgb": {
+              "count": 141,
+              "received_hz": 14.1,
+              "max_callback_gap_s": 0.373235636,
+              "age_samples": 141,
+              "max_age_ms": 41.289129,
+              "median_age_ms": 33.762833,
+              "p95_age_ms": 36.96686
+            },
+            "skeleton": {
+              "count": 173,
+              "received_hz": 17.3,
+              "max_callback_gap_s": 0.11190537,
+              "age_samples": 173,
+              "max_age_ms": 133.868189,
+              "median_age_ms": 83.798067,
+              "p95_age_ms": 107.067642
+            },
+            "zone": {
+              "count": 173,
+              "received_hz": 17.3,
+              "max_callback_gap_s": 0.11053459,
+              "age_samples": 173,
+              "max_age_ms": 135.191836,
+              "median_age_ms": 83.806292,
+              "p95_age_ms": 109.765246
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.11190537,
+            "geometry_observed": 0.50051673
+          },
+          "name": "arm_motion",
+          "instruction": "Ayunkan satu lengan ke samping lalu kembali, sekitar satu kali per detik."
+        },
+        {
+          "index": 2,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 161,
+              "received_hz": 16.1,
+              "max_callback_gap_s": 0.148422803,
+              "age_samples": 161,
+              "max_age_ms": 124.619684,
+              "median_age_ms": 100.197569,
+              "p95_age_ms": 118.890065
+            },
+            "body_packets": {
+              "count": 160,
+              "received_hz": 16,
+              "max_callback_gap_s": 0.162397753,
+              "age_samples": 160,
+              "max_age_ms": 119.560185,
+              "median_age_ms": 90.272622,
+              "p95_age_ms": 107.997472
+            },
+            "depth": {
+              "count": 177,
+              "received_hz": 17.7,
+              "max_callback_gap_s": 0.23463486,
+              "age_samples": 177,
+              "max_age_ms": 36.450263,
+              "median_age_ms": 28.836146,
+              "p95_age_ms": 33.576442
+            },
+            "geometry_observed": {
+              "count": 188,
+              "received_hz": 18.8,
+              "max_callback_gap_s": 0.269991249,
+              "age_samples": 188,
+              "max_age_ms": 94.841204,
+              "median_age_ms": 32.376989,
+              "p95_age_ms": 44.050718
+            },
+            "rgb": {
+              "count": 148,
+              "received_hz": 14.8,
+              "max_callback_gap_s": 0.232842048,
+              "age_samples": 148,
+              "max_age_ms": 43.337721,
+              "median_age_ms": 33.987334,
+              "p95_age_ms": 38.239531
+            },
+            "skeleton": {
+              "count": 161,
+              "received_hz": 16.1,
+              "max_callback_gap_s": 0.159799077,
+              "age_samples": 161,
+              "max_age_ms": 119.672791,
+              "median_age_ms": 92.626468,
+              "p95_age_ms": 111.368395
+            },
+            "zone": {
+              "count": 161,
+              "received_hz": 16.1,
+              "max_callback_gap_s": 0.162218366,
+              "age_samples": 161,
+              "max_age_ms": 122.126112,
+              "median_age_ms": 92.755429,
+              "p95_age_ms": 114.354553
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.159799077,
+            "geometry_observed": 0.269991249
+          },
+          "name": "partial_occlusion",
+          "instruction": "Putar badan sedikit dan sembunyikan lengan itu di balik torso."
+        },
+        {
+          "index": 3,
+          "duration_s": 10,
+          "active_zone_s": 10,
+          "geometry_state_seconds": {
+            "invalid": 0,
+            "observed": 10
+          },
+          "streams": {
+            "body_index": {
+              "count": 171,
+              "received_hz": 17.1,
+              "max_callback_gap_s": 0.106720212,
+              "age_samples": 171,
+              "max_age_ms": 130.050791,
+              "median_age_ms": 89.771912,
+              "p95_age_ms": 113.441862
+            },
+            "body_packets": {
+              "count": 170,
+              "received_hz": 17,
+              "max_callback_gap_s": 0.135470305,
+              "age_samples": 170,
+              "max_age_ms": 111.643633,
+              "median_age_ms": 83.019045,
+              "p95_age_ms": 102.769948
+            },
+            "depth": {
+              "count": 173,
+              "received_hz": 17.3,
+              "max_callback_gap_s": 0.232039119,
+              "age_samples": 173,
+              "max_age_ms": 38.721422,
+              "median_age_ms": 28.562095,
+              "p95_age_ms": 31.878505
+            },
+            "geometry_observed": {
+              "count": 195,
+              "received_hz": 19.5,
+              "max_callback_gap_s": 0.235929318,
+              "age_samples": 195,
+              "max_age_ms": 89.080966,
+              "median_age_ms": 30.920778,
+              "p95_age_ms": 42.897284
+            },
+            "rgb": {
+              "count": 151,
+              "received_hz": 15.1,
+              "max_callback_gap_s": 0.334454691,
+              "age_samples": 151,
+              "max_age_ms": 43.628045,
+              "median_age_ms": 33.704403,
+              "p95_age_ms": 37.309881
+            },
+            "skeleton": {
+              "count": 169,
+              "received_hz": 16.9,
+              "max_callback_gap_s": 0.164896568,
+              "age_samples": 169,
+              "max_age_ms": 115.434384,
+              "median_age_ms": 84.845451,
+              "p95_age_ms": 106.170235
+            },
+            "zone": {
+              "count": 169,
+              "received_hz": 16.9,
+              "max_callback_gap_s": 0.162637382,
+              "age_samples": 169,
+              "max_age_ms": 115.47414,
+              "median_age_ms": 84.889107,
+              "p95_age_ms": 108.410024
+            }
+          },
+          "longest_silence_s": {
+            "skeleton": 0.164896568,
+            "geometry_observed": 0.235929318
+          },
+          "name": "recovery",
+          "instruction": "Hadap kamera kembali, perlihatkan kedua lengan, lalu diam."
+        }
+      ],
+      "pair_delta_note": "Observer receipt ordering; authoritative validity remains in ReconstructionNode",
+      "observed_in_still_and_recovery": true,
+      "mode": "wait-5ms",
+      "enqueue_wait_ms": 5,
+      "wall_s": 56.62850184900162,
+      "exits_before_cleanup": {
+        "tf": null,
+        "skeleton": null,
+        "zone": null,
+        "reconstruction": null,
+        "monitor": 0,
+        "driver": null
+      },
+      "capture_profiles": [
+        {
+          "capture_fps": 27.33,
+          "sdk_wait_mean_ms": 3.632,
+          "sdk_wait_max_ms": 470.478,
+          "process_mean_ms": 5.972,
+          "process_max_ms": 13.311,
+          "last_tracker_enqueue_ms": 5.059
+        },
+        {
+          "capture_fps": 29.98,
+          "sdk_wait_mean_ms": 0.011,
+          "sdk_wait_max_ms": 0.06,
+          "process_mean_ms": 5.987,
+          "process_max_ms": 12.327,
+          "last_tracker_enqueue_ms": 5.104
+        },
+        {
+          "capture_fps": 30.02,
+          "sdk_wait_mean_ms": 0.016,
+          "sdk_wait_max_ms": 0.818,
+          "process_mean_ms": 5.978,
+          "process_max_ms": 13.573,
+          "last_tracker_enqueue_ms": 4.096
+        },
+        {
+          "capture_fps": 29.99,
+          "sdk_wait_mean_ms": 0.117,
+          "sdk_wait_max_ms": 15.922,
+          "process_mean_ms": 5.669,
+          "process_max_ms": 17.072,
+          "last_tracker_enqueue_ms": 4.796
+        },
+        {
+          "capture_fps": 29.99,
+          "sdk_wait_mean_ms": 0.01,
+          "sdk_wait_max_ms": 0.066,
+          "process_mean_ms": 5.4,
+          "process_max_ms": 12.1,
+          "last_tracker_enqueue_ms": 5.093
+        },
+        {
+          "capture_fps": 30.0,
+          "sdk_wait_mean_ms": 0.008,
+          "sdk_wait_max_ms": 0.033,
+          "process_mean_ms": 5.141,
+          "process_max_ms": 13.798,
+          "last_tracker_enqueue_ms": 5.148
+        },
+        {
+          "capture_fps": 30.0,
+          "sdk_wait_mean_ms": 0.012,
+          "sdk_wait_max_ms": 0.08,
+          "process_mean_ms": 6.052,
+          "process_max_ms": 14.524,
+          "last_tracker_enqueue_ms": 5.102
+        },
+        {
+          "capture_fps": 30.0,
+          "sdk_wait_mean_ms": 0.011,
+          "sdk_wait_max_ms": 0.035,
+          "process_mean_ms": 6.105,
+          "process_max_ms": 13.05,
+          "last_tracker_enqueue_ms": 5.131
+        },
+        {
+          "capture_fps": 30.01,
+          "sdk_wait_mean_ms": 0.01,
+          "sdk_wait_max_ms": 0.036,
+          "process_mean_ms": 6.005,
+          "process_max_ms": 17.04,
+          "last_tracker_enqueue_ms": 0.028
+        },
+        {
+          "capture_fps": 30.01,
+          "sdk_wait_mean_ms": 0.009,
+          "sdk_wait_max_ms": 0.078,
+          "process_mean_ms": 5.399,
+          "process_max_ms": 14.261,
+          "last_tracker_enqueue_ms": 5.121
+        }
+      ],
+      "sdk_busy_skips_reported": 655,
+      "fatal_capture_timeout": false,
+      "capture_timeout_warnings": 0,
+      "camera_cleanup_completed": true,
+      "invalid_diagnostics": [
+        "[WARN] [1795166475.445878166] [reconstruction_node]: Reconstruction invalid: last_block=INPUTS_STALE_OR_MISSING depth_rx_age_ms=582.2 body_index_rx_age_ms=531.5 skeleton_rx_age_ms=531.5 zone_rx_age_ms=531.5 last_success_age_ms=581.4 depth_body_sync_ms=0.2 active_bodies=1"
+      ],
+      "driver_sha256": "6cf3775517b4393ebe685d74cf3d034c3855ae0a62d075bf0e43a02f767f22a9"
+    }
+  ],
+  "main_launch_nonblocking": false,
+  "limitations": [
+    "No Planning/Motion/GUI or full CRA workload",
+    "People and workspace occupancy can vary between trials",
+    "Phase cues record timing. Participant motion needs confirmation.",
+    "EMPTY is not proof of active-human geometry continuity",
+    "Observer pair deltas only describe subscriber receipt ordering"
+  ]
+}

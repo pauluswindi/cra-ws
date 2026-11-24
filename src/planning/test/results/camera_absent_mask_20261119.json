@@ -1,0 +1,153 @@
+{
+  "date": "2026-11-19",
+  "scope": "Camera-independent graph visibility and YAML dataset defaults; no planner or Motion behavior change",
+  "planning_tests": {
+    "passed": 247,
+    "total": 247,
+    "elapsed_s": 29.642
+  },
+  "launch_default_tests": {
+    "passed": 5,
+    "total": 5,
+    "elapsed_s": 0.073
+  },
+  "style": {
+    "flake8_passed": true,
+    "diff_whitespace_passed": true
+  },
+  "build": {
+    "packages": [
+      "planning",
+      "cra"
+    ],
+    "passed": true,
+    "elapsed_s": 1.41
+  },
+  "native_mask_ros": {
+    "scope": "Native DDS display probe on domain 227; no Motion node, viewer or live camera.\n\nUse the full stored GNG. Cancel ordinary Planning and RRT timers; verify only\nXYZ masking, original-data preservation and change-only marker transport.\n",
+    "ros_domain": 227,
+    "graph_nodes": 1000,
+    "graph_edges": 4453,
+    "stages": [
+      {
+        "stage": "startup_without_camera",
+        "nodes": 999,
+        "edges": 4445,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: UNKNOWN (partial obstacle data)\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "far_human",
+        "nodes": 999,
+        "edges": 4445,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "blocking_human",
+        "nodes": 998,
+        "edges": 4433,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 2/1000 nodes, 20/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "human_away",
+        "nodes": 999,
+        "edges": 4445,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "blocking_simulation_box",
+        "nodes": 998,
+        "edges": 4423,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 2/1000 nodes, 30/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "fresh_empty_human",
+        "nodes": 999,
+        "edges": 4445,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: EMPTY\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "unknown_human_boxes_still_masked",
+        "nodes": 999,
+        "edges": 4445,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: UNKNOWN (partial obstacle data)\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "moving_box_without_camera",
+        "nodes": 998,
+        "edges": 4423,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: UNKNOWN (partial obstacle data)\nHidden: 2/1000 nodes, 30/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "expired_human_graph_and_box_mask_visible",
+        "nodes": 999,
+        "edges": 4445,
+        "node_alpha": 0.8500000238418579,
+        "edge_alpha": 0.3499999940395355,
+        "status": "Workspace XYZ mask: UNKNOWN (partial obstacle data)\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      }
+    ],
+    "unchanged_scene": {
+      "extra_marker_arrays": 0,
+      "extra_mask_calculations": 0
+    },
+    "motion_commands": [],
+    "mask_worker_processes": 0,
+    "old_filtered_topic_publishers": 0,
+    "normal_planning_timer_cancelled": true,
+    "source_sha256": {
+      "src/planning/test/verify_workspace_graph_mask_ros.py": "d942b3eb56c5415e6971a4b6b2a352644d983333cfda65d533a3773570ba66cf",
+      "src/cra/config/robot.yaml": "3dac6fcdc6bd8489a1cc87aad406b34561fc37a8322721ef4ad6c6337959f84c",
+      "src/planning/data/workspace_graph.npz": "14b2644bd41bd19dae21f736f358d314bbeaab7e06b06341b8ce84c1c5c0f967",
+      "src/cra/config/cra.rviz": "840021d3388c8fd68a81d00a2058f5b4e1e8afd527516451070a9fef0a5f1f77",
+      "src/planning/planning/planning_node.py": "4c915039afeefd4aa32711d2ec7e5aa1ba8e9b5a8fe4a6689f2f73a7d1509a0a",
+      "src/planning/planning/visualization/planning_visualizer.py": "aa10d36e38223b9f9458e1859b348aa43866ebf8a546272ca9d01b4972b55006",
+      "src/planning/planning/visualization/workspace_graph_mask.py": "d21bef0ffd29df70e51c915783bf4014fddf12744781d64103a24ef8c7514634"
+    }
+  },
+  "log_diagnosis_artifact": "src/planning/test/results/camera_absent_log_diagnosis_20261119.json",
+  "rrt_scope": "No RRT behavior changes. Observer never dispatches Motion and requires eligible graph failure.",
+  "mask_scope": "XYZ visual only. Available human and simulation geometry mask independently; missing camera never dims or clears graph.",
+  "yaml_defaults": {
+    "workspace": "workspace.path",
+    "graph": "gng.graph_path",
+    "optional_cli_overrides_preserved": true,
+    "shared_by": [
+      "cra.launch.py",
+      "planning.launch.py",
+      "simulation.launch.py"
+    ]
+  },
+  "limits": [
+    "Native DDS probe uses synthetic geometry with ordinary Planning/RRT timers cancelled",
+    "Interactive RViz appearance and moving-robot behavior not tested",
+    "Stored graph visibility is not a robot safety certificate",
+    "Old running nodes must be restarted"
+  ],
+  "config_source_sha256": {
+    "src/cra/config/robot.yaml": "3dac6fcdc6bd8489a1cc87aad406b34561fc37a8322721ef4ad6c6337959f84c",
+    "src/cra/test/test_launch_data_paths.py": "8823ff8f7cee0cbeb49327d23dc9d48b126f077dda5afbe2588cb427a5ab168a",
+    "src/cra/launch/simulation.launch.py": "2331c291a64cbcd7eafae589c93e6a908cb34fec466fadbc6812bbd6e94867e9",
+    "src/cra/launch/cra.launch.py": "3d670cc2c5f5ee24ef267a203cde6fa6d3a29e4c532ce6969c1877a505bdcee5",
+    "src/cra/launch/planning.launch.py": "43d3769af9058e2431c886f4d6fa159acd45b16367b4274f4c266d8c771ef200",
+    "src/cra/launch/tuning.launch.py": "5a12cf699c3eb0788998d85b0fc8c5c270437a1514dc81056a7ccdd1203ac653",
+    "src/cra/launch/vision.launch.py": "6e08b8e5d6a69e6a1bf94b6db9cfabdee6948a6b828e7e4f15c53c35b7d24653",
+    "src/cra/launch/motion.launch.py": "7ed595fa28cb43dcb814133b55cdf26339f555cab15c7107564b3219f50fc789"
+  },
+  "installed_launch_defaults_verified": true
+}

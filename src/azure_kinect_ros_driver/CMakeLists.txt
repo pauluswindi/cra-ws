@@ -136,8 +136,7 @@ target_link_libraries(${PROJECT_NAME}_node
 install(TARGETS ${PROJECT_NAME}_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-  DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
@@ -156,6 +155,17 @@ if(BUILD_TESTING)
   ament_add_gtest(test_stream_control test/test_stream_control.cpp)
   target_include_directories(test_stream_control PRIVATE include)
   target_link_libraries(test_stream_control Threads::Threads)
+
+  # Explicit test target only: never installed or selected by the CRA launch.
+  add_executable(tracker_nonblocking_probe EXCLUDE_FROM_ALL
+    src/k4a_ros_bridge_node.cpp src/k4a_ros_device.cpp
+    src/k4a_ros_device_params.cpp src/k4a_calibration_transform_data.cpp)
+  ament_target_dependencies(tracker_nonblocking_probe rclcpp std_msgs sensor_msgs
+    visualization_msgs image_transport tf2 tf2_ros tf2_geometry_msgs cv_bridge angles)
+  get_target_property(driver_definitions ${PROJECT_NAME}_node COMPILE_DEFINITIONS)
+  target_compile_definitions(tracker_nonblocking_probe PRIVATE
+    ${driver_definitions} CRA_TEST_NONBLOCKING_TRACKER)
+  target_link_libraries(tracker_nonblocking_probe ${K4A_LIBS})
 
   # Hardware access is denied by this shim; it is never installed.
   add_library(fake_k4a_device SHARED test/fake_k4a_device.cpp)

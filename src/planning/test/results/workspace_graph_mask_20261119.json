@@ -1,0 +1,271 @@
+{
+  "date": "2026-11-19",
+  "scope": "Replace heavy whole-arm display filtering with cached XYZ mask of original GNG; display only",
+  "planning_regression": {
+    "tests": 244,
+    "passed": 244,
+    "elapsed_s": 29.65,
+    "workspace_mask_tests": 22
+  },
+  "style": {
+    "flake8_max_line_length": 100,
+    "passed": true,
+    "diff_whitespace_passed": true
+  },
+  "build": {
+    "packages": [
+      "planning",
+      "cra"
+    ],
+    "passed": true,
+    "elapsed_s": 2.26,
+    "notes": "Existing CMake deprecation and underlay override warnings; both packages built."
+  },
+  "mask_ros": {
+    "scope": "Native DDS display probe on domain 227; no Motion node, viewer or live camera.\n\nUse the full stored GNG. Cancel ordinary Planning and RRT timers; verify only\nXYZ masking, original-data preservation and change-only marker transport.\n",
+    "ros_domain": 227,
+    "graph_nodes": 1000,
+    "graph_edges": 4453,
+    "stages": [
+      {
+        "stage": "far_human",
+        "nodes": 999,
+        "edges": 4445,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "blocking_human",
+        "nodes": 998,
+        "edges": 4433,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 2/1000 nodes, 20/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "human_away",
+        "nodes": 999,
+        "edges": 4445,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "blocking_simulation_box",
+        "nodes": 998,
+        "edges": 4423,
+        "status": "Workspace XYZ mask: OBSERVED\nHidden: 2/1000 nodes, 30/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "fresh_empty_human",
+        "nodes": 999,
+        "edges": 4445,
+        "status": "Workspace XYZ mask: EMPTY\nHidden: 1/1000 nodes, 8/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "unknown_unverified_graph",
+        "nodes": 1000,
+        "edges": 4453,
+        "status": "Workspace XYZ mask: UNKNOWN (unverified; original shown)\nHidden: 0/1000 nodes, 0/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      },
+      {
+        "stage": "expired_human_unverified_graph",
+        "nodes": 1000,
+        "edges": 4453,
+        "status": "Workspace XYZ mask: UNKNOWN (unverified; original shown)\nHidden: 0/1000 nodes, 0/4453 edges\nDisplay only; whole-arm validity is checked by Planning"
+      }
+    ],
+    "unchanged_scene": {
+      "extra_marker_arrays": 0,
+      "extra_mask_calculations": 0
+    },
+    "motion_commands": [],
+    "mask_worker_processes": 0,
+    "old_filtered_topic_publishers": 0,
+    "normal_planning_timer_cancelled": true,
+    "source_sha256": {
+      "src/planning/test/verify_workspace_graph_mask_ros.py": "543a84e3c5c7a0ade4b33cb5ed7b5de0607527c6799fc7c3881005d6aac9ca17",
+      "src/cra/config/robot.yaml": "2aa84934ad230034e9735e86579e07fb376e8e134db43713e9f3a9411cf51031",
+      "src/planning/data/workspace_graph.npz": "14b2644bd41bd19dae21f736f358d314bbeaab7e06b06341b8ce84c1c5c0f967",
+      "src/cra/config/cra.rviz": "840021d3388c8fd68a81d00a2058f5b4e1e8afd527516451070a9fef0a5f1f77",
+      "src/planning/planning/planning_node.py": "e001151da2a8f026f269633463b45c8586a7972ed4bbe4fe995226aacc3bad93",
+      "src/planning/planning/visualization/planning_visualizer.py": "12f423da2a247ad717eba84988e51b43f2785b9073dc2acad742eb596907b21f",
+      "src/planning/planning/visualization/workspace_graph_mask.py": "fc7311101022afb34be7938ec2082f36a5588b1bf0f60da8844969db7c72dce3"
+    }
+  },
+  "offline_mask_benchmark": {
+    "scope": "Offline XYZ-mask timing on the stored GNG; excludes ROS/rendering and robot checks.",
+    "nodes": 1000,
+    "edges": 4453,
+    "scenes": [
+      {
+        "scene": "one_capsule",
+        "changed_geometry_updates": 50,
+        "visible_change_updates": 6,
+        "median_calculation_ms": 0.5415559990069596,
+        "max_calculation_ms": 0.7066680009302218,
+        "unchanged_call_mean_ms": 0.003370682999957353,
+        "unchanged_extra_calculations": 0
+      },
+      {
+        "scene": "16_capsules",
+        "changed_geometry_updates": 50,
+        "visible_change_updates": 15,
+        "median_calculation_ms": 5.080364999230369,
+        "max_calculation_ms": 6.867702999443281,
+        "unchanged_call_mean_ms": 0.0162478159982129,
+        "unchanged_extra_calculations": 0
+      },
+      {
+        "scene": "16_capsules_and_box",
+        "changed_geometry_updates": 50,
+        "visible_change_updates": 15,
+        "median_calculation_ms": 5.488292499649106,
+        "max_calculation_ms": 5.810311002278468,
+        "unchanged_call_mean_ms": 0.01774420400033705,
+        "unchanged_extra_calculations": 0
+      }
+    ],
+    "source_sha256": {
+      "src/planning/test/benchmark_workspace_graph_mask.py": "16f23683af54caec0d2f0da32ab024c40e4c103e5f0c19a8e0d8007ccea0eab5",
+      "src/planning/data/workspace_graph.npz": "14b2644bd41bd19dae21f736f358d314bbeaab7e06b06341b8ce84c1c5c0f967",
+      "src/planning/planning/visualization/workspace_graph_mask.py": "fc7311101022afb34be7938ec2082f36a5588b1bf0f60da8844969db7c72dce3",
+      "src/planning/planning/algorithms/human_collision.py": "acc02047150a975daa942f1029da84268ed187d4cb0a472a7910cf5d7dd3fdde"
+    }
+  },
+  "rrt_marker_regression": {
+    "scope": "Headless ROS transport probe on an isolated domain; no robot or Motion node.\n\nThe ordinary planning timer is cancelled deliberately. An artificial graph\nfailure exposes the new observer while real DDS joint/human callbacks run.\nThis does not prove whole-cycle responsiveness of the existing synchronous A*.\n",
+    "ros_domain": 224,
+    "events": [
+      {
+        "event": "SEARCH_SUBMITTED",
+        "attempt": 1,
+        "observation_only": true,
+        "scene_revision": 5
+      },
+      {
+        "kind": "search",
+        "worker_pid": 2332,
+        "reason": "NONE",
+        "scene_revision": 5,
+        "search": {
+          "iterations": 0,
+          "nodes": 2,
+          "state_checks": 4,
+          "edge_checks": 2,
+          "waypoints": 2,
+          "path_length_rad": 1.9232369572445733,
+          "reason": "NONE",
+          "environment_revision": 5,
+          "elapsed_s": 0.03795325500323088,
+          "seed": 1
+        },
+        "preference": {
+          "selection": "BASELINE_RETAINED",
+          "candidate_reason": "PREFERENCE_ALREADY_MET",
+          "clearance_samples": 338,
+          "baseline_score": {
+            "min_clearance_m": 17.1837538818643,
+            "start_clearance_m": 17.205243740184155,
+            "goal_clearance_m": 17.1837538818643,
+            "length_rad": 1.9232369572445733
+          },
+          "effective_preference_m": 0.07,
+          "selected_score": {
+            "min_clearance_m": 17.1837538818643,
+            "start_clearance_m": 17.205243740184155,
+            "goal_clearance_m": 17.1837538818643,
+            "length_rad": 1.9232369572445733
+          },
+          "reason": "NONE",
+          "environment_revision": 5,
+          "elapsed_s": 0.18676534200130845
+        },
+        "elapsed_s": 0.22481739499926334,
+        "visualization_summary": {
+          "projected_nodes": 2,
+          "recorded_events": 4,
+          "projection_s": 9.849300113273785e-05,
+          "dropped_nodes": 0,
+          "dropped_events": 0
+        },
+        "event": "LATEST_VALIDATION_SUBMITTED",
+        "attempt": 1,
+        "observation_only": true,
+        "candidate_points": 2,
+        "capture_to_result_s": 0.649906495000323,
+        "feedback_age_s": 0.01473201400222024,
+        "human_age_at_capture_s": 0.0069174560012470465,
+        "human_age_at_result_s": 0.6568239510015701
+      },
+      {
+        "kind": "validate",
+        "worker_pid": 2332,
+        "reason": "NONE",
+        "scene_revision": 5,
+        "points": 4,
+        "elapsed_s": 0.03529833999709808,
+        "event": "RESULT",
+        "attempt": 1,
+        "observation_only": true,
+        "candidate_points": 0,
+        "capture_to_result_s": 0.04988179499923717,
+        "feedback_age_s": 0.005973109000478871,
+        "human_age_at_capture_s": 0.01679912100007641,
+        "human_age_at_result_s": 0.06668091599931358,
+        "disposition": "VALID_FOR_CURRENT_SCENE_NO_DISPATCH"
+      }
+    ],
+    "parent_pid": 2241,
+    "feedback_updates_while_worker_active": 36,
+    "human_updates_while_worker_active": 36,
+    "max_spin_once_s": 0.00800046500080498,
+    "elapsed_s": 0.7074208240010194,
+    "motion_commands": [],
+    "normal_astar_timer_cancelled": true,
+    "marker_points_received": {
+      "start_tree": 1,
+      "goal_tree": 1,
+      "final_path": 2
+    },
+    "scene_change_deletes": {
+      "start_tree": true,
+      "goal_tree": true,
+      "final_path": true
+    },
+    "source_sha256": {
+      "src/planning/test/verify_rrt_shadow_ros.py": "da357de779a64e0e5c884775a31ebcd37708d960719180aeeb60134215099348",
+      "src/cra/config/robot.yaml": "2aa84934ad230034e9735e86579e07fb376e8e134db43713e9f3a9411cf51031",
+      "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+      "src/planning/planning/rrt_shadow.py": "f7f581a5df20cb3c13e51a89c7ff923145ca35377108e2a270b46e2e218a864c",
+      "src/planning/planning/planning_node.py": "e001151da2a8f026f269633463b45c8586a7972ed4bbe4fe995226aacc3bad93",
+      "src/planning/planning/planning_manager.py": "3d2f814808fddb23337a329d7b85da02e75a41e8e5697199391067e2cc644dcf",
+      "src/planning/planning/rrt_trace.py": "b0f8ac17d9107fd0487f01db1e6c20c829d206780d3999e32a980f8dc7349b7a",
+      "src/planning/planning/algorithms/rrt_connect.py": "1bee16fa39dbc3476d151e7660b098235a04f092b99fcc3c79ad9685f80d1731",
+      "src/planning/planning/visualization/rrt_display.py": "2678f721671a5a6c0c6a14eb87da5d68fc5c14964fa6d5148123eebc3eb63b7d",
+      "src/planning/planning/visualization/projection.py": "c089af2853f69b3c12ae11c741f3350eb573abbf8f2fea564a74226df37646a6"
+    }
+  },
+  "removed_runtime": [
+    "FilteredGraphDisplay",
+    "GraphFilterWorker",
+    "/planning/filtered_joint_graph",
+    "/planning/filtered_graph_status",
+    "/planning/joint_graph_nodes",
+    "/planning/joint_graph_edges",
+    "Joint graph - filtered RViz display"
+  ],
+  "preserved": [
+    "Stored graph coordinates/connectivity/assets",
+    "GNG and A* behavior",
+    "CollisionFilter and full robot state/edge certification",
+    "Mandatory collision margins",
+    "execute_path=True",
+    "simulation_only_ignore_unknown=True",
+    "Motion interfaces",
+    "RRT observation"
+  ],
+  "limits": [
+    "XYZ overlap is not a whole-arm safety certificate",
+    "Persistent display can retain its last snapshot if main callbacks are blocked",
+    "Native transport probe cancels ordinary Planning/RRT timers",
+    "Mask benchmark excludes ROS serialization, RViz and existing planning work",
+    "Interactive RViz/live Kinect/moving-robot avoidance not verified",
+    "Existing running nodes require restart to pick up removed worker and new display"
+  ]
+}

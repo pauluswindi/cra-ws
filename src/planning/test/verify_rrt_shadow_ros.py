@@ -21,6 +21,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Bool, String
 from trajectory_msgs.msg import JointTrajectory
+from visualization_msgs.msg import Marker, MarkerArray
 
 from benchmark_rrt_connect import CONFIG, GOAL, GRAPH, MODEL, ROOT, START
 from planning.planning_node import PlanningNode
@@ -29,10 +30,12 @@ from planning.planning_node import PlanningNode
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--visualization', action='store_true',
+                        help='Also verify batched RRT markers and revision clearing')
     args = parser.parse_args()
     if os.environ.get('ROS_DOMAIN_ID') != '224':
         parser.error('Run this synthetic probe with ROS_DOMAIN_ID=224')
-    rclpy.init(args=['--ros-args', '-p', f'graph_path:={GRAPH}',
+    rclpy.init(args=['--ros-args', '-p', 'rrt_mode:=shadow', '-p', f'graph_path:={GRAPH}',
                      '-p', f'model_path:={MODEL}', '-p', f'config_path:={CONFIG}',
                      '-p', f'workspace_path:={ROOT / "src/planning/data/raw_workspace.npz"}'])
     node = feeder = executor = None
@@ -45,6 +48,7 @@ def main():
         human_pub = feeder.create_publisher(HumanCapsuleArray, '/vision/human/geometry', 10)
         obstacle_pub = feeder.create_publisher(PoseArray, '/simulation/obstacle_poses', 10)
         events, commands = [], []
+        arrays = {layer: [] for layer in ('start_tree', 'goal_tree', 'final_path')}
         subscriptions = [
             feeder.create_subscription(String, '/planning/rrt_shadow',
                                        lambda msg: events.append(json.loads(msg.data)), 10),
@@ -53,6 +57,10 @@ def main():
             feeder.create_subscription(Bool, '/motion/stop_requested',
                                        lambda msg: commands.append('STOP_OR_RELEASE'), 10),
         ]
+        if args.visualization:
+            subscriptions += [feeder.create_subscription(
+                MarkerArray, '/planning/rrt/' + layer, messages.append, 10)
+                for layer, messages in arrays.items()]
         checker = node.planner.collision_filter
         target_world = checker.data.mocap_pos[
             checker.obstacle_geoms['target']['mocap_id']].copy()
@@ -115,7 +123,10 @@ def main():
             if node.rrt_shadow.future is not None:
                 feedback_stamps.add(node.manager.feedback_time)
                 human_stamps.add(node.human_monitor.stamp_ns)
-            if events and events[-1].get('disposition') == 'VALID_FOR_CURRENT_SCENE_NO_DISPATCH':
+            if (events and events[-1].get('disposition') == 'VALID_FOR_CURRENT_SCENE_NO_DISPATCH'
+                    and (not args.visualization or all(
+                        any(m.points for a in messages for m in a.markers)
+                        for messages in arrays.values()))):
                 break
         assert events and events[-1].get('disposition') == (
             'VALID_FOR_CURRENT_SCENE_NO_DISPATCH'), events
@@ -126,10 +137,31 @@ def main():
                       human_updates_while_worker_active=len(human_stamps),
                       max_spin_once_s=max(spin_times), elapsed_s=time.monotonic() - began,
                       motion_commands=commands, normal_astar_timer_cancelled=True)
+        if args.visualization:
+            report['marker_points_received'] = {
+                layer: max((sum(len(m.points) for m in a.markers) for a in messages), default=0)
+                for layer, messages in arrays.items()}
+            assert all(report['marker_points_received'].values()), report
+            timer.cancel()
+            node.rrt_shadow_timer.cancel()
+            checker.environment_revision += 1
+            node.rrt_display.tick(node.manager)
+            until = time.monotonic() + .5
+            while time.monotonic() < until:
+                executor.spin_once(timeout_sec=.01)
+            report['scene_change_deletes'] = {
+                layer: any(m.action == Marker.DELETE for a in messages for m in a.markers)
+                for layer, messages in arrays.items()}
+            assert all(report['scene_change_deletes'].values()), report
+            assert not commands, commands
         files = [Path(__file__), CONFIG, MODEL,
                  ROOT / 'src/planning/planning/rrt_shadow.py',
                  ROOT / 'src/planning/planning/planning_node.py',
-                 ROOT / 'src/planning/planning/planning_manager.py']
+                 ROOT / 'src/planning/planning/planning_manager.py',
+                 ROOT / 'src/planning/planning/rrt_trace.py',
+                 ROOT / 'src/planning/planning/algorithms/rrt_connect.py',
+                 ROOT / 'src/planning/planning/visualization/rrt_display.py',
+                 ROOT / 'src/planning/planning/visualization/projection.py']
         report['source_sha256'] = {
             str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
         args.output.parent.mkdir(parents=True, exist_ok=True)

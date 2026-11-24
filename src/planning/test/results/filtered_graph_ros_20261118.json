@@ -1,0 +1,40 @@
+{
+  "scope": "Headless DDS probe for optional filtered graph markers; never execute motion.\n\nA small synthetic joint graph keeps the probe bounded. Raw GNG data is kept.\nThe normal planning timer is cancelled; this is not a moving-robot experiment.\n",
+  "stages": [
+    {
+      "stage": "far_human",
+      "shown_nodes": 3,
+      "status": "Filtered OBSERVED: checked nodes 3/3, edges 3/3\nValid: 3 nodes, 3 edges; shown 3",
+      "elapsed_s": 0.9031980069994461
+    },
+    {
+      "stage": "blocking_human",
+      "shown_nodes": 2,
+      "status": "Filtered OBSERVED: checked nodes 3/3, edges 3/3\nValid: 2 nodes, 0 edges; shown 0",
+      "elapsed_s": 0.15048944399859465
+    },
+    {
+      "stage": "human_away_again",
+      "shown_nodes": 3,
+      "status": "Filtered OBSERVED: checked nodes 3/3, edges 3/3\nValid: 3 nodes, 3 edges; shown 3",
+      "elapsed_s": 0.20439968699974997
+    },
+    {
+      "stage": "unknown_human",
+      "shown_nodes": null,
+      "status": "Human data UNKNOWN: filtered graph hidden",
+      "elapsed_s": 0.10107315599998401
+    }
+  ],
+  "joint_updates": 27,
+  "motion_commands": [],
+  "normal_planning_timer_cancelled": true,
+  "source_sha256": {
+    "src/planning/test/verify_filtered_graph_ros.py": "2d18b55896d27024a033c7bdebc602a298ab218532fd1e68d47d4c37b9307b64",
+    "src/cra/config/robot.yaml": "de381f4c27cfd1e02a2d1f7a6572073a1d62e716fe8885c1276d808870028d02",
+    "src/cra/config/cra.rviz": "f6cde70b66710b53e8b754c9f1c9256564521d7c1b670a47b169916c99686482",
+    "src/planning/planning/filtered_graph_display.py": "241d61f1d24346d076310e778ab4282ca8ba48a1e19c506f5cfbbe37852d35ba",
+    "src/planning/planning/planning_node.py": "213eabe240c436ef01248e1e0945e3aedd5aabee91148518ac98a78cb09578db",
+    "src/planning/planning/visualization/planning_visualizer.py": "57fb7a698ef261928bd7222f82321fc33058fa2cdc496bad5275fce40722345b"
+  }
+}

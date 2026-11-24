@@ -97,6 +97,9 @@ bool ReconstructionPipeline::process(
     bool debug_voxels,
     ReconstructionResult& result)
 {
+    if (depth.width != body_index.width || depth.height != body_index.height) {
+        throw std::invalid_argument("Body index and depth dimensions must match");
+    }
     ReconstructionResult next_result;
     RadiusMap next_radii = filtered_radii_;
 
@@ -122,8 +125,8 @@ bool ReconstructionPipeline::process(
             return false;
         }
 
-        const auto human_mask =
-            human_segmenter_.generateMask(
+        const auto human_pixels =
+            human_segmenter_.generatePixelRuns(
                 body_index,
                 static_cast<std::uint32_t>(body_id));
 
@@ -135,7 +138,8 @@ bool ReconstructionPipeline::process(
                 roi,
                 config_.min_depth,
                 config_.max_depth,
-                &human_mask);
+                nullptr,
+                &human_pixels);
 
         auto voxels =
             voxel_reconstruction_.reconstruct(

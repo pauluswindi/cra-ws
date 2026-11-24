@@ -20,7 +20,17 @@ def main():
          3, 'capture_max_consecutive_timeouts must be positive'),
         ('recording_open_exception', '0', ['-p', 'recording_file:=/nonexistent/cra_test.mkv'],
          3, 'K4A initialization/runtime failure'),
+        ('default_blocking', '0', [], 1,
+         'Tracker admission: mode=blocking enqueue_wait_ms=-1'),
+        ('explicit_blocking', '0', ['-p', 'tracker_enqueue_wait_ms:=-1'], 1,
+         'Tracker admission: mode=blocking enqueue_wait_ms=-1'),
+        ('bounded_five_ms', '0', ['-p', 'tracker_enqueue_wait_ms:=5'], 1,
+         'Tracker admission: mode=bounded enqueue_wait_ms=5'),
     ]
+    for wait_ms in (-2, 0, 1, 10):
+        cases.append((f'invalid_tracker_wait_{wait_ms}', '0',
+                      ['-p', f'tracker_enqueue_wait_ms:={wait_ms}'],
+                      3, 'tracker_enqueue_wait_ms must be -1 (blocking) or 5'))
     rows = []
     for name, count, parameters, code, expected in cases:
         environment = os.environ.copy()

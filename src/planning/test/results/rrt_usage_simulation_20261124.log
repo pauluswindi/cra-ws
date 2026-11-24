@@ -1,0 +1,19 @@
+[A*] NO_PATH: no collision-free connection
+[A*] NO_PATH: no collision-free connection
+[INFO] [1795455472.383638769] [planning_node]: Planning status: RRT_SEARCHING
+[INFO] [1795455472.422325203] [planning_node]: RRT fallback: {"event":"SEARCH_SUBMITTED","mode":"fallback","observation_only":false,"attempt":1,"scene_revision":6}
+[INFO] [1795455472.920431082] [planning_node]: RRT fallback: {"event":"LATEST_VALIDATION_SUBMITTED","mode":"fallback","observation_only":false,"attempt":1,"kind":"search","reason":"NONE","worker_pid":6797,"elapsed_s":0.02025276600033976,"capture_to_result_s":0.5001754069999151}
+[INFO] [1795455472.968733734] [planning_node]: RRT fallback: {"event":"FALLBACK_VALIDATED","mode":"fallback","observation_only":false,"attempt":1,"kind":"validate","reason":"NONE","worker_pid":6797,"elapsed_s":0.02328804799981299,"capture_to_result_s":0.049937678002606845,"points":3,"delivered_to_planning":true}
+[INFO] [1795455472.980784297] [planning_node]: Planning status: RRT_PATH_READY
+[INFO] [1795455473.193866127] [planning_node]: Planning status: TRAJECTORY_SENT
+[INFO] [1795455473.194317903] [planning_node]: TRAJECTORY_SENT: 3 waypoints sent; source=RRT_CONNECT
+[A*] NO_PATH: no collision-free connection
+[A*] NO_PATH: no collision-free connection
+[INFO] [1795455476.383198332] [planning_node]: Planning status: RRT_SEARCHING
+[INFO] [1795455476.419212085] [planning_node]: RRT fallback: {"event":"SEARCH_SUBMITTED","mode":"fallback","observation_only":false,"attempt":2,"scene_revision":7}
+[INFO] [1795455476.468777543] [planning_node]: RRT fallback: {"event":"LATEST_VALIDATION_SUBMITTED","mode":"fallback","observation_only":false,"attempt":2,"kind":"search","reason":"NONE","worker_pid":6797,"elapsed_s":0.027827434001665097,"capture_to_result_s":0.04991578599947388}
+[INFO] [1795455476.518449553] [planning_node]: RRT fallback: {"event":"FALLBACK_VALIDATED","mode":"fallback","observation_only":false,"attempt":2,"kind":"validate","reason":"NONE","worker_pid":6797,"elapsed_s":0.02094175900128903,"capture_to_result_s":0.04995098300059908,"points":3,"delivered_to_planning":true}
+[INFO] [1795455476.581902185] [planning_node]: Planning status: RRT_PATH_READY
+[INFO] [1795455476.792845466] [planning_node]: Planning status: TRAJECTORY_SENT
+[INFO] [1795455476.793270341] [planning_node]: TRAJECTORY_SENT: 3 waypoints sent; source=RRT_CONNECT
+[INFO] [1795455476.980259208] [planning_node]: Planning status: RRT_HUMAN_VISION_UNKNOWN

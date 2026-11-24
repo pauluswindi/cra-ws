@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <mutex>
 #include <vector>
@@ -12,6 +13,7 @@
 #include "sensor_msgs/msg/image.hpp"
 
 #include "vision/reconstruction/roi.hpp"
+#include "vision/segmentation/pixel_run.hpp"
 
 namespace vision::reconstruction
 {
@@ -27,6 +29,17 @@ public:
         double min_depth,
         double max_depth,
         const std::vector<std::uint8_t>* pixel_mask = nullptr) const;
+
+    // Exactly the selected row-major pixels, preserving the original point order.
+    std::vector<geometry_msgs::msg::Point> extractPoints(
+        const sensor_msgs::msg::Image& depth_image,
+        const sensor_msgs::msg::CameraInfo& camera_info,
+        const geometry_msgs::msg::TransformStamped& transform,
+        const ROI3D& roi,
+        double min_depth,
+        double max_depth,
+        const std::vector<std::uint8_t>* pixel_mask,
+        const std::vector<segmentation::PixelRun>* pixel_runs) const;
 
 private:
     void updateLookupTable(

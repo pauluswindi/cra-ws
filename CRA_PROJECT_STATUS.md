@@ -1,7 +1,7 @@
 # Cognitive Robotic Arm (CRA)
 # Development Status
 
-Last updated: 2026-11-18
+Last updated: 2026-11-24
 
 ## 1. Project Information
 
@@ -44,6 +44,7 @@ Planning
     +-- Growing Neural Gas
     +-- Joint Graph
     +-- A*
+    +-- RRT-Connect fallback (simulation only)
     +-- Collision Checking
     +-- Path Validation
     |
@@ -57,6 +58,8 @@ Vision provides human geometry to Planning.
 
 Planning uses GNG and A* for path planning
 and CollisionFilter for path validation.
+Simulation can try RRT-Connect after eligible graph-search failure;
+it uses the same validation and Motion execution pipeline.
 
 Motion handles trajectory execution.
 
@@ -161,6 +164,725 @@ the local preview. SET TARGET validates the preview and submits one command.
 Current Target changes only when valid simulation feedback arrives.
 
 ## 5. Recent Development
+
+### 2026-11-24 — Refresh stale inputs before admitting a failed graph's RRT attempt
+
+After known NO_GRAPH_PATH, transiently stale feedback/obstacles now retain one
+lightweight attempt with its target generation, start, goal and fixed deadline.
+Planning returns RRT_WAITING_FOR_FEEDBACK/RRT_WAITING_FOR_OBSTACLES so input
+callbacks can run; it does not immediately repeat A* or launch a worker yet.
+Fresh input triggers start/goal collision checks on the latest human scene,
+then the existing RRT coordinator and final Motion validation. Waiting consumes
+the existing fallback allowance and never extends its deadline.
+
+Changed target, moved start, static obstacle changes, faults, external STOP,
+active recovery, unknown/expired human data and timeout cancel the saved
+attempt. Human proximity checks still run first; HUMAN_TOO_CLOSE cancels the
+attempt and retains Human Retreat priority. Profiles now report
+rrt_admission_reason and rrt_refresh_pending, with cancellation reasons in
+rrt_result. Camera configuration, YAML, 1 s feedback/obstacle freshness, 2 s
+human freshness, 5 cm margin, execute_path and simulation UNKNOWN policy are
+unchanged. A* remains synchronous; this does not bound its own callback time.
+
+Verification: 149 fallback/dynamic-replanning tests and Flake8 passed; Planning
+was built and installed. Native regression delayed the first real A* call by
+1100 ms on the temporary disconnected graph: RRT_WAITING_FOR_FEEDBACK ->
+RRT_SEARCHING -> RRT_PATH_READY -> source=RRT_CONNECT, then Motion COMPLETED.
+Exactly one primary plan call occurred before the first RRT goal completed;
+maximum measured joint error was 0.0197165 rad. Return motion stopped after
+synthetic geometry became invalid, with no further EXECUTE/RELEASE in the
+probe's following 0.5 s window. Source hashes matched the installed run.
+This uses real Planning/C++ Motion/headless MuJoCo and synthetic human input;
+live Kinect/moving-human validation of this handoff remains unverified.
+
+Evidence: `src/planning/test/results/rrt_input_refresh_simulation_20261124.json`
+and `src/planning/test/results/rrt_input_refresh_simulation_20261124.log`.
+
+### 2026-11-24 — Bounded latest-only log on normal CRA launch
+
+Normal CRA launch now records child stdout/stderr and process start/exit
+metadata to the YAML-configured `logs/cra_latest.log`. It locks the file before
+truncation at launch execution, replaces only its own file, and leaves ROS,
+colcon and unrelated logs untouched. Description loading/--show-args has no
+file side effect. The new `logs/` path avoids the non-writable root-owned
+colcon log directory for host UID 1000 and is ignored by Git.
+
+ProcessIO callbacks only enqueue bounded 8 KiB chunks into a 256-entry queue.
+A daemon writer frames lines, removes ANSI color, uses buffered I/O and flushes
+approximately every 0.5 s. Queue overflow drops chunks with an explicit counter;
+the file truncates in place at the configured 20 MiB cap to retain newer output.
+CLI atexit drains teardown output; shutdown join is bounded to 2 s. Disk errors
+disable the added capture while console/control processes continue. The
+existing console-only demo explicitly bypasses the additional logger.
+
+Verification: nine logger unit cases and ten launch/data-path regressions
+passed, Flake8 passed, CRA built and installed. A hardware-free native ROS
+probe used C++ TF and Python subprocesses for two consecutive normal launches,
+plus disabled and console-only cases: overwrite, stdout/stderr, fragmented
+Unicode, process exit and final shutdown output passed. Existing native demo
+console tests also passed. No full CRA/camera/Motion run or whole-pipeline
+performance measurement was performed; sensor, planning and control settings
+are unchanged. Evidence: `src/cra/test/results/latest_log_20261124.json`.
+Usage and limits: `src/cra/LATEST_LOG.md`.
+
+### 2026-11-24 — RRT fallback executed through native Motion and MuJoCo
+
+Ran `verify_rrt_fallback_simulation.py` in isolated localhost domain 228.
+Its temporary two-node, zero-edge roadmap makes A* unable to connect the
+start and goal; the original workspace graph and YAML were not modified.
+Planning submitted and validated two RRT attempts and dispatched two
+three-waypoint trajectories with `source=RRT_CONNECT`. The first reached
+Motion COMPLETED with maximum measured joint error 0.0196097 rad; the first
+goal sequence took 4.0216 s, including planning and execution.
+
+During the return trajectory, synthetic HumanCapsuleArray input was changed
+to valid=false. Planning reported RRT_HUMAN_VISION_UNKNOWN and native Motion
+reported STOPPED. No additional trajectory or RELEASE was observed during
+the probe's subsequent 0.5 s observation window. The report's legacy
+camera_loss fields refer to this synthetic invalid-input injection, not an
+actual Kinect disconnection. Source hashes matched the run's files.
+
+This verifies real Planning/C++ Motion/headless MuJoCo execution of RRT
+fallback. The synthetic human was far away and the RRT edge was directly
+valid (two root markers, no random detour growth). It does not verify live
+Kinect avoidance, physical braking or routing around a moving human.
+Evidence: `src/planning/test/results/rrt_usage_simulation_20261124.json` and
+`src/planning/test/results/rrt_usage_simulation_20261124.log`.
+
+### 2026-11-23 — YAML defaults for RViz and tracker admission
+
+At user request, robot.yaml now contains `rviz.enabled: true` and
+`vision.tracker_enqueue_wait_ms: 5`. CRA launch reads both defaults; the CRA
+Vision entrypoint reads the same tracker setting and forwards it to the
+driver. Explicit CLI overrides remain available. Missing fields retain the
+previous fallbacks of false/-1, and invalid YAML types or unsupported waits
+are rejected. Sensor FPS/resolution/mode, smoothing, calibration and safety
+parameters are unchanged. The standalone driver's own default remains -1.
+
+Ten Python launch/data-path tests and Flake8 passed. CRA was rebuilt with
+symlink installation. Installed launch --show-args confirms defaults of
+rviz=true and tracker_enqueue_wait_ms=5 without starting any nodes. No camera
+or manual experiment was run. Normal startup now needs only
+`ros2 launch cra cra.launch.py` in the sourced container.
+
+### 2026-11-23 — Installed tracker admission option, blocking by default
+
+The installed Kinect driver now accepts read-only startup ROS parameter
+`tracker_enqueue_wait_ms`: -1 retains blocking admission, 5 uses the measured
+bounded-wait policy. Main CRA, Vision and body-tracking launches declare and
+forward the option as an integer; omitting it keeps blocking. A bounded SDK
+timeout skips only that tracker submission, without adding a pending result;
+SDK FAILED still propagates to the existing worker shutdown handling.
+No automatic mode switching or live parameter changes were added. The 0/10 ms
+variants remain restricted to the BUILD_TESTING executable. The comparison
+runner now uses the installed driver for blocking and 5 ms and records the
+driver variant/hash.
+
+Fixed the runtime install destination to `lib/azure_kinect_ros_driver/node`.
+The previous generic bin destination left ROS launching a stale lib copy
+despite successful builds. The installed executable now matches the build
+binary and reports the selected admission policy before opening a device.
+
+Verification: azure_kinect_ros_driver/cra/vision built and installed; 17 C++
+stream-control tests, 11 native startup cases with a camera-denying shim,
+and 28 Python launch/data-path/runner/scenario cases passed. Native startup
+also passed against the installed executable. Launch --show-args exposes
+the option. Camera/workspace/calibration values and robot/reconstruction
+YAML hashes match the preceding participant trial. No new manual experiment
+or live Kinect/MuJoCo run was performed after promotion; previous live
+evidence remains scoped to its recorded binaries. Human obstruction during
+target execution remains unverified from the last not_exercised trial.
+
+Use `ros2 launch cra cra.launch.py rviz:=true tracker_enqueue_wait_ms:=5`
+inside the sourced container, or restart with -1 for blocking. Instructions:
+`src/azure_kinect_ros_driver/TRACKER_ADMISSION.md`. Evidence:
+`src/azure_kinect_ros_driver/test/results/tracker_main_integration_20261123.json`.
+
+### 2026-11-23 — Trigger disturbance tests from target Motion execution
+
+The tracker comparison now accepts `--scenario vision-loss` or `blockage`
+with the existing isolated MuJoCo mode. It waits for recent observed human
+geometry and IDLE/COMPLETED after warm-up, sends one guarded target, and
+triggers the disturbance cue only on that target's EXECUTING status. Initial
+simulator motion cannot activate it. The original four timed phases remain
+available without `--scenario`.
+
+Both scenarios pass depth through the native probe to Reconstruction only.
+Vision-loss withholds that input for 3 s, then restores forwarding; the
+camera driver is not paused or reconfigured. Blockage requires recorded
+HUMAN_TOO_CLOSE/HUMAN_PATH_BLOCKED evidence while the target is executing.
+Reports classify passed/failed/not_exercised and preserve event times.
+Completion before disturbance is not a pass. Passing recovery requires STOP,
+STOPPED, observed geometry, RELEASE, a new trajectory, EXECUTING and both
+Motion/Planning completion. DDS boundary ambiguity is marked for review;
+the evaluator's 0.2 s receipt uncertainty changes no runtime timeout.
+
+Verification: 20 Python regression cases and Flake8 passed; the C++ probe
+built and its original four-phase CLI/JSON was verified. A synthetic DDS
+fixture exercises the actual depth relay and Reconstruction watchdog. A
+separate synthetic-input test ran real Planning, C++ Motion and headless
+MuJoCo: depth withholding at 6.209 s, invalid geometry at 6.717 s, STOPPED
+at 6.795 s, restored depth at 9.210 s, fresh observed geometry at 9.256 s,
+resumed execution at 9.605 s and Motion completion at 10.868 s. Times are
+observer receipt times, not end-to-end reaction guarantees.
+
+No Kinect/live-human disturbance trial has been run for this new scenario.
+Physical braking distance, pose accuracy, USB disconnect/restart and RRT
+fallback are not established by these tests. No production camera/YAML,
+Planning/Motion behavior or legacy planner changed. Normal launch remains
+blocking. Depth relay overhead means these scenario rates must not be treated
+as the original direct-pipeline FPS comparison.
+
+Instructions: `src/perception/vision/test/TRACKER_MOTION_SCENARIOS.md`.
+Evidence: `src/perception/vision/test/results/tracker_motion_scenarios_20261123.json`.
+
+### 2026-11-23 — Camera startup restored with the host user UID
+
+After USB detection recovered to one sensor, the integration driver failed
+with Depth Engine error 204. The complete log first showed X11 authorization
+failure, including during Transform Engine initialization. A direct X11
+connection failed as container root but succeeded as host UID 1000. NVIDIA
+devices and `nvidia-smi` were available; GPU enumeration alone did not prove
+display access.
+
+A 20 s real-camera-only probe under UID/GID 1000:1000 received 184 depth,
+124 RGB and 334 body-tracking messages, with zero capture timeout warnings
+and completed cleanup. Original camera settings were preserved. Report:
+`/tmp/cra_kinect_uid1000_probe_20261123.json` inside `cra-humble`.
+This verifies camera startup and stream delivery, not the controlled MuJoCo
+comparison. Run the latter with `docker exec -u "$(id -u):$(id -g)"`,
+`bash -c`, a writable `ROS_LOG_DIR`, and a fresh output directory to avoid
+the previous root-owned trial files. No display access rules were changed.
+
+### 2026-11-23 — Reject tracker trials when the camera is unavailable
+
+Both modes in `/tmp/cra_tracker_mujoco` reported `Found 0 sensors` and
+failed to start cameras. Blocking recorded 40 s invalid geometry and no
+camera streams; the requested target was skipped. The 5 ms assertion was
+secondary: its admission log is emitted only after camera startup. These
+trials provide no tracker performance comparison. A live SDK enumeration
+also returned zero sensors; the container USB inventory showed no Kinect.
+The physical connection or power cause remains unverified.
+
+The comparison harness now checks SDK sensor enumeration before starting
+any trial, and monitors required child processes during both guided and
+unguided runs. A driver that exits with code zero still aborts the trial
+with its log tail. Camera settings, YAML and Planning/Motion are unchanged.
+Six isolated Python regression tests and Flake8 passed. Running the real
+integration command with the camera absent rejected it in 0.08 s without
+creating trial output or starting simulation. Restore Kinect detection,
+then repeat the controlled blocking/5 ms MuJoCo comparison.
+
+### 2026-11-20 — Guided tracker movement and occlusion comparison
+
+The Vision-only comparison supports `--guided` for stillness, repetitive
+arm motion, partial arm occlusion by the torso, and recovery. It runs the
+same cues for both modes and measures geometry state duration, stream rates,
+observation ages, and longest silence per phase. A phase with no skeleton
+messages records its full duration as silence. Participant actions must
+follow the cues for a controlled comparison.
+
+Run this in one terminal from the sourced CRA container with the regular
+camera launch closed:
+
+```bash
+source /opt/ros/humble/setup.bash
+source install/msgs/share/msgs/local_setup.bash
+source install/vision/share/vision/local_setup.bash
+source install/azure_kinect_ros_driver/share/azure_kinect_ros_driver/local_setup.bash
+ROS_DOMAIN_ID=221 ROS_LOCALHOST_ONLY=1 \
+  python3 src/perception/vision/test/compare_tracker_admission.py \
+  --guided --modes blocking wait-5ms --warmup 15 --duration 40 \
+  --output /tmp/cra_tracker_motion
+```
+
+The sampler writes phase metrics to `comparison.json` in the output
+directory. Four timed cues, phase accounting, invalid geometry, missing
+skeleton messages, and recovery were verified with synthetic DDS inputs.
+The 5 ms Kinect smoke run completed all four cues and wrote the report.
+The later participant run completed all four phases in both blocking and
+5 ms with a person detected in the workspace throughout both 40 s windows.
+Both trials reported 40 s observed geometry and no invalid state during
+measurement. The camera reported no capture timeouts. The invalidation
+logs after each run followed camera shutdown.
+
+Blocking versus 5 ms: median skeleton age 318 vs 88 ms, skeleton rate
+25.5 vs 16.6 Hz, RGB receipt rate 10.0 vs 14.8 Hz, and observed geometry rate
+14.5 vs 18.7 Hz. During arm motion, the longest observed geometry message
+gap was 432 vs 501 ms. During partial occlusion it was 399 vs 270 ms.
+The 5 ms mode is a candidate for isolated MuJoCo integration. This single
+pair measures output continuity and timing with the participant cues.
+Pose accuracy during occlusion and response latency through Planning and
+Motion require separate evaluation.
+
+Results: `src/perception/vision/test/results/tracker_admission_guided_20261120.json`.
+
+The guided runner also supports an isolated MuJoCo integration trial with
+`--mujoco --target 0.50 0.10 -0.25`. The installed configuration must specify
+simulation mode. The runner starts MuJoCo, Planning and Motion alongside
+Vision and sends the test target at the arm-motion cue when the monitor has
+recent observed geometry in the workspace. Each mode starts its own instance
+of the simulator. Physics runs headless by default. Use `--viewer` for the
+interactive MuJoCo window.
+
+The report includes `simulation_events` for target, Vision, Planning and
+Motion status, STOP/RELEASE, and trajectory messages. Event times are DDS
+receipt times. Closely spaced events across topics can be received in either
+order. The trial uses the regular simulated motion policies. Record any live
+camera invalidation that occurs during an active trajectory to evaluate the
+stop response on that run.
+
+### 2026-11-20 — Bounded tracker enqueue comparison
+
+The test-only tracker binary accepts a 0, 5 or 10 ms SDK enqueue wait.
+The normal CRA launch uses the installed blocking driver. The real-camera
+comparison used the existing calibration and reconstruction settings in
+isolated domain 221 with Vision nodes only.
+
+Seven 25 s measurement windows followed 15 s warm-ups. A human was active in
+the zone and geometry was continuously in the observed state in all measured
+windows. The three experimental modes were repeated in reverse order.
+The 5 ms mode produced 15.7–16.0 skeleton updates/s, with median data age
+80–86 ms and maximum observed callback gap 165 ms. The 10 ms mode produced
+17.5–17.7 updates/s with median age 87 ms and a maximum observed gap of 294 ms.
+The 0 ms mode produced 14.6 updates/s and the highest received RGB rate.
+The 5 ms mode is the candidate for a controlled movement and occlusion trial.
+This run measured stream behavior. Pose accuracy and camera-loss recovery
+require separate trials.
+
+Build the experimental target and run the series inside the sourced CRA
+container with the regular camera launch closed:
+
+```bash
+cmake --build build/azure_kinect_ros_driver --target tracker_nonblocking_probe -j2
+ROS_DOMAIN_ID=221 ROS_LOCALHOST_ONLY=1 \
+  python3 src/perception/vision/test/compare_tracker_admission.py \
+  --modes blocking wait-5ms wait-10ms nonblocking --output /tmp/cra_tracker_wait
+```
+
+Results and source hashes are in
+`src/perception/vision/test/results/tracker_admission_bounded_wait_20261120.json`.
+
+### 2026-11-20 — Isolated nonblocking tracker A/B and B/A experiment
+
+Status: User-authorized experiment complete; normal launch still BLOCKING.
+Nonblocking is a BUILD_TESTING-only `tracker_nonblocking_probe` executable,
+excluded from default builds and never installed. SDK TIMEOUT skips only the
+tracker submission; accepted work alone increments the pending-result counter.
+SDK FAILED exceptions still propagate through the existing worker handler.
+
+- Real Kinect, original camera parameters, TF calibration, workspace monitor,
+  skeleton transform and reconstruction YAML on localhost domain 221. No GUI,
+  Planning or Motion. A native subscriber records headers/counters only; no
+  images, skeleton coordinates or capsule payloads are saved.
+- Four trials: blocking/nonblocking, then nonblocking/blocking. Each uses
+  15 s warm-up plus 30 s measurement. A real person is active in the original
+  workspace throughout all 120 measured seconds. All pipeline children remain
+  alive; capture cleanup completes and no fatal capture timeout occurs.
+- Repeated ranges, blocking -> nonblocking: SDK capture consumption about
+  24.7-25.0 -> 30.0 Hz; received RGB 8.4-9.9 -> 17.2-19.1 Hz; observed geometry
+  11.4-11.7 -> 18.2-20.4 Hz. Median skeleton capture age 318-322 -> 80-83 ms;
+  median geometry depth-stamp age 241 -> 30-31 ms. No invalid-state interval
+  is observed during the warmed measurement windows in either mode.
+- Important tradeoff: skeleton update rate drops 24.5-25.1 -> 14.7-14.8 Hz.
+  Geometry can reuse a pose within the existing sync allowance, so geometry Hz
+  must not be presented as independent pose-measurement Hz. Faster/fresher
+  geometry does not establish fast-motion tracking accuracy or execution safety.
+- 15 driver policy/shutdown C++ cases and four native startup cases pass.
+  Busy submission creates no pending result; real failures still propagate.
+  Python style, whitespace and preserved-setting/source hashes pass.
+- Production mode is intentionally unchanged. Controlled fast-person motion,
+  occlusion, long capture stability and full CRA operation remain unverified.
+  No deadline, max_sync_delay, freshness, smoothing, calibration, FPS/resolution,
+  Planning/Motion policy or stored workspace asset was changed.
+
+Reproduce inside the sourced container/workspace after closing the normal
+camera launch:
+
+```bash
+cmake --build build/azure_kinect_ros_driver --target tracker_nonblocking_probe -j2
+ROS_DOMAIN_ID=221 ROS_LOCALHOST_ONLY=1 \
+  python3 src/perception/vision/test/compare_tracker_admission.py \
+  --output /tmp/cra_tracker_comparison
+```
+
+Files: src/azure_kinect_ros_driver/{CMakeLists.txt,src/k4a_ros_device.cpp,
+include/azure_kinect_ros_driver/stream_control.h,test/test_stream_control.cpp};
+src/perception/vision/{CMakeLists.txt,test/vision_stream_probe.cpp,
+test/compare_tracker_admission.py}.
+Results: src/perception/vision/test/results/tracker_admission_ab_20261120.json.
+
+### 2026-11-20 — Camera-loss/FPS diagnosis; nonblocking tracker still proposed
+
+The new supplied log contains a real five-timeout SDK stream shutdown while
+Planning is COMPLETED, followed by respawn and recovery. A later 0.200 s
+VISION_INVALID event has no SDK timeout in the excerpt. RGB/depth are requested
+as synchronized pairs; continuing Color queue drops do not establish the
+original reason a synchronized capture stopped arriving.
+
+- Applied preview-only native reduced JPEG decode for the existing half-size
+  view. Original JPEG/depth inputs, YAML, 30 FPS/1536P, smoothing, calibration,
+  synchronization and data timeouts remain unchanged. Preview pixel values may
+  differ slightly from the previous full-decode/resize, with the same size.
+- Previously empty Vision build type now defaults to RelWithDebInfo (-O2 and
+  debug symbols), honoring explicitly chosen build modes. All existing explicit
+  geometry checks remain. Direct image callback decode is retained: a tested
+  timer-decode experiment lowered view cadence and was discarded.
+- Separate Input/View FPS in the GUI, plus five-second Preview profile and
+  Capture profile timing. Reconstruction invalid diagnostics report input ages,
+  sync delta and last blocking reason. These counters never refresh observations
+  or change timeout/retry behavior.
+- Controlled JPEG decode/resize median improves 16.52->12.57 ms. Seventeen
+  Vision C++ cases, 12 driver C++ cases and four native startup cases pass.
+  Native reconstruction preserves eight capsules, stale invalidation and fresh
+  EMPTY. Synthetic headless preview verifies raw priority, compressed fallback
+  and survival of input loss; it does not establish live GUI/full CRA FPS.
+- Crucial real-camera measurement at unchanged settings: complete SDK capture
+  consumption about 24-25 Hz, get_capture wait about 0.003 ms, processing about
+  33-35 ms and tracker enqueue commonly 30-42 ms. enqueue_capture currently
+  waits indefinitely in the same thread that publishes RGB/depth. The isolated
+  60 s run has no capture timeout; original intermittent loss is not fixed.
+- Proposed, NOT applied: zero-timeout tracker enqueue; skip that tracker input
+  when busy, continue actual RGB/depth publication, retain original body result
+  timestamps and all freshness policies. SDK FAILED remains fatal. User asked
+  for pros/cons before deciding; queue behavior is unchanged pending decision.
+
+Files: src/perception/vision/{CMakeLists.txt,src/nodes/{visual_node,
+reconstruction_node}.cpp,include/vision/frame/preview_decode.hpp,
+test/{test_preview_decode.cpp,benchmark_preview_decode.cpp,verify_preview_ros.py}};
+src/azure_kinect_ros_driver/src/k4a_ros_device.cpp.
+Evidence: src/perception/vision/test/results/camera_fps_diagnosis_20261120.json.
+
+### 2026-11-20 — Vision optimization with unchanged YAML and camera settings
+
+Status: User-authorized code optimization built and tested. No YAML, camera
+launch settings, smoothing, calibration, voxel size, capsule parameters, sync
+allowance or freshness timeout changed. Driver, Planning/Motion and RRT
+implementation are untouched by this optimization.
+
+- Replace the intermediate full-size per-body binary mask with ordered runs
+  containing every matching body-index pixel. Depth projection visits those
+  pixels in the original row-major order. No sampling, geometric approximation
+  or dropped body pixels is introduced. The original mask-based C++ entry
+  point remains available. Dimension, frame, encoding, transform, calibration,
+  bounds and byte-order checks remain; malformed runs are rejected.
+- VisualNode captures one TF snapshot for a skeleton batch instead of looking
+  up the same transform for every joint. Missing TF suppresses that projected
+  overlay; it no longer substitutes untransformed points. Geometry sent to
+  Planning uses its unchanged frame/validation flow.
+- Thirteen C++ cases pass: exact points for integer/float depth, padded rows,
+  sparse/dense/fragmented masks, distortion/rotation/ROI and changed calibration;
+  invalid inputs, exact voxels/capsules and 96 batch/per-joint TF comparisons.
+  Installed reconstruction DDS probe on domain 231 produces eight base_link
+  capsules, invalidates after input loss (observed 0.569 s under the existing
+  0.5 s timeout/100 ms watchdog), then accepts fresh EMPTY. No camera or Motion
+  runs in this probe. Vision build and probe Flake8 checks pass.
+- Independent original committed DepthProcessor comparison on synthetic
+  512x512 images requires exactly identical point vectors. With 35% selected
+  pixels, selection/extraction median falls from 7.305 to 5.669 ms (22.4%).
+  This stage improves 18.2-32.6% across tested nonempty densities; whole Vision
+  FPS and live CRA stability are not established. Mask shape and hardware can
+  change the gain. Existing compiler optimization level is unchanged.
+- Live Kinect/full CRA/moving-human operation and interactive GUI appearance
+  remain unverified for this optimization. Previous intermittent capture
+  failure is not declared fixed. Restart the launch to load the new binaries.
+
+Files: src/perception/vision/{src/segmentation/human_segmenter.cpp,
+src/reconstruction/{depth_processor,reconstruction_pipeline}.cpp,
+src/nodes/visual_node.cpp,include/vision/{segmentation,reconstruction,frame},
+test/{test_sparse_depth.cpp,test_frame_batch.cpp,vision_fixture.hpp,
+benchmark_sparse_depth.cpp,verify_reconstruction_ros.py},CMakeLists.txt,package.xml}.
+Results and source/configuration hashes:
+src/perception/vision/test/results/vision_optimization_20261120.json.
+
+### 2026-11-20 — Retreat dead-end correction and unchanged-camera diagnosis
+
+The supplied 23:46 runtime log loads rrt_mode=fallback but has 85 profiles
+with NOT_TRIED, six A* PATH_FOUND and no NO_GRAPH_PATH. Its long stop is
+HUMAN_RETREAT_BLOCKED, including 0.01812 m and 0.00747 m current clearance
+under the existing 0.05 m margin. Ordinary RRT is not admitted from that start.
+SEARCH_BUDGET_EXHAUSTED is the retreat's 32-step bound, not a wall deadline;
+logged retreat searches average 273.0 ms and peak at 439.786 ms.
+
+- Rank improving endpoints before transition certification. The same
+  highest-gain certified candidate wins, with stable joint/sign ties; lower
+  candidates need no edge checks after a better one passes.
+- At a local dead end, consider the same staged-progress certificate already
+  used at the step limit instead of discarding progress immediately. Minimum
+  gain remains 0.005 m; complete straight-transition certification and all
+  normal Manager/RELEASE/final execution gates remain mandatory. No contacts,
+  pair-clearance relaxation, worker or ordinary RRT invalid-start escape added.
+- Add bounded retreat statistics to the existing Planning profiles: completed
+  steps, endpoint/transition queries, clearance/gain, final certificate verdict,
+  stop condition and elapsed time. Search remains synchronous and greedy;
+  blocked does not prove that no multi-joint escape exists.
+- User explicitly retained camera settings. No FPS, resolution, smoothing,
+  calibration, retry count, driver implementation or freshness limit changed.
+  First capture timeout precedes heavy retreat; color queue drops begin after
+  that first timeout. Exact physical/system cause remains unverified.
+- Add a real-camera stream diagnostic on isolated domain 229, using parameters
+  verbatim from the existing launch, without Planning/Motion or saved images.
+  Native 25 s and 60 s runs have no capture timeout or SDK color queue drop,
+  and complete worker shutdown. The 60 s probe receives 1375 skeleton messages
+  (maximum measured capture age 421.84 ms). These received-message statistics
+  do not establish sensor FPS, full CRA stability or a camera repair.
+- Verification and final source hashes: test/results/retreat_debug_20261120.json.
+  All 296 Planning tests pass in 29.836 s, including 10 new retreat cases;
+  Planning build passes in 0.98 s, with Flake8 and whitespace checks passing.
+  Twelve frozen native scenes retain the same 10 successful paths; transition
+  calls fall from 346 to 228. Two scenes remain blocked. Installed-package
+  RRT/Motion/MuJoCo regression again reaches its joint goal and stops on
+  synthetic camera invalidation; this is not a live-human retreat trial.
+  Offline native comparisons use synthetic capsules, including a logged joint
+  pose; the original log lacks full geometry for exact failure replay.
+
+Files: src/planning/planning/{path_planner.py,planning_node.py};
+src/planning/test/{test_human_retreat_search.py,benchmark_human_retreat.py,
+HUMAN_RETREAT_DEBUG.md};
+src/azure_kinect_ros_driver/test/probe_capture_stream.py;
+src/planning/test/results/retreat_debug_20261120.json; CRA_PROJECT_CONTEXT.json.
+
+### 2026-11-19 — Active simulation RRT-Connect fallback
+
+Status: User-authorized implementation, build, regression and isolated native
+Planning -> C++ Motion -> MuJoCo verification passed. This supersedes the
+observation-only runtime status in the older entries below; shadow mode remains
+available.
+
+- GNG+A* and configured alternative joint goals remain primary. Eligible
+  NO_GRAPH_PATH requests one bounded RRT attempt before existing safe-position
+  recovery. Invalid starts, human-margin intrusion, unreachable goals, manual
+  STOP and Motion faults retain their existing handling.
+- One isolated worker searches with ordinary CollisionFilter checks, then
+  prepares/certifies the candidate on a new scene. A private mailbox delivers
+  it to the regular PlanningManager step; normal path preparation, final
+  validation and RELEASE acknowledgement still precede EXECUTE. Target/start/
+  scene changes, expired inputs/deadlines and malformed results reject it.
+- Fresh OBSERVED or EMPTY human input is mandatory. UNKNOWN is never accepted
+  by fallback; camera loss during an active RRT trajectory requests STOP.
+  Existing primary simulation_only_ignore_unknown=True and execute_path=True
+  remain unchanged, as do the 0.05 m margin and 2 s observation timeout.
+- YAML planning.rrt.mode defaults to fallback; off and shadow are available.
+  Fallback is rejected outside simulation before node/model creation. Search
+  allowance is 0.5 s, latest validation 0.5 s, total request 1.5 s including
+  startup/handoff, capped by original data freshness; retries are >=3 s apart.
+  Fallback omits the extra clearance-preference search used by shadow mode.
+- RViz is optional; no marker subscriber means no trace/FK overhead. Events on
+  /planning/rrt/events and legacy /planning/rrt_shadow explain admission and
+  rejection. RRT_PATH_READY and source=RRT_CONNECT identify adopted paths.
+  Trees are expiring diagnostics; normal Planned path shows the manager path.
+- Verification: 286/286 Planning tests (38 fallback tests and 19 RRT marker
+  tests) pass in 30.006 s; 5 launch-default tests pass. planning/cra build,
+  Flake8 and whitespace checks pass. CollisionFilter, PathPlanner, Motion,
+  MuJoCo model/control and legacy workspace_planning are unchanged.
+- Native domain 228 uses the installed packages, real C++ Motion and actual
+  MuJoCo physics/control/feedback with a headless viewer and synthetic vision.
+  On a temporary two-node/zero-edge roadmap, RRT reaches the first joint goal:
+  maximum joint error 0.01948 rad in 4.020 s, Motion COMPLETED. A return
+  trajectory followed by invalid camera input produces STOPPED and no further
+  EXECUTE/RELEASE while invalid. Start/goal/final markers are received.
+  Separate shadow-mode DDS probe passes with zero Motion commands.
+- Limits: native execution uses a deliberately disconnected small roadmap and
+  a directly free RRT edge. Live Kinect, moving-human detours, production-graph
+  failure, interactive RViz and physical execution remain unverified. Existing
+  A*/human monitoring/final execution checks remain synchronous; cooperative
+  deadlines reject late results but cannot interrupt native collision calls.
+
+Built configuration is installed. Restart the existing launch, then use
+`ros2 launch cra cra.launch.py rviz:=true`; dataset paths come from YAML.
+
+Files: src/planning/planning/{rrt_fallback.py,rrt_shadow.py,planning_manager.py,
+planning_node.py,visualization/rrt_display.py}; src/cra/config/robot.yaml;
+src/planning/test/{test_rrt_fallback.py,verify_rrt_fallback_simulation.py,
+test_rrt_visualization.py,verify_rrt_shadow_ros.py,RRT_FALLBACK.md,
+RRT_SHADOW.md,RRT_VISUALIZATION.md};
+src/planning/test/results/rrt_fallback_20261119.json; CRA_PROJECT_CONTEXT.json.
+
+### 2026-11-19 — Keep the workspace visible without camera data; YAML dataset defaults
+
+User log diagnosis: the supplied launch excerpt configures rrt_shadow=True but
+contains zero `RRT shadow` events, seven A* PATH_FOUND and zero A* NO_PATH.
+There is no evidence of shadow-search admission in this excerpt. RRT remains
+observation-only and never supplies Motion trajectories; HUMAN_RETREAT states
+come from existing recovery. Enabling the observer does not force a search.
+Evidence: test/results/camera_absent_log_diagnosis_20261119.json.
+
+- Keep GNG nodes/edges at their normal green/orange colors and opacity for
+  UNKNOWN, camera absence and expiry. The earlier gray/translucent style could
+  make the graph appear missing; the log itself does not establish rendering
+  loss. Missing human data now removes only human masks. Fresh target/obstacle
+  boxes remain masked independently; fresh capsules still apply if simulation
+  poses are stale. Text reports partial geometry without implying safety.
+- XYZ mask output remains visual-only. Actual A* and CollisionFilter still
+  check whole-arm configurations and joint-space transitions. No changes to
+  RRT admission, active planning, Motion, margins or camera-loss/STOP policy.
+- Add workspace.path and gng.graph_path to robot.yaml; main, Planning and
+  Simulation launches read/expand these defaults. Missing fields preserve
+  previous defaults; CLI overrides remain optional. Normal run is now simply
+  `ros2 launch cra cra.launch.py rviz:=true`, without dataset arguments.
+- Verification: 247/247 Planning tests pass in 29.642 s, including 25 mask
+  tests. Five launch tests check YAML defaults, fallback, tilde expansion,
+  overrides and the shipped dataset files. Native DDS domain 227 starts with
+  no camera messages: 999/1000 nodes remain at alpha 0.85 (one hidden by target),
+  and moving a simulation box without camera data changes visibility to 998.
+  Human blocking/away, EMPTY, UNKNOWN and expiry pass. Zero Motion commands,
+  additional mask workers or unchanged-scene marker/calculation repeats.
+- planning/cra build succeeds in 1.41 s; installed --show-args confirms dataset
+  defaults, and Flake8/CRLF-aware whitespace checks pass. This is headless
+  transport verification; interactive RViz and moving-robot behavior were not
+  tested. Existing running nodes must be restarted to load the correction.
+
+Files: src/planning/planning/{planning_node.py,visualization/planning_visualizer.py,
+visualization/workspace_graph_mask.py}; src/planning/test/{test_workspace_graph_mask.py,
+verify_workspace_graph_mask_ros.py,WORKSPACE_GRAPH_MASK.md};
+src/planning/test/results/camera_absent_mask_20261119.json;
+src/cra/config/robot.yaml; src/cra/launch/{cra,planning,simulation}.launch.py;
+src/cra/test/test_launch_data_paths.py; CRA_PROJECT_CONTEXT.json.
+
+### 2026-11-19 — Replace heavy filtered display with lightweight workspace XYZ mask
+
+Status: User-authorized replacement implemented, built and tested headlessly.
+This supersedes the whole-arm filtered visualization described in older entries.
+
+- Remove the progressive graph-filter worker, its extra CollisionFilter/model,
+  filtered joint-node/edge publishers and `Joint graph - filtered` RViz display.
+  Offline PathPlanner filtering methods remain available; the live display no
+  longer calls them. No changes to A*, manager, CollisionFilter or Motion.
+- `Workspace graph - obstacle mask` uses the exact stored GNG positions/edges
+  (1000/4453), rather than overlaying the separate 4000-configuration joint
+  graph. Hide XYZ nodes and straight edges intersecting validated human
+  capsules or existing active simulation boxes, including the target. Restore
+  original elements after obstacles move away; graph assets stay unchanged.
+- Cache static endpoints and obstacle signatures; use bounding-box rejection
+  and batched finite-segment distances. No FK, joint sampling, whole-arm
+  collision queries, additional ROS node or process. Identical geometry does
+  no mask calculation; unchanged visibility/status sends no MarkerArray.
+  The native stable-scene probe observes zero additional calculations/messages.
+- Mask display defaults on, original GNG defaults off to avoid covering hidden
+  elements. New topics: /planning/workspace_graph_mask and its _status String.
+  Persistent markers avoid refresh streaming. UNKNOWN/expired human or stale
+  obstacle input restores a gray graph labelled unverified. A blocked main
+  executor can retain the last snapshot until callbacks resume. XYZ occlusion
+  never constitutes whole-arm clearance or authorizes Motion; full robot/path
+  validation and existing execution/UNKNOWN experimental flags are preserved.
+- Final regression: 244/244 Planning tests pass in 29.650 s, including 22 new
+  mask tests replacing the 18 retired filtered-display tests. Coverage includes
+  crossing edges with exterior endpoints, tangency, parallel/degenerate cases,
+  rotated boxes, restoration, data identity, freshness and display isolation.
+- Native DDS domain 227 uses the full GNG with real Planning subscriptions and
+  synthetic obstacles. Human/box overlaps hide and restore elements; EMPTY,
+  UNKNOWN and expiry behave as labelled. Zero Motion commands, zero mask
+  processes and zero old filtered-topic publishers. Display calls are guarded
+  against robot state/edge collision queries. RRT domain 224 marker regression
+  also passes. Ordinary Planning/RRT timers are cancelled in the mask probe.
+- Offline median XYZ-mask time: 0.54 ms for one capsule, 5.08 ms for 16 capsules,
+  5.49 ms for 16 capsules plus a box, over 50 geometry changes on the stored GNG.
+  These exclude ROS serialization, RViz rendering and existing planning work.
+  planning/cra build succeeds (2.26 s); Flake8 and whitespace checks pass.
+
+Files: planning/visualization/workspace_graph_mask.py; planning/planning_node.py;
+planning/visualization/planning_visualizer.py; test/test_workspace_graph_mask.py;
+test/verify_workspace_graph_mask_ros.py; test/benchmark_workspace_graph_mask.py;
+test/WORKSPACE_GRAPH_MASK.md; test/results/workspace_graph_mask_20261119.json
+(under src/planning), plus src/cra/config/cra.rviz and CRA_PROJECT_CONTEXT.json.
+Retired display documentation redirects to the new guide; old result artifacts
+are retained as historical evidence.
+Next: restart the existing CRA/RViz launch and check human/box masking visually.
+Interactive RViz, live Kinect noise and moving-robot avoidance remain unverified.
+
+### 2026-11-19 — Bounded RRT tree markers, replay and empty-filter diagnostics
+
+Status: Implemented, built and verified headlessly. Native interactive RViz,
+live Kinect and moving-robot avoidance remain unverified.
+
+- Reuse the existing shadow worker and CollisionFilter. Optional recording
+  retains up to 256 accepted nodes per tree, 64 rejected candidates and 512
+  events, with a reserved terminal event. Accepted children appear only after
+  both state and directed edge checks pass; full path certification is retained.
+  No GNG/A*, checker margin, Motion interface or experimental flag is changed.
+- Share the existing MuJoCo FK/base_link projection between the visualizer and
+  worker. Compute each distinct retained configuration once after search;
+  cache/batch markers at <=5 Hz, with no live-callback FK/collision queries.
+  Marker lifetime is <=0.6 s and capped by original snapshot expiry. Scene,
+  target or freshness changes clear old trees. No automatic tree revalidation.
+- Separate RViz Start Tree, Goal Tree, Final Path, Rejected Candidates and
+  Search Step/Status displays. Rejected candidates default off. The green path
+  is the certified baseline RRT snapshot, not a preference-selected/live path.
+  RRT shadow still runs only after eligible primary graph failure. Trace/FK
+  work requires marker subscribers and visualization_enabled=true.
+- Existing filtered graph is retained. Its saved RViz checkbox defaults off,
+  so the subscriber-triggered worker has no work until enabled. Freshness gates,
+  node-first processing and geometry-driven progress resets can also leave the
+  display empty/sparse. These are source-verified conditions; the user's exact
+  live cause is unconfirmed. Expose /planning/filtered_graph_status counters
+  and reasons; make the Displays dock visible. No duplicate filter is added.
+- Offline recorder/replay uses the same search, checker and FK. Equal start/
+  goal, seed 9: without human, direct path with 2 roots; with synthetic blocking
+  capsule, direct edge rejected and a certified detour with 92 accepted nodes.
+  It records 64 rejections and 512 events (88 omitted events explicitly
+  reported). Human freshness is frozen only for this historical experiment.
+  Replay labels historical data and reveals the final path at PATH_FOUND.
+- Final Planning regression: 240/240 tests passed (18 new visualization tests),
+  29.678 s. Actual geometry, invalid state/edge exclusion, directed parent
+  certificates, bounded replay, expiry/target/revision gates, renderer isolation
+  and FK versus five stored joint_eof configurations pass. planning/cra build,
+  installed replay --help, Flake8 and whitespace checks pass. Initial combined
+  runs exhausted MuJoCo 3.1.6 STL file descriptors; new tests reuse one model,
+  and the final suite passes without raising OS limits.
+- Native DDS domain 224 receives both tree roots and a certified path, then
+  DELETE markers on revision change; domain 225 rechecks the existing filtered
+  graph; domain 226 replays samples, nearest selections, extensions, connection
+  steps and final path with historical labels. All probes emit zero Motion
+  commands. Domain 224's two-node FK projection took ~0.105 ms; this is a small
+  fixture measurement, not a full-tree performance guarantee. The ordinary
+  Planning timer is cancelled in live-node transport probes.
+
+Files: planning/algorithms/rrt_connect.py; planning/rrt_shadow.py;
+planning/rrt_trace.py; planning/rrt_replay.py; planning/planning_node.py;
+planning/visualization/{planning_visualizer,projection,rrt_display}.py; setup.py;
+test/{test_rrt_visualization,record_rrt_experiment,verify_rrt_replay_ros,
+verify_rrt_shadow_ros}.py; test/RRT_VISUALIZATION.md;
+test/results/rrt_visualization_20261119.json (under src/planning), plus
+src/cra/config/{cra.rviz,robot.yaml}. Pre-existing filtered-display work is kept.
+Next: use the documented normal launch, enable filtered graph when needed,
+inspect status while human geometry changes, and capture matching RViz views.
+Keep historical replay separate from live ROS topics using its own domain.
+
+### 2026-11-18 — Optional original/filtered RViz graph displays
+
+User-requested visual-only feature after pushed checkpoint ba5b072. RViz has
+independent `GNG - original` (on) and `Joint graph - filtered` (off) MarkerArray
+checkboxes. The first preserves learned GNG points/edges; cyan filtered markers
+show checked-valid joint configurations/edges projected at stored joint_eof.
+These are 1000-point GNG versus 4000-configuration joint-graph layers.
+
+- Separate spawned worker filters only while a filtered subscriber exists.
+  One job, <=128 checks or cooperative 0.08 s per slice, independent model/data/
+  cache. Parent does no new collision queries; original blocking full-filter
+  call is removed from visualization. A frozen full-graph probe took ~55 s.
+- Unknown/stale input clears markers. New geometry resets progress; identical
+  geometry reuses checks while observations remain fresh. Unchecked points and
+  connections are hidden, not labelled blocked. Text reports checked/valid and
+  shown counts; 2000-edge drawing cap remains display-only. Marker lifetime
+  is 0.6 s, and worker/render errors cannot change live Motion decisions.
+- All 222 Planning functional tests pass, including 18 new display tests.
+  Analytic geometry, optional subscription, progressive resets, expiry,
+  saved RViz choices and marker/error-isolation tests pass. Native headless DDS
+  probe on a temporary three-node joint graph shows 3 -> 2 -> 3 visible nodes
+  as the synthetic human blocks/moves away; blocked edges 0/3, UNKNOWN deletes
+  markers, zero Motion commands. Source hashes saved. Planning/cra build and
+  Python style checks pass.
+- Full dynamic graph/GUI interaction remains a live trial: human noise can
+  repeatedly reset progress. A sparse/partial display does not prove NO_PATH.
+  Existing A* is still synchronous. Graph assets, CollisionFilter, manager,
+  Motion, 5 cm margin, 2 s timeout and experimental flags are unchanged.
+
+Files: src/cra/config/cra.rviz; src/planning/planning/filtered_graph_display.py;
+planning_node.py; visualization/planning_visualizer.py; test/test_filtered_graph_display.py;
+test/verify_filtered_graph_ros.py; test/FILTERED_GRAPH_DISPLAY.md;
+test/results/filtered_graph_ros_20261118.json (Planning paths under src/planning).
+Next: relaunch normal CRA/RViz, tick filtered/untick original, and observe
+progress and human-driven invalidation without treating partial masks as a plan.
 
 ### 2026-11-18 — Isolated RRT observation and latest-scene validation
 

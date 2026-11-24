@@ -171,6 +171,7 @@ class K4AROSDevice : public rclcpp::Node
   bool tracker_started_{false};
 #endif
   int capture_timeout_limit_{5};
+  int tracker_enqueue_wait_ms_{-1};
 
   // Last capture timestamp for synchronizing playback capture and imu thread
   std::atomic_int64_t last_capture_time_usec_;

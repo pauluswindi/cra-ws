@@ -2,6 +2,7 @@
 
 import argparse
 from pathlib import Path
+import time
 
 import mujoco
 import numpy as np
@@ -121,6 +122,7 @@ class PathPlanner:
         self.path_revision = None
         self.last_plan_failure = "NONE"
         self.last_human_retreat_failure = "NONE"
+        self.last_human_retreat_statistics = None
         self.safe_recovery_path = None
 
         self.valid_node_mask = None
@@ -503,19 +505,46 @@ class PathPlanner:
         """
         checker = self.collision_filter
         self.last_human_retreat_failure = "NONE"
+        began = time.perf_counter()
+        stats = dict(step_limit=max_steps, steps=0, endpoint_checks=0, transition_checks=0,
+                     screened_candidates=0, initial_clearance_m=None, final_clearance_m=None,
+                     gain_m=None, required_gain_m=checker.safety_margin,
+                     final_transition_valid=None, stop_condition=None)
+        self.last_human_retreat_statistics = stats
+
+        def state_at(joints):
+            stats['endpoint_checks'] += 1
+            return checker.human_margin_state(joints)
+
+        def transition_valid(a, b):
+            stats['transition_checks'] += 1
+            return checker.is_human_margin_transition_valid(a, b)
+
+        def final_transition_valid(a, b):
+            stats['final_transition_valid'] = transition_valid(a, b)
+            return stats['final_transition_valid']
+
+        def finish(reason, path=None):
+            self.last_human_retreat_failure = reason
+            stats.update(reason=reason, returned_path=path is not None,
+                         elapsed_ms=round((time.perf_counter() - began) * 1000., 3))
+            return path
+
         start = np.asarray(current_q, dtype=float)
-        initial = checker.human_margin_state(start)
+        initial = state_at(start)
         if initial is None or initial["status"] != "NEAR":
             diagnostic = checker.diagnose_state(start)
-            self.last_human_retreat_failure = diagnostic["reason"]
+            reason = diagnostic["reason"]
             if diagnostic["reason"] == "VALID":
-                self.last_human_retreat_failure = "NOT_IN_HUMAN_MARGIN"
+                reason = "NOT_IN_HUMAN_MARGIN"
             if (
                 diagnostic["reason"] == "HUMAN_COLLISION"
                 and diagnostic["human"]["clearance"] <= 0.
             ):
-                self.last_human_retreat_failure = "HUMAN_OVERLAP"
-            return None
+                reason = "HUMAN_OVERLAP"
+            return finish(reason)
+        stats['initial_clearance_m'] = stats['final_clearance_m'] = initial['clearance']
+        stats['gain_m'] = 0.
         revision = checker.environment_revision
         current = start.copy()
         state = initial
@@ -523,7 +552,7 @@ class PathPlanner:
         target = checker.human_safety_margin + checker.safety_margin
         for _ in range(max_steps):
             best, best_state = None, None
-            improvement = 1e-6
+            candidates = []
             for joint in range(5):
                 for sign in (-1., 1.):
                     candidate = current.copy()
@@ -532,22 +561,21 @@ class PathPlanner:
                         self.max_joint_delta, self.max_segment_delta
                     ):
                         continue
-                    candidate_state = checker.human_margin_state(candidate)
+                    candidate_state = state_at(candidate)
                     if candidate_state is None:
                         if (
                             not checker.human_data_ready()
                             or checker.environment_revision != revision
                         ):
-                            self.last_human_retreat_failure = (
+                            return finish(
                                 "HUMAN_DATA_UNKNOWN" if not checker.human_data_ready()
                                 else "ENVIRONMENT_CHANGED"
                             )
-                            return None
                         # Invalid joints or static contact disqualify only this
                         # candidate, just as the full transition checker would.
                         continue
                     gain = candidate_state["clearance"] - state["clearance"]
-                    if gain <= improvement:
+                    if gain <= 1e-6:
                         continue
                     # A worsening endpoint cannot pass the sampled monotonic
                     # certificate. Screen it before evaluating the whole edge.
@@ -556,39 +584,54 @@ class PathPlanner:
                         for pair, value in candidate_state["pairs"].items()
                     ):
                         continue
-                    if checker.is_human_margin_transition_valid(current, candidate):
-                        best, best_state, improvement = candidate, candidate_state, gain
+                    candidates.append((gain, candidate, candidate_state))
+            # The same maximum-gain valid candidate wins, but lower-ranked
+            # edges need no certification once a better one has passed.
+            # Stable sorting preserves joint/sign order for equal gains.
+            stats['screened_candidates'] += len(candidates)
+            for _, candidate, candidate_state in sorted(candidates, key=lambda row: -row[0]):
+                if transition_valid(current, candidate):
+                    best, best_state = candidate, candidate_state
+                    break
             if (
                 best is None or checker.environment_revision != revision
                 or not checker.human_data_ready()
             ):
-                self.last_human_retreat_failure = (
-                    "HUMAN_DATA_UNKNOWN" if not checker.human_data_ready()
-                    else "ENVIRONMENT_CHANGED" if checker.environment_revision != revision
-                    else "NO_MONOTONIC_STEP"
-                )
-                return None
+                if not checker.human_data_ready() or checker.environment_revision != revision:
+                    return finish("HUMAN_DATA_UNKNOWN" if not checker.human_data_ready()
+                                  else "ENVIRONMENT_CHANGED")
+                # A local dead end must not discard progress which satisfies
+                # the existing staged-retreat contract. Certify start->current
+                # below, just as at the step limit; endpoints alone never suffice.
+                stats['stop_condition'] = 'NO_MONOTONIC_STEP'
+                break
             current, state = best, best_state
+            stats['steps'] += 1
+            stats['final_clearance_m'] = state['clearance']
+            stats['gain_m'] = state['clearance'] - initial['clearance']
             if (
                 state["clearance"] > target
                 and checker.is_state_valid(current)
-                and checker.is_human_margin_transition_valid(start, current)
+                and final_transition_valid(start, current)
                 and checker.environment_revision == revision
             ):
-                return np.vstack((start, current))
+                stats['stop_condition'] = 'MARGIN_CLEARED'
+                return finish('NONE', np.vstack((start, current)))
+        if stats['stop_condition'] is None:
+            stats['stop_condition'] = 'STEP_LIMIT'
         if (
             state["clearance"] - initial["clearance"] >= checker.safety_margin
-            and checker.is_human_margin_transition_valid(start, current)
+            and final_transition_valid(start, current)
             and checker.environment_revision == revision
             and checker.human_data_ready()
         ):
-            return np.vstack((start, current))
-        self.last_human_retreat_failure = (
+            return finish('NONE', np.vstack((start, current)))
+        return finish(
             "HUMAN_DATA_UNKNOWN" if not checker.human_data_ready()
             else "ENVIRONMENT_CHANGED" if checker.environment_revision != revision
+            else "NO_MONOTONIC_STEP" if stats['stop_condition'] == 'NO_MONOTONIC_STEP'
             else "SEARCH_BUDGET_EXHAUSTED"
         )
-        return None
 
     def find_alternative_path(self, start, goal, revision):
         checker = self.collision_filter

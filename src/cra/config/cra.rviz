@@ -5,7 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 430
+    Tree Height: 373
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
@@ -63,168 +63,322 @@ Visualization Manager:
       Namespaces:
         human_capsule_1: true
         human_capsule_100: true
-        human_capsule_102: true
-        human_capsule_103: true
-        human_capsule_104: true
         human_capsule_105: true
-        human_capsule_106: true
         human_capsule_107: true
         human_capsule_108: true
-        human_capsule_109: true
-        human_capsule_111: true
-        human_capsule_115: true
-        human_capsule_116: true
-        human_capsule_119: true
-        human_capsule_127: true
+        human_capsule_11: true
+        human_capsule_112: true
+        human_capsule_12: true
+        human_capsule_121: true
+        human_capsule_126: true
         human_capsule_128: true
-        human_capsule_13: true
-        human_capsule_130: true
-        human_capsule_133: true
-        human_capsule_138: true
-        human_capsule_14: true
-        human_capsule_142: true
-        human_capsule_143: true
+        human_capsule_131: true
+        human_capsule_132: true
+        human_capsule_139: true
+        human_capsule_145: true
+        human_capsule_149: true
+        human_capsule_151: true
         human_capsule_153: true
-        human_capsule_156: true
-        human_capsule_161: true
+        human_capsule_154: true
+        human_capsule_157: true
+        human_capsule_160: true
         human_capsule_163: true
-        human_capsule_164: true
-        human_capsule_168: true
+        human_capsule_165: true
         human_capsule_17: true
-        human_capsule_170: true
-        human_capsule_172: true
         human_capsule_173: true
-        human_capsule_174: true
-        human_capsule_175: true
-        human_capsule_176: true
-        human_capsule_177: true
-        human_capsule_178: true
-        human_capsule_19: true
-        human_capsule_193: true
+        human_capsule_18: true
+        human_capsule_181: true
+        human_capsule_182: true
+        human_capsule_184: true
+        human_capsule_186: true
+        human_capsule_188: true
         human_capsule_196: true
-        human_capsule_199: true
+        human_capsule_197: true
         human_capsule_2: true
-        human_capsule_201: true
-        human_capsule_203: true
+        human_capsule_20: true
+        human_capsule_204: true
         human_capsule_205: true
-        human_capsule_209: true
-        human_capsule_21: true
+        human_capsule_206: true
         human_capsule_210: true
         human_capsule_211: true
-        human_capsule_212: true
-        human_capsule_213: true
-        human_capsule_215: true
-        human_capsule_217: true
-        human_capsule_218: true
-        human_capsule_22: true
-        human_capsule_220: true
-        human_capsule_222: true
-        human_capsule_223: true
-        human_capsule_225: true
-        human_capsule_227: true
-        human_capsule_228: true
-        human_capsule_229: true
-        human_capsule_23: true
-        human_capsule_230: true
-        human_capsule_231: true
-        human_capsule_232: true
-        human_capsule_233: true
-        human_capsule_234: true
-        human_capsule_235: true
+        human_capsule_226: true
+        human_capsule_239: true
         human_capsule_240: true
+        human_capsule_241: true
+        human_capsule_243: true
+        human_capsule_245: true
+        human_capsule_246: true
+        human_capsule_248: true
         human_capsule_249: true
-        human_capsule_25: true
         human_capsule_250: true
+        human_capsule_251: true
         human_capsule_252: true
         human_capsule_253: true
-        human_capsule_255: true
+        human_capsule_254: true
+        human_capsule_256: true
+        human_capsule_257: true
+        human_capsule_258: true
         human_capsule_26: true
         human_capsule_260: true
+        human_capsule_261: true
         human_capsule_263: true
         human_capsule_267: true
+        human_capsule_268: true
         human_capsule_269: true
+        human_capsule_27: true
         human_capsule_271: true
+        human_capsule_272: true
         human_capsule_273: true
-        human_capsule_276: true
+        human_capsule_274: true
+        human_capsule_279: true
+        human_capsule_28: true
         human_capsule_280: true
-        human_capsule_282: true
-        human_capsule_289: true
-        human_capsule_296: true
+        human_capsule_281: true
+        human_capsule_286: true
+        human_capsule_290: true
         human_capsule_3: true
         human_capsule_30: true
-        human_capsule_302: true
-        human_capsule_303: true
-        human_capsule_308: true
-        human_capsule_312: true
-        human_capsule_320: true
-        human_capsule_321: true
-        human_capsule_322: true
-        human_capsule_325: true
+        human_capsule_300: true
+        human_capsule_304: true
+        human_capsule_313: true
+        human_capsule_314: true
+        human_capsule_316: true
+        human_capsule_317: true
         human_capsule_326: true
-        human_capsule_341: true
-        human_capsule_348: true
+        human_capsule_327: true
+        human_capsule_328: true
+        human_capsule_33: true
+        human_capsule_335: true
+        human_capsule_34: true
+        human_capsule_346: true
         human_capsule_35: true
-        human_capsule_352: true
         human_capsule_354: true
-        human_capsule_36: true
+        human_capsule_356: true
+        human_capsule_359: true
         human_capsule_362: true
+        human_capsule_365: true
         human_capsule_368: true
-        human_capsule_369: true
         human_capsule_37: true
-        human_capsule_370: true
-        human_capsule_373: true
-        human_capsule_374: true
         human_capsule_375: true
-        human_capsule_377: true
-        human_capsule_378: true
-        human_capsule_380: true
-        human_capsule_386: true
-        human_capsule_39: true
+        human_capsule_379: true
+        human_capsule_38: true
+        human_capsule_382: true
+        human_capsule_384: true
+        human_capsule_387: true
+        human_capsule_388: true
+        human_capsule_389: true
+        human_capsule_391: true
         human_capsule_393: true
-        human_capsule_399: true
+        human_capsule_398: true
         human_capsule_4: true
         human_capsule_401: true
-        human_capsule_407: true
-        human_capsule_410: true
-        human_capsule_420: true
-        human_capsule_422: true
-        human_capsule_423: true
-        human_capsule_424: true
-        human_capsule_43: true
-        human_capsule_451: true
-        human_capsule_453: true
+        human_capsule_402: true
+        human_capsule_41: true
+        human_capsule_412: true
+        human_capsule_42: true
+        human_capsule_435: true
+        human_capsule_450: true
+        human_capsule_455: true
         human_capsule_456: true
-        human_capsule_486: true
-        human_capsule_488: true
-        human_capsule_491: true
+        human_capsule_461: true
+        human_capsule_469: true
+        human_capsule_47: true
+        human_capsule_479: true
+        human_capsule_48: true
+        human_capsule_493: true
+        human_capsule_494: true
+        human_capsule_495: true
+        human_capsule_497: true
+        human_capsule_499: true
         human_capsule_5: true
-        human_capsule_500: true
+        human_capsule_50: true
+        human_capsule_512: true
+        human_capsule_513: true
         human_capsule_515: true
-        human_capsule_55: true
-        human_capsule_56: true
+        human_capsule_516: true
+        human_capsule_534: true
+        human_capsule_539: true
+        human_capsule_54: true
+        human_capsule_542: true
+        human_capsule_543: true
+        human_capsule_549: true
+        human_capsule_550: true
+        human_capsule_552: true
+        human_capsule_553: true
+        human_capsule_555: true
+        human_capsule_560: true
+        human_capsule_561: true
+        human_capsule_562: true
+        human_capsule_563: true
+        human_capsule_569: true
         human_capsule_57: true
-        human_capsule_58: true
-        human_capsule_59: true
+        human_capsule_571: true
+        human_capsule_572: true
+        human_capsule_573: true
+        human_capsule_574: true
+        human_capsule_576: true
+        human_capsule_577: true
+        human_capsule_578: true
+        human_capsule_580: true
+        human_capsule_581: true
+        human_capsule_582: true
+        human_capsule_583: true
+        human_capsule_584: true
+        human_capsule_591: true
         human_capsule_6: true
-        human_capsule_60: true
-        human_capsule_61: true
-        human_capsule_67: true
-        human_capsule_7: true
-        human_capsule_74: true
+        human_capsule_602: true
+        human_capsule_603: true
+        human_capsule_604: true
+        human_capsule_607: true
+        human_capsule_612: true
+        human_capsule_614: true
+        human_capsule_617: true
+        human_capsule_620: true
+        human_capsule_621: true
+        human_capsule_622: true
+        human_capsule_623: true
+        human_capsule_624: true
+        human_capsule_625: true
+        human_capsule_626: true
+        human_capsule_629: true
+        human_capsule_632: true
+        human_capsule_634: true
+        human_capsule_635: true
+        human_capsule_636: true
+        human_capsule_638: true
+        human_capsule_642: true
+        human_capsule_643: true
+        human_capsule_644: true
+        human_capsule_645: true
+        human_capsule_646: true
+        human_capsule_648: true
+        human_capsule_65: true
+        human_capsule_650: true
+        human_capsule_657: true
+        human_capsule_661: true
+        human_capsule_665: true
+        human_capsule_670: true
+        human_capsule_675: true
+        human_capsule_678: true
+        human_capsule_679: true
+        human_capsule_680: true
+        human_capsule_682: true
+        human_capsule_684: true
+        human_capsule_686: true
+        human_capsule_692: true
+        human_capsule_694: true
+        human_capsule_696: true
+        human_capsule_699: true
+        human_capsule_701: true
+        human_capsule_704: true
+        human_capsule_705: true
+        human_capsule_707: true
+        human_capsule_710: true
+        human_capsule_72: true
+        human_capsule_720: true
+        human_capsule_729: true
+        human_capsule_73: true
+        human_capsule_732: true
+        human_capsule_740: true
+        human_capsule_742: true
+        human_capsule_749: true
         human_capsule_75: true
+        human_capsule_753: true
+        human_capsule_754: true
+        human_capsule_755: true
+        human_capsule_757: true
+        human_capsule_764: true
+        human_capsule_765: true
+        human_capsule_766: true
         human_capsule_77: true
-        human_capsule_79: true
+        human_capsule_771: true
+        human_capsule_778: true
+        human_capsule_781: true
+        human_capsule_782: true
+        human_capsule_784: true
+        human_capsule_786: true
+        human_capsule_787: true
+        human_capsule_788: true
+        human_capsule_789: true
+        human_capsule_794: true
+        human_capsule_797: true
+        human_capsule_798: true
         human_capsule_80: true
+        human_capsule_800: true
+        human_capsule_801: true
+        human_capsule_805: true
+        human_capsule_807: true
+        human_capsule_809: true
         human_capsule_81: true
-        human_capsule_82: true
-        human_capsule_84: true
-        human_capsule_86: true
-        human_capsule_9: true
-        human_capsule_94: true
-        human_capsule_95: true
-        human_capsule_96: true
+        human_capsule_810: true
+        human_capsule_812: true
+        human_capsule_814: true
+        human_capsule_818: true
+        human_capsule_820: true
+        human_capsule_821: true
+        human_capsule_822: true
+        human_capsule_824: true
+        human_capsule_826: true
+        human_capsule_83: true
+        human_capsule_830: true
+        human_capsule_844: true
+        human_capsule_846: true
+        human_capsule_847: true
+        human_capsule_848: true
+        human_capsule_852: true
+        human_capsule_855: true
+        human_capsule_857: true
+        human_capsule_858: true
+        human_capsule_865: true
+        human_capsule_867: true
+        human_capsule_871: true
+        human_capsule_880: true
+        human_capsule_882: true
+        human_capsule_883: true
+        human_capsule_884: true
+        human_capsule_886: true
+        human_capsule_888: true
+        human_capsule_894: true
+        human_capsule_898: true
+        human_capsule_899: true
+        human_capsule_90: true
+        human_capsule_903: true
+        human_capsule_905: true
+        human_capsule_91: true
+        human_capsule_915: true
+        human_capsule_917: true
+        human_capsule_927: true
+        human_capsule_928: true
+        human_capsule_929: true
+        human_capsule_931: true
+        human_capsule_932: true
+        human_capsule_933: true
+        human_capsule_935: true
+        human_capsule_936: true
+        human_capsule_937: true
+        human_capsule_938: true
+        human_capsule_941: true
+        human_capsule_942: true
+        human_capsule_943: true
+        human_capsule_947: true
+        human_capsule_949: true
+        human_capsule_953: true
+        human_capsule_955: true
+        human_capsule_956: true
+        human_capsule_959: true
+        human_capsule_961: true
         human_capsule_97: true
+        human_capsule_972: true
+        human_capsule_973: true
+        human_capsule_976: true
+        human_capsule_979: true
         human_capsule_98: true
+        human_capsule_987: true
+        human_capsule_99: true
+        human_capsule_992: true
+        human_capsule_993: true
+        human_capsule_994: true
+        human_capsule_995: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -282,31 +436,90 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /planning/initial_path
       Value: true
-    - Class: rviz_default_plugins/Marker
-      Enabled: true
-      Name: GNG nodes
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: false
+      Name: GNG - original
       Namespaces:
+        gng_edges: true
         gng_nodes: true
       Topic:
         Depth: 1
         Durability Policy: Transient Local
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /planning/gng_nodes
-      Value: true
-    - Class: rviz_default_plugins/Marker
+        Value: /planning/gng_graph
+      Value: false
+    - Class: rviz_default_plugins/MarkerArray
       Enabled: true
-      Name: GNG edges
+      Name: Workspace graph - obstacle mask
       Namespaces:
-        gng_edges: true
+        {}
       Topic:
         Depth: 1
         Durability Policy: Transient Local
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /planning/gng_edges
+        Value: /planning/workspace_graph_mask
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: RRT - Start Tree
+      Namespaces:
+        {}
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/rrt/start_tree
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: RRT - Goal Tree
+      Namespaces:
+        {}
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/rrt/goal_tree
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: RRT - Final Path
+      Namespaces:
+        {}
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/rrt/final_path
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: false
+      Name: RRT - Rejected Candidates
+      Namespaces:
+        {}
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/rrt/rejected_candidates
+      Value: false
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: RRT - Search Step and Status
+      Namespaces:
+        {}
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/rrt/search_step
       Value: true
   Enabled: true
   Global Options:
@@ -342,18 +555,18 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7700001001358032
+      Pitch: 0.8800000548362732
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 6.258181571960449
+      Yaw: 0.13999676704406738
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: true
+    collapsed: false
   Height: 1011
-  Hide Left Dock: true
+  Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000001000000000000019b0000039dfc0200000002fb000000100044006900730070006c006100790073000000003b0000022f000000c700fffffffb0000000a00560069006500770073000000027000000168000000a000ffffff000007800000039d00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000001000000000000019b0000039dfc0200000002fb000000100044006900730070006c006100790073000000003b0000022f000000c700fffffffb0000000a00560069006500770073000000003b0000039d000000a000ffffff000007800000039d00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: true
   Width: 1920

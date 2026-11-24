@@ -1,10 +1,10 @@
 # RRT observation without Motion dispatch
 
-This is the next user-approved development stage after the offline clearance
-experiment: run an observational candidate search in a separate process and
-measure freshness, latest-scene rejection and callback responsiveness. GNG/A*
-still supplies the live path. This does not activate RRT execution or best-first
-retreat and does not change completed-task/idle avoidance policy.
+This document describes `planning.rrt.mode: shadow`, retained for comparison.
+The current simulation YAML selects active `mode: fallback`; see
+[RRT_FALLBACK.md](RRT_FALLBACK.md). Shadow mode remains observational, keeps
+GNG/A* as the live path source and does not dispatch candidates or change
+completed-task/idle avoidance behavior.
 
 ## Data flow
 
@@ -46,9 +46,9 @@ are rejected. This is not a hard real-time scheduling guarantee.
 
 ## Configuration and observation
 
-`src/cra/config/robot.yaml`, under `planning.rrt_shadow`:
+`src/cra/config/robot.yaml`, under `planning.rrt` (legacy `rrt_shadow` is also supported):
 
-- `enabled: true`: observation in simulation mode only; false disables it.
+- `mode: shadow`: observation in simulation mode only; `off` disables RRT.
 - `search_budget: 0.5`, `selection_budget: 2.0`,
   `preference_search_budget: 0.8`, `validation_budget: 0.5`: wall seconds.
 - `preferred_clearance: 0.07`: optional preference, original hard 0.05 m remains.

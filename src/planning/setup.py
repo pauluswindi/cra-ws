@@ -29,6 +29,7 @@ setup(
     license="Apache-2.0",
     entry_points={
         "console_scripts": [
+            "rrt_replay = planning.rrt_replay:main",
             "generate_workspace = "
             "planning.workspace.generate_workspace:main",
 

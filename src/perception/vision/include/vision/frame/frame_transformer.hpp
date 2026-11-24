@@ -31,11 +31,12 @@ public:
 
     bool canTransform(const std::string& target_frame, const std::string& source_frame) const;
 
-private:
+    // Capture one transform for a batch of points in the same frame.
     bool lookupTransform(const std::string& target_frame,
                          const std::string& source_frame,
                          tf2::Transform& out) const;
 
+private:
     rclcpp::Node* node_;
     std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
     std::shared_ptr<tf2_ros::TransformListener> tf_listener_;

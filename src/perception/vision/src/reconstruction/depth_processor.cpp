@@ -145,6 +145,20 @@ std::vector<geometry_msgs::msg::Point> DepthProcessor::extractPoints(
     double max_depth,
     const std::vector<std::uint8_t>* pixel_mask) const
 {
+    return extractPoints(depth_image, camera_info, transform, roi,
+                         min_depth, max_depth, pixel_mask, nullptr);
+}
+
+std::vector<geometry_msgs::msg::Point> DepthProcessor::extractPoints(
+    const sensor_msgs::msg::Image& depth_image,
+    const sensor_msgs::msg::CameraInfo& camera_info,
+    const geometry_msgs::msg::TransformStamped& transform,
+    const ROI3D& roi,
+    double min_depth,
+    double max_depth,
+    const std::vector<std::uint8_t>* pixel_mask,
+    const std::vector<segmentation::PixelRun>* pixel_runs) const
+{
     std::vector<geometry_msgs::msg::Point> points;
 
     if (!roi.valid) {
@@ -176,6 +190,21 @@ std::vector<geometry_msgs::msg::Point> DepthProcessor::extractPoints(
 
     const std::size_t width = depth_image.width;
     const std::size_t height = depth_image.height;
+
+    if (pixel_mask != nullptr && pixel_runs != nullptr) {
+        throw std::invalid_argument("Use one pixel selection representation");
+    }
+    std::size_t selected_count = 0;
+    if (pixel_runs != nullptr) {
+        std::size_t previous_end = 0;
+        for (const auto& run : *pixel_runs) {
+            if (run.begin >= run.end || run.end > width * height || run.begin < previous_end) {
+                throw std::invalid_argument("Pixel runs must be ordered, disjoint and in bounds");
+            }
+            selected_count += run.end - run.begin;
+            previous_end = run.end;
+        }
+    }
 
     if (pixel_mask != nullptr &&
         pixel_mask->size() != width * height) {
@@ -311,89 +340,98 @@ std::vector<geometry_msgs::msg::Point> DepthProcessor::extractPoints(
 
     const std::uint8_t* data = depth_image.data.data();
 
-    for (std::size_t v = 0; v < height; ++v) {
-        const std::size_t row_offset =
-            v * depth_image.step;
+    const auto append_pixel = [&](std::size_t index, std::size_t offset) {
+        double depth = 0.0;
 
-        for (std::size_t u = 0; u < width; ++u) {
-            const std::size_t index = v * width + u;
+        if (depth_u16) {
+            std::uint16_t value;
 
-            // Ignore pixels outside the selected object mask.
-            if (pixel_mask != nullptr &&
-                (*pixel_mask)[index] == 0) {
-                continue;
+            std::memcpy(
+                &value,
+                data + offset,
+                sizeof(value));
+
+            depth =
+                static_cast<double>(value) * 0.001;
+        } else {
+            float value;
+
+            std::memcpy(
+                &value,
+                data + offset,
+                sizeof(value));
+
+            depth = static_cast<double>(value);
+        }
+
+        if (!std::isfinite(depth) ||
+            depth < near_depth ||
+            depth > far_depth) {
+            return;
+        }
+
+        const auto& ray = undistorted_rays_[index];
+
+        if (!std::isfinite(ray.x) ||
+            !std::isfinite(ray.y)) {
+            return;
+        }
+
+        const double x =
+            static_cast<double>(ray.x) * depth;
+
+        const double y =
+            static_cast<double>(ray.y) * depth;
+
+        if (x < camera_min.x() ||
+            x > camera_max.x() ||
+            y < camera_min.y() ||
+            y > camera_max.y()) {
+            return;
+        }
+
+        const tf2::Vector3 point_base =
+            camera_to_base * tf2::Vector3(x, y, depth);
+
+        if (point_base.x() < roi.min.x ||
+            point_base.x() > roi.max.x ||
+            point_base.y() < roi.min.y ||
+            point_base.y() > roi.max.y ||
+            point_base.z() < roi.min.z ||
+            point_base.z() > roi.max.z) {
+            return;
+        }
+
+        geometry_msgs::msg::Point point;
+        point.x = point_base.x();
+        point.y = point_base.y();
+        point.z = point_base.z();
+
+        points.push_back(point);
+    };
+
+    if (pixel_runs != nullptr) {
+        points.reserve(selected_count);
+        for (const auto& run : *pixel_runs) {
+            auto index = run.begin;
+            while (index < run.end) {
+                const auto row = index / width;
+                const auto row_end = std::min(run.end, (row + 1) * width);
+                auto offset = row * depth_image.step + (index % width) * pixel_size;
+                for (; index < row_end; ++index, offset += pixel_size) {
+                    append_pixel(index, offset);
+                }
             }
-
-            const std::size_t offset =
-                row_offset + u * pixel_size;
-
-            double depth = 0.0;
-
-            if (depth_u16) {
-                std::uint16_t value;
-
-                std::memcpy(
-                    &value,
-                    data + offset,
-                    sizeof(value));
-
-                depth =
-                    static_cast<double>(value) * 0.001;
-            } else {
-                float value;
-
-                std::memcpy(
-                    &value,
-                    data + offset,
-                    sizeof(value));
-
-                depth = static_cast<double>(value);
+        }
+    } else {
+        for (std::size_t v = 0; v < height; ++v) {
+            const auto row = v * depth_image.step;
+            for (std::size_t u = 0; u < width; ++u) {
+                const auto index = v * width + u;
+                if (pixel_mask == nullptr || (*pixel_mask)[index] != 0) {
+                    append_pixel(index, row + u * pixel_size);
+                }
             }
-
-            if (!std::isfinite(depth) ||
-                depth < near_depth ||
-                depth > far_depth) {
-                continue;
-            }
-
-            const auto& ray = undistorted_rays_[index];
-
-            if (!std::isfinite(ray.x) ||
-                !std::isfinite(ray.y)) {
-                continue;
-            }
-
-            const double x =
-                static_cast<double>(ray.x) * depth;
-
-            const double y =
-                static_cast<double>(ray.y) * depth;
-
-            if (x < camera_min.x() ||
-                x > camera_max.x() ||
-                y < camera_min.y() ||
-                y > camera_max.y()) {
-                continue;
-            }
-
-            const tf2::Vector3 point_base =
-                camera_to_base * tf2::Vector3(x, y, depth);
-
-            if (point_base.x() < roi.min.x ||
-                point_base.x() > roi.max.x ||
-                point_base.y() < roi.min.y ||
-                point_base.y() > roi.max.y ||
-                point_base.z() < roi.min.z ||
-                point_base.z() > roi.max.z) {
-                continue;
-            }
-
-            geometry_msgs::msg::Point point;
-            point.x = point_base.x();
-            point.y = point_base.y();
-            point.z = point_base.z();
-
-            points.push_back(point);
         }
     }
 

@@ -22,7 +22,10 @@ from planning.human_capsule_monitor import HumanCapsuleMonitor
 from planning.path_planner import PathPlanner
 from planning.planning_manager import PlanningManager
 from planning.rrt_shadow import ShadowRRTObserver
+from planning.rrt_fallback import RRTFallbackCoordinator, rrt_settings
 from planning.visualization.planning_visualizer import PlanningVisualizer
+from planning.visualization.rrt_display import RRTDisplay
+from planning.visualization.workspace_graph_mask import WorkspaceGraphMask
 from simulation.frame_transform import FrameTransform
 
 
@@ -39,10 +42,11 @@ class PlanningNode(Node):
             "obstacle_timeout": 1.0,
             "goal_tolerance": 0.12,
             "target_clearance": 0.04,
-            "publish_filtered_joint_graph": False,
+            "publish_workspace_graph_mask": True,
             "execute_path": True,
             "simulation_only_ignore_unknown": True,
             "profile_planning": True,
+            "rrt_mode": "",  # Empty uses YAML; useful for controlled probes.
         }
 
         for name, value in defaults.items():
@@ -69,6 +73,8 @@ class PlanningNode(Node):
             config = yaml.safe_load(file)
 
         robot = config["robot"]
+        self.rrt_mode, self.rrt_visualization_enabled, rrt_options = rrt_settings(
+            config.get('planning', {}), robot.get('mode'), get('rrt_mode'))
 
         self.joint_names = list(robot["joints"])
         self.base_frame = robot["frames"]["base"]
@@ -76,9 +82,7 @@ class PlanningNode(Node):
         if len(self.joint_names) != 5:
             raise ValueError("Expected five robot joints")
 
-        self.show_joint_graph = bool(
-            get("publish_filtered_joint_graph")
-        )
+        self.show_workspace_graph_mask = bool(get("publish_workspace_graph_mask"))
 
         human_config = config.get("planning", {}).get(
             "human_avoidance", {}
@@ -163,7 +167,6 @@ class PlanningNode(Node):
 
         self.status = None
         self.displayed_path = None
-        self.graph_update_required = self.show_joint_graph
 
         durable = QoSProfile(
             depth=1,
@@ -247,19 +250,33 @@ class PlanningNode(Node):
         )
 
         self.rrt_shadow = None
-        shadow_config = config.get('planning', {}).get('rrt_shadow', {})
-        shadow_enabled = shadow_config.get('enabled', False)
-        if not isinstance(shadow_enabled, bool):
-            raise ValueError('rrt_shadow.enabled must be boolean')
-        if shadow_enabled and robot.get('mode') == 'simulation':
-            self.rrt_shadow = ShadowRRTObserver(
+        self.rrt_display = RRTDisplay(self, self.visualizer)
+        self.workspace_graph_mask = (WorkspaceGraphMask(
+            self.visualizer.gng_nodes, self.visualizer.gng_edges)
+            if self.show_workspace_graph_mask else None)
+        self.workspace_mask_scene_key = None
+        self.workspace_mask_status_pub = self.create_publisher(
+            String, '/planning/workspace_graph_mask_status', durable)
+        if self.rrt_mode != 'off' and robot.get('mode') == 'simulation':
+            coordinator = (RRTFallbackCoordinator if self.rrt_mode == 'fallback'
+                           else ShadowRRTObserver)
+            self.rrt_shadow = coordinator(
                 paths['model_path'], self.joint_names,
                 {key: getattr(checker, key) for key in (
                     'safety_margin', 'max_joint_step', 'human_safety_margin',
                     'human_data_timeout', 'human_report_cache_size')},
-                **{key: value for key, value in shadow_config.items() if key != 'enabled'})
+                projection_bodies=(self.base_frame, robot['frames']['end_effector']),
+                **rrt_options)
+            self.manager.rrt_fallback_enabled = self.rrt_mode == 'fallback'
+            if self.manager.rrt_fallback_enabled:
+                self.manager.rrt_wait_timeout = self.rrt_shadow.fallback_budget
             self.rrt_shadow_pub = self.create_publisher(String, '/planning/rrt_shadow', 10)
+            self.rrt_events_pub = self.create_publisher(String, '/planning/rrt/events', 10)
             self.rrt_shadow_timer = self.create_timer(.05, self.observe_rrt)
+            self.rrt_display.status('RRT ' + self.rrt_mode
+                                    + ': waiting for an eligible GNG/A* failure')
+        else:
+            self.rrt_display.status('SHADOW_DISABLED: no RRT searches')
 
         self.set_status("WAITING_FOR_FEEDBACK")
 
@@ -272,6 +289,7 @@ class PlanningNode(Node):
             f"human_geometry_cache={checker.human_report_cache_size}, "
             f"profile_planning={self.manager.profiler.enabled}, "
             f"rrt_shadow={self.rrt_shadow is not None}, "
+            f"rrt_mode={self.rrt_mode}, "
             f"segment_progress={self.planner.segment_progress_enabled}, "
             f"progress_corridor="
             f"{self.planner.execution_progress_config['corridor_tolerance']}rad, "
@@ -281,12 +299,39 @@ class PlanningNode(Node):
         )
 
     def observe_rrt(self):
-        # No manager.step(), path replacement, STOP, RELEASE or EXECUTE here.
+        # Deliver a mailbox result only. The regular manager step owns paths,
+        # STOP/RELEASE/EXECUTE, full preparation and final collision validation.
+        self.rrt_shadow.visualization_requested = (
+            self.rrt_visualization_enabled and self.rrt_display.interested())
         event = self.rrt_shadow.tick(self.manager)
+        delivery = getattr(self.rrt_shadow, 'delivery', None)
+        if delivery is not None:
+            self.rrt_shadow.delivery = None
+            delivered = self.manager.offer_rrt_result(delivery)
+            if event is not None:
+                event['delivered_to_planning'] = delivered
         if event is not None:
             payload = json.dumps(event, allow_nan=False, separators=(',', ':'))
             self.rrt_shadow_pub.publish(String(data=payload))
-            self.get_logger().info(f'RRT shadow: {payload}')
+            self.rrt_events_pub.publish(String(data=payload))
+            self.get_logger().info(f'RRT {self.rrt_mode}: {payload}')
+        try:
+            data = self.rrt_shadow.visualization_result
+            self.rrt_shadow.visualization_result = None
+            if event is not None:
+                status = ('RRT ' + event['event'] + ': '
+                          + event.get('disposition', event.get('reason', '')))
+                if event['event'] in ('SEARCH_SUBMITTED', 'DISCARDED', 'DISABLED',
+                                      'FALLBACK_REJECTED'):
+                    self.rrt_display.clear(status)
+                else:
+                    self.rrt_display.status(status)
+            if data is not None:
+                self.rrt_display.accept(data)
+            self.rrt_display.tick(self.manager)
+        except Exception as error:
+            self.get_logger().error(f'RRT visualization failed: {error}')
+            self.rrt_display.clear('VISUALIZATION_ERROR: see console')
 
     def destroy_node(self):
         if getattr(self, 'rrt_shadow', None) is not None:
@@ -553,9 +598,6 @@ class PlanningNode(Node):
 
             if changed:
                 self.clear_visualization()
-                self.graph_update_required = (
-                    self.show_joint_graph
-                )
 
         except Exception as error:
             self.manager.target_base = None
@@ -631,9 +673,6 @@ class PlanningNode(Node):
 
             if changed:
                 self.clear_visualization()
-                self.graph_update_required = (
-                    self.show_joint_graph
-                )
 
         except Exception as error:
             self.manager.obstacles_ready = False
@@ -709,23 +748,66 @@ class PlanningNode(Node):
         self.visualizer.clear_path("replanned")
 
     def update_graph_visualization(self):
-        if not self.graph_update_required:
+        if self.workspace_graph_mask is None:
             return
-
-        self.graph_update_required = False
-
-        if not self.show_joint_graph:
-            return
-
         try:
-            graph = self.planner.get_filtered_graph()
-
-            self.visualizer.publish_filtered_graph(graph)
-
+            self.update_workspace_graph_mask()
         except Exception as error:
-            self.get_logger().error(
-                f"Graph visualization failed: {error}"
-            )
+            self.get_logger().error(f'Workspace graph mask failed: {error}')
+            self.workspace_graph_mask = None
+            self.visualizer.clear_workspace_graph_mask('Workspace mask unavailable; see console')
+
+    def update_workspace_graph_mask(self):
+        if self.visualizer.workspace_mask_pub.get_subscription_count() == 0:
+            return
+        manager = self.manager
+        checker = self.planner.collision_filter
+        capsules, boxes = (), []
+        obstacles_fresh = manager.obstacle_data_ready()
+        if not manager.human_avoidance_enabled:
+            status = 'HUMAN_DISABLED'
+        elif manager.human_status == 'OBSERVED' and checker.human_data_ready():
+            status = 'OBSERVED'
+        elif (manager.human_status == 'EMPTY' and manager.human_empty_until is not None
+              and time.monotonic() < manager.human_empty_until):
+            status = 'EMPTY'
+        else:
+            status = 'UNKNOWN'
+        # The simulation UNKNOWN policy can temporarily disable human checks,
+        # so actual capsule changes must not rely on the checker revision alone.
+        human_observed = status == 'OBSERVED'
+        if not obstacles_fresh:
+            status += '_OBSTACLES_STALE'
+        key = (checker.environment_revision, status,
+               checker.human_capsules if human_observed else ())
+        if key == self.workspace_mask_scene_key:
+            return
+        if human_observed:
+            capsules = tuple((a, b, radius) for _, a, b, radius in checker.human_capsules)
+        if obstacles_fresh:
+            # Read existing compiled poses only. Never run FK or mutate checker state.
+            data, model = checker.data, checker.model
+            base = data.xpos[checker.base_id]
+            conversion = (FrameTransform.ROBOT_FROM_MUJOCO_BASE
+                          @ data.xmat[checker.base_id].reshape(3, 3).T)
+            for obstacle in checker.obstacle_geoms.values():
+                for geom in obstacle['geom_ids']:
+                    if not (model.geom_contype[geom] or model.geom_conaffinity[geom]):
+                        continue
+                    if model.geom_type[geom] != mujoco.mjtGeom.mjGEOM_BOX:
+                        raise ValueError('Workspace display supports box simulation obstacles')
+                    boxes.append((conversion @ (data.geom_xpos[geom] - base),
+                                  conversion @ data.geom_xmat[geom].reshape(3, 3),
+                                  model.geom_size[geom, :3]))
+        result = self.workspace_graph_mask.update(capsules, boxes, status)
+        self.workspace_mask_scene_key = key
+        if result is not None:
+            self.visualizer.publish_workspace_graph_mask(result)
+            self.workspace_mask_status_pub.publish(String(data=json.dumps(dict(
+                status=status, display_only=True,
+                hidden_nodes=int(np.count_nonzero(~result['visible_node_mask'])),
+                hidden_edges=int(np.count_nonzero(~result['visible_edge_mask'])),
+                calculation_ms=result['elapsed_s'] * 1000.), separators=(',', ':'))))
 
     def report_path_failure(self):
         """Report frozen failed-check evidence after dispatch, without geometry work."""
@@ -744,7 +826,7 @@ class PlanningNode(Node):
             return
         now = time.monotonic()
         work_ms = (time.perf_counter() - began) * 1000.
-        key = (decision.action, decision.status)
+        key = (decision.action, decision.status, getattr(self.manager, 'rrt_block_reason', None))
         acknowledgement = any('origin_cycle' in row for row in profiler.records)
         failed_stage = any(row['outcome'] == 'ERROR' for row in profiler.records)
         if (
@@ -761,6 +843,10 @@ class PlanningNode(Node):
             "cycle": profiler.cycle,
             "status": decision.status,
             "action": decision.action,
+            "planner_source": getattr(self.manager, 'path_source', None),
+            "rrt_result": getattr(self.manager, 'rrt_last_reason', None),
+            "rrt_admission_reason": getattr(self.manager, 'rrt_block_reason', None),
+            "rrt_refresh_pending": getattr(self.manager, 'rrt_refresh_attempt', None) is not None,
             "cycle_work_ms": round(work_ms, 3),
             "human_status": self.manager.human_status,
             "human_reason": self.manager.human_reason,
@@ -783,6 +869,9 @@ class PlanningNode(Node):
             "retreat_reason": (
                 self.manager.human_margin_block_reason
                 if decision.status == "HUMAN_RETREAT_BLOCKED" else None),
+            "retreat_search": (
+                getattr(self.planner, 'last_human_retreat_statistics', None)
+                if any(row['stage'] == 'retreat_search' for row in profiler.records) else None),
             **observation,
             "stages": list(profiler.records),
         }
@@ -846,7 +935,8 @@ class PlanningNode(Node):
 
             self.get_logger().info(
                 f"{decision.status}: "
-                f"{len(trajectory.points)} waypoints sent"
+                f"{len(trajectory.points)} waypoints sent; "
+                f"source={getattr(self.manager, 'path_source', None)}"
             )
 
         # Dispatch Motion commands before potentially expensive visualization.

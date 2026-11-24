@@ -16,11 +16,24 @@ robot:
     - joint4
     - joint5
 
+rviz:
+  enabled: true
+
+vision:
+  tracker_enqueue_wait_ms: 5 # -1: blocking; 5: bounded tracker admission wait
+
+logging:
+  enabled: true
+  latest_file: /home/lvinz/living-lab/cra_ws/logs/cra_latest.log
+  max_size_mb: 20
+
 workspace:
+  path: ~/living-lab/cra_ws/src/planning/data/raw_workspace.npz
   num_samples: 50000
   random_seed: 42
 
 gng:
+  graph_path: ~/living-lab/cra_ws/src/planning/data/workspace_graph.npz
   max_nodes: 1000
   epochs: 20
   epsilon_b: 0.05
@@ -44,10 +57,12 @@ planning:
   collision_checks:
     human_report_cache_size: 256 # Exact geometry reuse within the current snapshot.
 
-  rrt_shadow:
-    enabled: true # Simulation observation only; candidates never command Motion.
+  rrt:
+    mode: fallback # off / shadow / fallback; fallback is simulation-only.
+    fallback_budget: 1.5 # Admission through latest-scene validation, including worker startup.
+    visualization_enabled: true # Bounded traces only when RRT marker subscribers exist.
     search_budget: 0.5
-    selection_budget: 2.0
+    selection_budget: 2.0 # Clearance selection applies in shadow mode only.
     preference_search_budget: 0.8
     validation_budget: 0.5
     preferred_clearance: 0.07

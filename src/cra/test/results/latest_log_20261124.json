@@ -1,0 +1,79 @@
+{
+  "scope": "Verify latest-only capture with actual launch, C++ TF and Python output.\n\nNo camera, Planning, Motion, MuJoCo or physical hardware is started. Each\nlaunch uses temporary files and isolated localhost ROS domain 224.\n",
+  "description_load_has_no_file_side_effect": true,
+  "trials": [
+    {
+      "mode": "normal",
+      "marker": "FIRST_RUN",
+      "checks": {
+        "clean_exit": true,
+        "console_stdout": true,
+        "console_stderr": true,
+        "console_shutdown": true,
+        "other_log_preserved": true,
+        "file_stdout": true,
+        "file_stderr": true,
+        "file_fragmented_unicode": true,
+        "file_shutdown": true,
+        "file_cpp_ros_output": true,
+        "lifecycle_exit": true,
+        "clean_writer_close": true,
+        "previous_launch_removed": true,
+        "bounded_file": true
+      }
+    },
+    {
+      "mode": "normal",
+      "marker": "SECOND_RUN",
+      "checks": {
+        "clean_exit": true,
+        "console_stdout": true,
+        "console_stderr": true,
+        "console_shutdown": true,
+        "other_log_preserved": true,
+        "file_stdout": true,
+        "file_stderr": true,
+        "file_fragmented_unicode": true,
+        "file_shutdown": true,
+        "file_cpp_ros_output": true,
+        "lifecycle_exit": true,
+        "clean_writer_close": true,
+        "previous_launch_removed": true,
+        "bounded_file": true
+      }
+    },
+    {
+      "mode": "disabled",
+      "marker": "DISABLED_RUN",
+      "checks": {
+        "clean_exit": true,
+        "console_stdout": true,
+        "console_stderr": true,
+        "console_shutdown": true,
+        "other_log_preserved": true,
+        "disabled_does_not_touch_latest": true
+      }
+    },
+    {
+      "mode": "console-only",
+      "marker": "CONSOLE_RUN",
+      "checks": {
+        "clean_exit": true,
+        "console_stdout": true,
+        "console_stderr": true,
+        "console_shutdown": true,
+        "other_log_preserved": true,
+        "disabled_does_not_touch_latest": true
+      }
+    }
+  ],
+  "verified_files_sha256": {
+    "src/cra/launch/latest_log.py": "8ac18169ead31d6e1f5087e92938c3041d21809d35361fa6ebb8dca114c4ab9a",
+    "src/cra/launch/cra.launch.py": "0c674b2da95a999dcbcf1d1ffee8645949985d80def8fa7d086208148453f612",
+    "src/cra/config/robot.yaml": "8a7d63c5d64e05df1568063d746a187e19bc75956fbd56189abd18972d7dcc63",
+    "src/cra/scripts/demo": "7774858c9302f2829922eebcd8854467fee7dbfd90c288b7b05a36a491a795f6"
+  },
+  "unit_test_cases": 9,
+  "launch_regression_cases": 10,
+  "full_cra_pipeline_started": false
+}
