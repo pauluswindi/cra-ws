@@ -1,13 +1,11 @@
 """Search certificates, bounded replay, shared FK and observational marker gates."""
 
-import copy
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 from builtin_interfaces.msg import Time
 import numpy as np
-from visualization_msgs.msg import Marker
 
 from benchmark_rrt_connect import FAR, GOAL, GRAPH, START, configure, geom_center, planner
 from planning.algorithms.rrt_connect import RRTConnectPlanner
@@ -146,6 +144,9 @@ class MarkerGateTests(unittest.TestCase):
         self.p.collision_filter.enable_human_obstacles(True)
         self.p.collision_filter.set_human_capsules(FAR)
         self.manager = manager_for(self.p)
+        self.manager.status = 'IDLE'
+        self.manager.rrt_human_ready = lambda: (
+            self.manager.human_status == 'EMPTY' or self.p.collision_filter.human_data_ready())
         self.node = FakeNode()
         self.visualizer = object.__new__(PlanningVisualizer)
         self.visualizer.node = self.node
@@ -168,47 +169,37 @@ class MarkerGateTests(unittest.TestCase):
         self.assertEqual(start[0].lifetime.nanosec, 600_000_000)
         self.assertEqual(len(batches['final_path'].markers[0].points), 3)
 
-    def test_scene_change_deletes_previous_tree_and_path(self):
+    def test_scene_change_keeps_labeled_history_without_command(self):
         self.display.accept(self.data)
         self.p.collision_filter.environment_revision += 1
         self.display.tick(self.manager)
-        for topic in ('start_tree', 'goal_tree', 'final_path'):
-            self.assertTrue(all(m.action == Marker.DELETE for m in
-                                self.node.messages['/planning/rrt/' + topic][-1].markers))
-        self.assertIsNone(self.display.data)
-        self.assertIn('ENVIRONMENT_CHANGED', self.display.last_status)
+        self.assertIsNotNone(self.display.data)
+        label = self.node.messages['/planning/rrt/status'][-1].data
+        self.assertIn('HISTORICAL SCENE', label)
+        self.assertIn('candidate only', label)
+        self.assertIsNone(self.manager.pending_action)
 
-    def test_expiry_cannot_borrow_new_human_observation(self):
+    def test_expired_scene_is_history_not_a_refreshed_certificate(self):
         self.data['expires_at'] = 0.
         self.display.accept(self.data)
         self.display.tick(self.manager)
-        self.assertIsNone(self.display.data)
-        self.assertIn('EXPIRED', self.display.last_status)
+        self.assertEqual(self.display.data['expires_at'], 0.)
+        self.assertIn('HISTORICAL SCENE', self.node.messages['/planning/rrt/status'][-1].data)
 
-    def test_marker_lifetime_never_extends_original_snapshot_expiry(self):
-        self.data['expires_at'] = 100.1
-        self.p.collision_filter.human_received_at = 100.
-        self.display.accept(self.data)
+    def test_history_has_fixed_expiry_independent_of_human_updates(self):
         with patch('time.monotonic', return_value=100.):
+            self.display.accept(self.data)
+        with patch('time.monotonic', return_value=105.):
             self.display.tick(self.manager)
-        marker = self.node.messages['/planning/rrt/start_tree'][-1].markers[0]
-        self.assertLessEqual(marker.lifetime.nanosec, 100_000_000)
-        self.assertGreater(marker.lifetime.nanosec, 0)
+        self.assertIsNone(self.display.data)
+        self.assertEqual(self.display.last_status, 'HISTORY_FINISHED')
 
-    def test_unknown_human_and_target_replacement_clear_geometry(self):
-        for change in ('unknown', 'target'):
-            with self.subTest(change=change):
-                self.p.collision_filter.set_human_capsules(FAR)
-                self.data['scene_revision'] = self.p.collision_filter.environment_revision
-                self.display.accept(copy.deepcopy(self.data))
-                if change == 'unknown':
-                    self.p.collision_filter.human_received_at = None
-                else:
-                    self.manager.target_generation += 1
-                self.display.tick(self.manager)
-                self.assertIsNone(self.display.data)
-                self.assertEqual(self.manager.motion_status, 'STOPPED')
-                self.assertIsNone(self.manager.pending_action)
+    def test_target_replacement_clears_geometry(self):
+        self.display.accept(self.data)
+        self.manager.target_generation += 1
+        self.display.tick(self.manager)
+        self.assertIsNone(self.display.data)
+        self.assertIsNone(self.manager.pending_action)
 
     def test_unknown_rejection_has_distinct_gray_layer(self):
         self.data['rejected'] = [dict(reason='HUMAN_VISION_UNKNOWN',
@@ -222,14 +213,16 @@ class MarkerGateTests(unittest.TestCase):
         self.manager.human_empty_until = 102.
         self.p.collision_filter.human_received_at = None
         self.data.update(human_data_kind='EMPTY', mode='fallback', expires_at=102.)
-        self.display.accept(self.data)
+        with patch('time.monotonic', return_value=100.):
+            self.display.accept(self.data)
         with patch('time.monotonic', return_value=100.):
             self.display.tick(self.manager)
         self.assertIsNotNone(self.display.data)
         self.assertTrue(self.node.messages['/planning/rrt/start_tree'][-1].markers[0].points)
         with patch('time.monotonic', return_value=102.1):
             self.display.tick(self.manager)
-        self.assertIsNone(self.display.data)
+        self.assertIsNotNone(self.display.data)
+        self.assertIn('HISTORICAL SCENE', self.node.messages['/planning/rrt/status'][-1].data)
 
 
 class NativeProjectionTests(unittest.TestCase):

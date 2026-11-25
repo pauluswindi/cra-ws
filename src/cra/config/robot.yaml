@@ -43,7 +43,17 @@ gng:
   error_decay: 0.995
 
 planning:
+  planner_mode: rrt # gng / rrt / combined; restart launch after changing.
   obstacle_safety_margin: 0.005
+
+  astar:
+    mode: blocking # blocking / incremental; restart launch after changing.
+    slice_budget_ms: 10.0 # Incremental only; one collision query can overrun this soft budget.
+    slice_period_ms: 10.0 # Yield to ROS callbacks between search slices.
+    max_operations_per_slice: 2048
+
+  visualization:
+    workspace_graph_rate_hz: 2.0 # Display only; collision checks keep their normal scheduling.
 
   human_avoidance:
     enabled: true
@@ -57,10 +67,30 @@ planning:
   collision_checks:
     human_report_cache_size: 256 # Exact geometry reuse within the current snapshot.
 
+  goal_selection:
+    retain_valid_goal: true
+    clearance_candidates: 4 # Rank only a bounded pool of valid graph goals.
+    preferred_clearance: 0.07 # Soft preference; the mandatory margin remains 0.05 m.
+    ik_fallback:
+      enabled: true # Simulation only; used only when no valid graph goal is available.
+      max_seeds: 6
+      max_iterations: 80
+      time_budget_ms: 100.0
+      retry_interval: 1.0
+      position_tolerance: 0.001
+
   rrt:
-    mode: fallback # off / shadow / fallback; fallback is simulation-only.
+    # Worker settings for rrt/combined; planner_mode above selects the algorithm.
     fallback_budget: 1.5 # Admission through latest-scene validation, including worker startup.
-    visualization_enabled: true # Bounded traces only when RRT marker subscribers exist.
+    visualization_enabled: true # Disable to skip visual trace recording.
+    visualization:
+      mode: live # live / playback; restart launch after changing.
+      publish_rate_hz: 10.0
+      playback_duration_s: 2.0 # Playback only; never delays Motion.
+      show_rejected: false
+      max_nodes_per_tree: 256
+      max_events: 512
+      history_duration_s: 3.0 # Visual history, not a safety certificate.
     search_budget: 0.5
     selection_budget: 2.0 # Clearance selection applies in shadow mode only.
     preference_search_budget: 0.8

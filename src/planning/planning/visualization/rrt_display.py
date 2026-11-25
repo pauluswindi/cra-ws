@@ -2,6 +2,8 @@
 
 import time
 
+from planning.visualization.rrt_animation import playback_frame, visualization_settings
+
 from geometry_msgs.msg import Point
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 from std_msgs.msg import String
@@ -27,7 +29,7 @@ def marker_batches(visualizer, data, historical=False):
         a.markers = markers
         batches[layer] = a
 
-    for name, color in (('start', (.1, .4, 1.)), ('goal', (1., .15, .15))):
+    for name, color in (('start', (.1, .4, 1.)), ('goal', (1., .1, .85))):
         nodes = data['trees'][name]
         lines = []
         for i, node in enumerate(nodes):
@@ -41,7 +43,7 @@ def marker_batches(visualizer, data, historical=False):
             marker(namespace + '_nodes', Marker.POINTS, .009, color,
                    [n['xyz'] for n in nodes]),
             marker(namespace + '_edges', Marker.LINE_LIST, .002, color, lines)])
-    batch('final_path', [marker('rrt_final_path', Marker.LINE_STRIP, .006, (0., 1., .2),
+    batch('final_path', [marker('rrt_final_path', Marker.LINE_STRIP, .008, (.7, .15, 1.),
                                 data['path'])])
     # Unknown outcomes are separate from confirmed geometric rejections.
     unknown = {'TIME_BUDGET_EXHAUSTED', 'HUMAN_VISION_UNKNOWN', 'HUMAN_DATA_UNKNOWN',
@@ -62,6 +64,7 @@ def marker_batches(visualizer, data, historical=False):
     prefix = ('OFFLINE HISTORICAL REPLAY' if historical else
               'RRT fallback snapshot' if data.get('mode') == 'fallback'
               else 'RRT baseline snapshot')
+    prefix = data.get('visual_label', prefix)
     text.text = (f"{prefix}: {data.get('reason', '')}; rev {data.get('scene_revision', 'offline')}"
                  '\nFK joint-tree projection; '
                  'lines are not Cartesian trajectories')
@@ -75,7 +78,9 @@ def marker_batches(visualizer, data, historical=False):
 
 
 class RRTDisplay:
-    def __init__(self, node, visualizer):
+    def __init__(self, node, visualizer, settings=None):
+        self.settings = visualization_settings(settings)
+        self.accepted_at = 0.
         self.visualizer = visualizer
         qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE,
                          durability=DurabilityPolicy.TRANSIENT_LOCAL)
@@ -85,7 +90,7 @@ class RRTDisplay:
         self.data = self.batches = None
         self.last_publish = float('-inf')
         self.last_status = None
-        self.status('WAITING: shadow searches only after eligible GNG/A* failure')
+        self.status('WAITING: RRT search visualization; execution owned by Planning')
 
     def interested(self):
         return any(p.get_subscription_count() for p in self.publishers.values())
@@ -114,34 +119,55 @@ class RRTDisplay:
 
     def accept(self, data):
         self.data = data
-        self.batches = marker_batches(self.visualizer, data)
+        self.accepted_at = time.monotonic()
+        self.last_publish = float('-inf')
 
     def tick(self, manager):
         now = time.monotonic()
         if self.data is None:
             return
         checker = manager.planner.collision_filter
-        human_ready = ((manager.human_status == 'EMPTY' and manager.human_empty_until is not None
-                        and now < manager.human_empty_until)
-                       if self.data.get('human_data_kind') == 'EMPTY'
-                       else checker.human_data_ready())
-        if (now >= self.data['expires_at'] or not human_ready
-                or not manager.obstacle_data_ready()):
-            self.clear('EXPIRED_OR_UNKNOWN: old snapshot hidden')
-        elif checker.environment_revision != self.data['scene_revision']:
-            self.clear('ENVIRONMENT_CHANGED: old trees hidden; no automatic revalidation')
-        elif manager.target_generation != self.data['target_generation']:
-            self.clear('TARGET_CHANGED: old trees hidden')
+        live = self.settings['mode'] == 'live'
+        partial = self.data.get('live_partial', False)
+        duration = 0. if live else self.settings['playback_duration_s']
+        age = now - self.accepted_at
+        if manager.target_generation != self.data['target_generation']:
+            self.clear('TARGET_CHANGED: old search cleared')
+        elif age >= duration + self.settings['history_duration_s']:
+            self.clear('HISTORY_FINISHED')
         elif not self.interested():
             self.clear('DISPLAY_DISABLED: no RRT subscribers')
-        elif now - self.last_publish >= .2:
+        elif now - self.last_publish >= 1. / self.settings['publish_rate_hz']:
             self.last_publish = now
-            for layer, array in self.batches.items():
+            fraction = 1. if live else min(1., age / duration)
+            frame = playback_frame(self.data, fraction, self.settings['show_rejected'])
+            historical = (now >= self.data['expires_at']
+                          or checker.environment_revision != self.data['scene_revision']
+                          or not manager.obstacle_data_ready()
+                          or not manager.rrt_human_ready())
+            label = ('LIVE SEARCH' if partial else 'LIVE SEARCH RESULT')
+            if not live:
+                label = 'SEARCH REPLAY'
+            if historical:
+                label += ' / HISTORICAL SCENE'
+            elapsed = self.data.get('search_elapsed_s')
+            if elapsed is not None:
+                label += f' / original {elapsed * 1000.:.1f} ms'
+            direct = any(e['event'] == 'DIRECT_CONNECTION'
+                         for e in self.data.get('events', []))
+            if fraction >= 1. and direct:
+                label += ' / DIRECT CONNECTION'
+            label += f' / Planning: {manager.status} / candidate only'
+            frame['visual_label'] = label
+            self.batches = marker_batches(self.visualizer, frame)
+            for array in self.batches.values():
                 for marker in array.markers:
                     marker.header.stamp = self.visualizer.node.get_clock().now().to_msg()
-                    marker.lifetime.nanosec = max(
-                        1, int(min(.6, self.data['expires_at'] - now) * 1e9))
+                    lifetime = max(.6, 2. / self.settings['publish_rate_hz'])
+                    marker.lifetime.sec = int(lifetime)
+                    marker.lifetime.nanosec = int((lifetime % 1.) * 1e9)
+                    if historical and marker.type != Marker.TEXT_VIEW_FACING:
+                        marker.color.a = .35
+            for layer, array in self.batches.items():
                 self.publishers[layer].publish(array)
-            suffix = ('; search visualization, execution owned by Planning'
-                      if self.data.get('mode') == 'fallback' else '; observational baseline only')
-            self.status('SNAPSHOT: ' + self.data['reason'] + suffix)
+            self.status_pub.publish(String(data=label))

@@ -220,11 +220,117 @@ class ManagerFallbackTests(FallbackFixture):
         self.assertEqual(self.m.rrt_last_reason, 'VALIDATION_SNAPSHOT_EXPIRED')
         self.assertIsNone(self.m.current_path)
 
-    def test_changed_validation_scene_restarts_primary(self):
+    def test_changed_validation_scene_revalidates_candidate_before_adoption(self):
         self.request()
         self.m.offer_rrt_result(self.result(scene_revision=-1))
-        self.assertEqual(self.m.step().status, 'RRT_REPLANNING')
-        self.assertTrue(self.m.planning_required)
+        with patch.object(self.p, 'prepare_execution_path',
+                          wraps=self.p.prepare_execution_path) as prepare:
+            decision = self.m.step()
+        self.assertEqual(decision.status, 'RRT_PATH_READY')
+        self.assertEqual(decision.action, 'NONE')
+        prepare.assert_called_once()
+        self.assertEqual(self.m.rrt_handoff_validation['reason'], 'NONE')
+        self.assertEqual(self.m.path_source, 'RRT_CONNECT')
+        self.assertEqual(self.p.collision_filter.max_joint_step, .02)
+
+    def test_rrt_revalidation_preserves_fine_sampling_and_restores_checker(self):
+        self.request()
+        self.m.offer_rrt_result(self.result(scene_revision=-1))
+
+        def prepare(path):
+            self.assertEqual(self.p.collision_filter.max_joint_step, .01)
+            return path
+
+        with patch.object(self.p, 'prepare_execution_path', side_effect=prepare):
+            self.assertEqual(self.m.step().status, 'RRT_PATH_READY')
+        self.assertEqual(self.p.collision_filter.max_joint_step, .02)
+
+    def test_changed_scene_collision_rejects_candidate_without_motion(self):
+        self.request()
+        self.m.offer_rrt_result(self.result(scene_revision=-1))
+        with patch.object(self.p.collision_filter, 'is_path_valid', return_value=False):
+            decision = self.m.step()
+        self.assertEqual(decision.action, 'NONE')
+        self.assertEqual(self.m.rrt_last_reason, 'VALIDATION_FAILED')
+        self.assertIsNone(self.m.current_path)
+        self.assertEqual(self.p.collision_filter.max_joint_step, .02)
+
+    def test_manual_stop_during_handoff_validation_cannot_adopt(self):
+        self.request()
+        self.m.offer_rrt_result(self.result(scene_revision=-1))
+
+        def manual_stop(path):
+            self.m.motion_status, self.m.stop_owned = 'STOPPED', False
+            return path
+
+        with patch.object(self.p, 'prepare_execution_path', side_effect=manual_stop):
+            decision = self.m.step()
+        self.assertEqual(decision.action, 'NONE')
+        self.assertEqual(self.m.rrt_last_reason, 'MOTION_CONTEXT_CHANGED')
+        self.assertIsNone(self.m.current_path)
+
+    def test_target_change_during_handoff_validation_cannot_adopt(self):
+        self.request()
+        self.m.offer_rrt_result(self.result(scene_revision=-1))
+
+        def new_target(path):
+            self.m.target_generation += 1
+            return path
+
+        with patch.object(self.p, 'prepare_execution_path', side_effect=new_target):
+            decision = self.m.step()
+        self.assertEqual(decision.action, 'NONE')
+        self.assertEqual(self.m.rrt_last_reason, 'TARGET_CHANGED')
+        self.assertIsNone(self.m.current_path)
+
+    def test_revision_change_inside_manager_validation_still_rejects(self):
+        self.request()
+        self.m.offer_rrt_result(self.result(scene_revision=-1))
+
+        def prepare(path):
+            self.p.collision_filter.environment_revision += 1
+            return path
+
+        with patch.object(self.p, 'prepare_execution_path', side_effect=prepare):
+            decision = self.m.step()
+        self.assertEqual(decision.status, 'RRT_REPLANNING')
+        self.assertEqual(self.m.rrt_last_reason, 'ENVIRONMENT_CHANGED')
+        self.assertIsNone(self.m.current_path)
+
+    def slow_handoff(self, deadline, delay):
+        self.request()
+        self.m.rrt_fallback_attempt['deadline'] = deadline
+        self.m.offer_rrt_result(self.result(scene_revision=-1))
+
+        def slow_prepare(path):
+            self.now[0] += delay
+            return path
+
+        with patch.object(self.p, 'prepare_execution_path', side_effect=slow_prepare):
+            decision = self.m.step()
+        self.assertEqual(decision.action, 'NONE')
+        self.assertEqual(self.m.rrt_last_reason, 'TIME_BUDGET_EXHAUSTED')
+        self.assertIsNone(self.m.current_path)
+
+    def test_handoff_validation_cannot_overrun_validation_budget(self):
+        self.slow_handoff(101.2, .51)
+
+    def test_handoff_validation_cannot_extend_request_deadline(self):
+        self.slow_handoff(100.1, .11)
+
+    def test_camera_loss_during_handoff_validation_cannot_adopt(self):
+        self.request()
+        self.m.offer_rrt_result(self.result(scene_revision=-1))
+
+        def lose_camera(path):
+            self.m.human_status = self.p.collision_filter.human_status = 'UNKNOWN'
+            return path
+
+        with patch.object(self.p, 'prepare_execution_path', side_effect=lose_camera):
+            decision = self.m.step()
+        self.assertEqual(decision.action, 'NONE')
+        self.assertEqual(self.m.rrt_last_reason, 'INPUTS_STALE')
+        self.assertIsNone(self.m.current_path)
 
     def test_old_target_or_attempt_cannot_fill_mailbox(self):
         self.request()
@@ -467,12 +573,106 @@ class CoordinatorTests(FallbackFixture):
         self.assertEqual(self.executor.jobs[-1][1]['scene']['revision'],
                          self.p.collision_filter.environment_revision)
 
-    def test_coordinator_scene_changes_during_validation_reject(self):
+    def test_coordinator_scene_change_delivers_candidate_with_original_revision(self):
         self.validation()
+        revision = self.p.collision_filter.environment_revision
         self.p.collision_filter.environment_revision += 1
         self.executor.jobs[-1][2].set_result(dict(
             kind='validate', reason='NONE', prepared_path=PREPARED))
-        self.assertEqual(self.coordinator.tick(self.m)['reason'], 'ENVIRONMENT_CHANGED')
+        event = self.coordinator.tick(self.m)
+        self.assertEqual(event['event'], 'CANDIDATE_REVALIDATION_REQUIRED')
+        self.assertEqual(self.coordinator.delivery['scene_revision'], revision)
+        self.m.offer_rrt_result(self.coordinator.delivery)
+        self.assertEqual(self.m.step().status, 'RRT_PATH_READY')
+        self.assertEqual(self.m.rrt_handoff_validation['reason'], 'NONE')
+        self.assertEqual(len(self.executor.jobs), 2)
+
+    def test_scene_changes_between_delivery_and_adoption_are_revalidated(self):
+        self.validation()
+        self.executor.jobs[-1][2].set_result(dict(
+            kind='validate', reason='NONE', prepared_path=PREPARED))
+        self.coordinator.tick(self.m)
+        self.m.offer_rrt_result(self.coordinator.delivery)
+        self.p.collision_filter.environment_revision += 1
+        self.assertEqual(self.m.step().status, 'RRT_PATH_READY')
+        self.assertEqual(self.m.rrt_handoff_validation['reason'], 'NONE')
+
+    def wait_retry(self):
+        self.coordinator.last_started = 99.
+        self.m.rrt_retry_not_before = 99. + self.coordinator.settings['retry_interval']
+        self.assertEqual(self.m.step().status, 'RRT_WAITING_RETRY')
+        self.assertIsNone(self.coordinator.tick(self.m))
+        self.assertEqual(self.m.step().status, 'RRT_WAITING_RETRY')
+        self.assertEqual(self.m.rrt_last_reason, 'WAITING_RETRY')
+        self.assertEqual(len(self.executor.jobs), 0)
+
+    def test_cooldown_keeps_one_request_then_uses_latest_scene(self):
+        self.wait_retry()
+        sequence = self.m.rrt_fallback_attempt['sequence']
+        deadline = self.m.rrt_fallback_attempt['deadline']
+        for _ in range(3):
+            self.assertIsNone(self.coordinator.tick(self.m))
+            self.assertEqual(self.m.step().status, 'RRT_WAITING_RETRY')
+            self.assertEqual(self.m.rrt_fallback_attempt['sequence'], sequence)
+            self.assertEqual(self.m.rrt_fallback_attempt['deadline'], deadline)
+        self.now[0] = self.m.rrt_retry_not_before
+        self.m.feedback_time = self.m.obstacle_time = self.now[0]
+        self.p.collision_filter.human_received_at = self.now[0]
+        self.p.collision_filter.human_expires_at = self.now[0] + 2.
+        self.p.collision_filter.environment_revision += 1
+        event = self.coordinator.tick(self.m)
+        self.assertEqual(event['event'], 'SEARCH_SUBMITTED')
+        self.assertEqual(len(self.executor.jobs), 1)
+        self.assertEqual(self.executor.jobs[0][1]['scene']['revision'],
+                         self.p.collision_filter.environment_revision)
+        self.assertEqual(self.m.step().status, 'RRT_SEARCHING')
+        self.assertEqual(self.m.rrt_fallback_attempt['deadline'], self.now[0] + 1.2)
+
+    def test_cooldown_does_not_submit_after_start_changes(self):
+        self.wait_retry()
+        self.m.current_q[0] += .02
+        self.assertEqual(self.coordinator.tick(self.m)['reason'], 'START_MOVED')
+        self.assertEqual(len(self.executor.jobs), 0)
+
+    def test_target_change_during_cooldown_cannot_revive_saved_goal(self):
+        self.wait_retry()
+        self.m.target_generation += 1
+        self.assertEqual(self.coordinator.tick(self.m)['reason'], 'TARGET_CHANGED')
+        self.assertEqual(len(self.executor.jobs), 0)
+
+    def test_camera_loss_during_cooldown_never_submits(self):
+        self.wait_retry()
+        self.m.human_status = self.p.collision_filter.human_status = 'UNKNOWN'
+        self.assertEqual(self.coordinator.tick(self.m)['reason'], 'HUMAN_VISION_UNKNOWN')
+        self.assertEqual(len(self.executor.jobs), 0)
+
+    def test_cooldown_wait_has_a_fixed_expiry(self):
+        self.wait_retry()
+        self.now[0] = self.m.rrt_fallback_attempt['deadline']
+        self.m.feedback_time = self.m.obstacle_time = self.now[0]
+        self.p.collision_filter.human_received_at = self.now[0]
+        self.p.collision_filter.human_expires_at = self.now[0] + 2.
+        self.assertEqual(self.m.step().status, 'RRT_FAILED')
+        self.assertEqual(self.m.rrt_last_reason, 'TIME_BUDGET_EXHAUSTED')
+        self.assertIsNone(self.coordinator.tick(self.m))
+        self.assertEqual(len(self.executor.jobs), 0)
+
+    def test_coordinator_cannot_extend_expired_cooldown_wait(self):
+        self.wait_retry()
+        self.now[0] = self.m.rrt_fallback_attempt['deadline']
+        self.m.feedback_time = self.m.obstacle_time = self.now[0]
+        self.p.collision_filter.human_received_at = self.now[0]
+        self.p.collision_filter.human_expires_at = self.now[0] + 2.
+        self.assertEqual(self.coordinator.tick(self.m)['reason'], 'TIME_BUDGET_EXHAUSTED')
+        self.assertEqual(len(self.executor.jobs), 0)
+
+    def test_manual_stop_during_cooldown_never_submits_or_releases(self):
+        self.wait_retry()
+        self.m.motion_status, self.m.stop_owned = 'STOPPED', False
+        self.assertEqual(self.coordinator.tick(self.m)['reason'], 'MOTION_CONTEXT_CHANGED')
+        self.m.offer_rrt_result(self.coordinator.delivery)
+        self.assertEqual(self.m.step().action, 'NONE')
+        self.assertEqual(len(self.executor.jobs), 0)
 
     def test_coordinator_late_running_job_cannot_revive_request(self):
         self.start()
@@ -554,6 +754,36 @@ class NativeWorkerTests(unittest.TestCase):
                          self.p.collision_filter)
         self.assertEqual(result['reason'], 'HUMAN_VISION_UNKNOWN')
         self.assertIsNone(result['path'])
+
+    def test_manager_rejects_candidate_blocked_by_new_real_human_geometry(self):
+        from benchmark_rrt_connect import START as a, GOAL as b, configure, make_scenes
+        checker = self.p.collision_filter
+        scene = capture_scene(checker)
+        prepared = run_job(dict(
+            kind='validate', scene=scene, sample_step=.01, start=a, path=np.array([a, b]),
+            max_segment_delta=self.p.max_segment_delta, total_budget=1.,
+            request_deadline=101.2, return_prepared=True), checker)
+        self.assertEqual(prepared['reason'], 'NONE')
+        manager = PlanningManager(self.p, execute_path=True, human_avoidance_enabled=True,
+                                  simulation_only_ignore_unknown=True)
+        manager.current_q, manager.target_base = a.copy(), np.array([.2, .1, .3])
+        manager.feedback_time = manager.obstacle_time = 100.
+        manager.obstacles_ready = True
+        manager.motion_status, manager.human_status = 'IDLE', 'OBSERVED'
+        manager.rrt_fallback_pending = True
+        manager.planning_required = False
+        manager.rrt_fallback_attempt = dict(
+            sequence=1, target_generation=0, start=a.copy(), goal=b.copy(), deadline=101.2)
+        # The old path was safe in FAR; DETOUR intersects that same direct path.
+        configure(checker, make_scenes()[1][1])
+        manager.offer_rrt_result(dict(
+            sequence=1, target_generation=0, reason='NONE', scene_revision=scene['revision'],
+            expires_at=101.2, start=a.copy(), prepared_path=prepared['prepared_path']))
+        with patch.object(manager, '_prepare_safe_position', return_value=False):
+            decision = manager._poll_rrt_fallback()
+        self.assertEqual(decision.action, 'NONE')
+        self.assertEqual(manager.rrt_last_reason, 'VALIDATION_FAILED')
+        self.assertIsNone(manager.current_path)
 
     def test_fresh_empty_can_be_certified_with_real_static_collision_checks(self):
         from benchmark_rrt_connect import START as a, GOAL as b

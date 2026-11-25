@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from planning.profiling import PlanningProfiler, profiled
+from planning.astar_execution import GraphSearch, GraphSearchWorkspace, astar_settings
 from planning.path_diagnostics import execution_progress_report
 from planning.execution_progress import OrderedSegmentProgress
 
@@ -36,7 +37,15 @@ class PlanningManager:
         profiling_enabled=False,
     ):
         self.planner = path_planner
+        self.planner_mode = getattr(path_planner, 'planner_mode', 'combined')
+        if self.planner_mode not in ('gng', 'rrt', 'combined'):
+            raise ValueError('Invalid primary planner mode')
         self.profiler = PlanningProfiler(path_planner.collision_filter, profiling_enabled)
+        self.astar_config = getattr(path_planner, 'astar_execution_config', astar_settings({}))
+        self.graph_search = None
+        self.last_graph_search = None
+        self.graph_workspace = (GraphSearchWorkspace(path_planner)
+                                if self.astar_config['mode'] == 'incremental' else None)
 
         self.goal_tolerance = float(goal_tolerance)
         self.target_clearance = float(target_clearance)
@@ -63,8 +72,13 @@ class PlanningManager:
         self.target_generation = 0
         self.graph_attempt_sequence = 0
         self.last_graph_failure = None
+        self.rrt_primary_attempt = None
+        self.rrt_trigger = None
         self.rrt_fallback_enabled = False
         self.rrt_wait_timeout = 1.2
+        self.rrt_validation_budget = .5
+        self.rrt_retry_not_before = 0.
+        self.rrt_handoff_validation = None
         self.rrt_fallback_pending = False
         self.rrt_fallback_attempt = None
         self.rrt_fallback_result = None
@@ -202,6 +216,8 @@ class PlanningManager:
     def _retry_human_plan(self):
         """Retry a blocked request only after geometry or measured state changes."""
         checker = self.planner.collision_filter
+        selector = getattr(self.planner, 'goal_selector', None)
+        delayed_retry = selector is not None and selector.retry_due(time.monotonic())
         moved = (
             self.current_q is not None
             and self.human_retry_q is not None
@@ -214,7 +230,7 @@ class PlanningManager:
             and (
                 checker.environment_revision != self.human_retry_revision
                 or checker.human_data_ready() != self.human_retry_ready
-                or moved
+                or moved or delayed_retry
             )
         ):
             self.human_replan_blocked = False
@@ -953,6 +969,7 @@ class PlanningManager:
 
             if not commanded_stop:
                 self.safe_recovery_active = False
+                self._cancel_graph_search('EXTERNAL_STOP')
                 self.invalidate_path()
 
             return
@@ -1250,6 +1267,8 @@ class PlanningManager:
         return False
 
     def invalidate_path(self):
+        self.rrt_primary_attempt = None
+        self._cancel_graph_search('CONTEXT_INVALIDATED')
         self._cancel_rrt_refresh('CONTEXT_INVALIDATED')
         self.rrt_fallback_pending = False
         self.rrt_fallback_attempt = self.rrt_fallback_result = None
@@ -1336,13 +1355,89 @@ class PlanningManager:
             or (self.human_status == 'EMPTY' and self.human_empty_until is not None
                 and time.monotonic() < self.human_empty_until))
 
+    def _graph_context_reason(self):
+        job = self.graph_search
+        if job is None:
+            return None
+        if self.fault or self.recovery_pending or self.safe_recovery_active \
+                or self.safe_position_active or self.human_margin_recovery_active:
+            return 'RECOVERY_OR_FAULT'
+        if self.target_generation != job.generation:
+            return 'TARGET_CHANGED'
+        if self.current_q is None or np.max(np.abs(self.current_q - job.start)) > .01:
+            return 'START_MOVED'
+        if self.pending_action is not None or self._stop_required():
+            return 'MOTION_CONTEXT_CHANGED'
+        if self.motion_status not in ('IDLE', 'COMPLETED', 'STOPPED'):
+            return 'MOTION_CONTEXT_CHANGED'
+        if self.motion_status == 'STOPPED' and not self.stop_owned:
+            return 'EXTERNAL_STOP'
+        if not self.feedback_ready():
+            return 'FEEDBACK_STALE'
+        if not self.obstacle_data_ready():
+            return 'OBSTACLES_STALE'
+        if not self.planner.human_data_ready():
+            return 'HUMAN_VISION_UNKNOWN'
+        return None
+
+    def _cancel_graph_search(self, reason):
+        if self.graph_search is not None:
+            self.last_graph_search = self.graph_search.statistics(reason)
+            self.graph_search.close()
+            self.graph_search = None
+            self.last_graph_failure = None
+            self.planning_required = True
+
+    def advance_graph_search(self):
+        """One timer slice only searches; normal step() owns every command."""
+        reason = self._graph_context_reason()
+        if reason is not None:
+            self._cancel_graph_search(reason)
+        elif self.graph_search is not None:
+            self.graph_search.advance()
+
+    def _rrt_attempt_context(self):
+        return self.rrt_primary_attempt if self.planner_mode == 'rrt' else self.last_graph_failure
+
+    def _start_primary_rrt(self, goal):
+        """RRT-only path search uses a valid shared goal, never a fabricated graph failure."""
+        checker = self.planner.collision_filter
+        revision = checker.environment_revision
+        if not self.rrt_human_ready():
+            self.rrt_block_reason = 'HUMAN_VISION_UNKNOWN'
+            self._remember_human_block()
+            return self._decision(status='RRT_HUMAN_VISION_UNKNOWN')
+        if not checker.is_state_valid(self.current_q):
+            self.rrt_block_reason = 'START_INVALID'
+            self._remember_human_block()
+            return self._decision(status='START_INVALID')
+        if not checker.is_state_valid(goal):
+            self.rrt_block_reason = 'GOAL_INVALID'
+            self._remember_human_block()
+            return self._decision(status='GOAL_UNREACHABLE')
+        if checker.environment_revision != revision:
+            self.planning_required = True
+            return self._decision(status='RRT_REPLANNING')
+        self.rrt_primary_attempt = dict(
+            sequence=self.graph_attempt_sequence, target_generation=self.target_generation,
+            start=self.current_q.copy(), goal=np.asarray(goal).copy())
+        if self._request_rrt_fallback():
+            return self._rrt_pending_decision()
+        if self._defer_rrt_for_inputs():
+            return self._rrt_refresh_wait()
+        self.rrt_primary_attempt = None
+        self._remember_human_block()
+        return self._decision(status='RRT_NOT_READY')
+
     def _rrt_admission_reason(self):
+        if self.planner_mode == 'gng':
+            return 'PLANNER_MODE_GNG'
         if not self.rrt_fallback_enabled:
             return 'DISABLED'
         if not self.execute_path:
             return 'EXECUTION_DISABLED'
-        if self.last_graph_failure is None:
-            return 'NO_GRAPH_FAILURE'
+        if self._rrt_attempt_context() is None:
+            return 'NO_PRIMARY_RRT_GOAL' if self.planner_mode == 'rrt' else 'NO_GRAPH_FAILURE'
         if self.fault:
             return 'MOTION_FAULT'
         if (self.recovery_pending or self.resume_after_fault or self.safe_recovery_active
@@ -1372,11 +1467,20 @@ class PlanningManager:
             self.rrt_block_reason = 'HANDOFF_EXPIRED'
             return False
         self.rrt_fallback_attempt = dict(
-            self.last_graph_failure, deadline=deadline)
+            self._rrt_attempt_context(), deadline=deadline)
+        if now < self.rrt_retry_not_before:
+            # The search budget starts on admission, not while waiting for
+            # the previous search's retry interval. Waiting itself is bounded.
+            self.rrt_fallback_attempt.update(
+                waiting_retry=True, deadline=self.rrt_retry_not_before + self.rrt_wait_timeout)
+        self.rrt_trigger = ('PRIMARY_RRT' if self.planner_mode == 'rrt' else 'NO_GRAPH_PATH')
+        self.rrt_fallback_attempt['trigger'] = self.rrt_trigger
         self.rrt_refresh_attempt = None
         self.rrt_fallback_pending = True
         self.rrt_fallback_result = None
-        self.rrt_last_reason = 'WAITING'
+        self.rrt_last_reason = ('WAITING_RETRY' if self.rrt_fallback_attempt.get('waiting_retry')
+                                else 'WAITING')
+        self.rrt_handoff_validation = None
         self.current_path = self.goal_q = None
         self.path_source = None
         # New human frames may be used for validation, not automatic duplicate
@@ -1385,11 +1489,16 @@ class PlanningManager:
         self.planning_required = False
         return True
 
+    def _rrt_pending_decision(self):
+        waiting = self.rrt_fallback_attempt.get('waiting_retry', False)
+        self.rrt_last_reason = 'WAITING_RETRY' if waiting else 'WAITING'
+        return self._decision(status='RRT_WAITING_RETRY' if waiting else 'RRT_SEARCHING')
+
     def _defer_rrt_for_inputs(self):
         if self.rrt_block_reason not in ('FEEDBACK_STALE', 'OBSTACLES_STALE'):
             return False
         self.rrt_refresh_attempt = dict(
-            self.last_graph_failure, deadline=time.monotonic() + self.rrt_wait_timeout)
+            self._rrt_attempt_context(), deadline=time.monotonic() + self.rrt_wait_timeout)
         self.current_path = self.goal_q = None
         self.path_source = None
         self.path_sent = False
@@ -1400,6 +1509,7 @@ class PlanningManager:
     def _cancel_rrt_refresh(self, reason):
         if self.rrt_refresh_attempt is not None:
             self.rrt_refresh_attempt = None
+            self.rrt_primary_attempt = None
             self.rrt_block_reason = reason
             self.rrt_last_reason = 'CANCELLED_' + reason
             self.planning_required = True
@@ -1457,7 +1567,7 @@ class PlanningManager:
         # This is a new search on current input, not reuse of a path certificate.
         # Its original handoff deadline is retained even after fresh callbacks.
         if self._request_rrt_fallback(deadline=attempt['deadline']):
-            return self._decision(status='RRT_SEARCHING')
+            return self._rrt_pending_decision()
         if self.rrt_block_reason in ('FEEDBACK_STALE', 'OBSTACLES_STALE'):
             return self._rrt_refresh_wait()
         self._cancel_rrt_refresh(self.rrt_block_reason or 'CONTEXT_CHANGED')
@@ -1492,16 +1602,15 @@ class PlanningManager:
         result = self.rrt_fallback_result
         now = time.monotonic()
         if result is None and now < request['deadline']:
-            return self._decision(status='RRT_SEARCHING')
+            return self._rrt_pending_decision()
         self.rrt_fallback_pending = False
         self.rrt_fallback_attempt = self.rrt_fallback_result = None
+        self.rrt_primary_attempt = None
         reason = 'TIME_BUDGET_EXHAUSTED' if result is None else result['reason']
         if reason == 'NONE':
             checker = self.planner.collision_filter
             if (now >= request['deadline'] or now >= result['expires_at']):
                 reason = 'VALIDATION_SNAPSHOT_EXPIRED'
-            elif result['scene_revision'] != checker.environment_revision:
-                reason = 'ENVIRONMENT_CHANGED'
             elif (request['target_generation'] != self.target_generation
                   or self.target_base is None):
                 reason = 'TARGET_CHANGED'
@@ -1532,6 +1641,8 @@ class PlanningManager:
                         reason = 'START_MOVED'
                 except (TypeError, ValueError, KeyError):
                     reason = 'INVALID_WORKER_PATH'
+            if reason == 'NONE' and result['scene_revision'] != checker.environment_revision:
+                reason, path = self._revalidate_rrt_candidate(request, result, path)
         self.rrt_last_reason = reason
         if reason == 'NONE':
             self.current_path = path.copy()
@@ -1539,6 +1650,9 @@ class PlanningManager:
             self.planner.current_path = path.copy()
             self.planner.goal_q = self.goal_q.copy()
             self.planner.last_plan_failure = 'NONE'
+            selector = getattr(self.planner, 'goal_selector', None)
+            if selector is not None:
+                selector.remember(self.goal_q)
             self.path_source = 'RRT_CONNECT'
             self.path_sent = False
             self.human_retry_count = 0
@@ -1550,9 +1664,59 @@ class PlanningManager:
             self.invalidate_path()
             return self._decision(status='RRT_REPLANNING')
         self._remember_human_block()
-        if self._prepare_safe_position():
+        if self.planner_mode != 'rrt' and self._prepare_safe_position():
             return self._decision(status='SAFE_POSITION_READY')
         return self._decision(status='RRT_FAILED')
+
+    def _revalidate_rrt_candidate(self, request, result, path):
+        """Certify an RRT candidate on the manager's current scene, not its old revision.
+
+        This runs in the serialized Planning callback. A native collision query
+        cannot be preempted; the budget is a soft bound checked after preparation.
+        No late, stale or changed-scene result may become an executable path.
+        """
+        checker = self.planner.collision_filter
+        revision = checker.environment_revision
+        began = time.monotonic()
+        deadline = min(request['deadline'], result['expires_at'],
+                       began + self.rrt_validation_budget)
+        reason = 'NONE'
+        original_step = checker.max_joint_step
+        try:
+            # Retain the worker's finer RRT edge sampling during certification.
+            checker.max_joint_step = min(.01, original_step)
+            candidate = path.copy()
+            candidate[0] = self.current_q.copy()
+            prepared = self.profiler.call(
+                'rrt_handoff_validation', self.planner.prepare_execution_path, candidate)
+        except Exception as error:
+            self._record_error('RRT candidate revalidation', error)
+            reason = 'VALIDATION_FAILED'
+            prepared = None
+        finally:
+            checker.max_joint_step = original_step
+        if time.monotonic() >= deadline:
+            reason = 'TIME_BUDGET_EXHAUSTED'
+        elif not self.rrt_human_ready() or not self.feedback_ready() \
+                or not self.obstacle_data_ready():
+            reason = 'INPUTS_STALE'
+        elif checker.environment_revision != revision:
+            reason = 'ENVIRONMENT_CHANGED'
+        elif request['target_generation'] != self.target_generation or self.target_base is None:
+            reason = 'TARGET_CHANGED'
+        elif np.max(np.abs(self.current_q - result['start'])) > .01:
+            reason = 'START_MOVED'
+        elif (self._stop_required() or self.pending_action is not None or self.fault
+              or self.safe_recovery_active or self.safe_position_active
+              or self.human_margin_recovery_active or self.recovery_pending
+              or self.resume_after_fault
+              or self.motion_status not in ('IDLE', 'COMPLETED', 'STOPPED')
+              or (self.motion_status == 'STOPPED' and not self.stop_owned)):
+            reason = 'MOTION_CONTEXT_CHANGED'
+        self.rrt_handoff_validation = dict(
+            reason=reason, from_revision=result['scene_revision'], to_revision=revision,
+            elapsed_ms=round((time.monotonic() - began) * 1000., 3))
+        return reason, prepared
 
     @profiled("manager_step", new_cycle=True)
     def step(self):
@@ -1560,6 +1724,9 @@ class PlanningManager:
         self.last_error = None
         if self.rrt_refresh_attempt is None and not self.rrt_fallback_pending:
             self.rrt_block_reason = None
+        graph_problem = self._graph_context_reason()
+        if graph_problem is not None:
+            self._cancel_graph_search(graph_problem)
         refresh_cancelled = self._rrt_refresh_context_reason(now)
         if refresh_cancelled is not None:
             self._cancel_rrt_refresh(refresh_cancelled)
@@ -1585,6 +1752,7 @@ class PlanningManager:
             problem = self._human_guard()
 
             if problem is not None:
+                self._cancel_graph_search(problem)
                 if self.rrt_fallback_enabled:
                     self.rrt_block_reason = problem
                 if self.rrt_refresh_attempt is not None:
@@ -1734,36 +1902,89 @@ class PlanningManager:
                 )
 
             self.planning_required = False
-            self.graph_attempt_sequence += 1
-            self.last_graph_failure = None
+            if self.graph_search is None:
+                self.graph_attempt_sequence += 1
+                self.last_graph_failure = None
+                self.rrt_primary_attempt = None
+                self.rrt_trigger = None
 
             try:
-                goal = self.profiler.call(
-                    "goal_selection", self.planner.select_goal,
-                    self.target_base,
-                    self.goal_tolerance,
-                    self.target_clearance,
-                )
+                self.planner.goal_seed = self.current_q.copy()
+                self.planner.goal_empty_until = (self.human_empty_until
+                                                 if self.human_status == 'EMPTY' else None)
+                if self.graph_workspace is not None:
+                    if self.motion_status == 'STOPPED' and not self.stop_owned:
+                        self.planning_required = True
+                        return self._decision(status='STOPPED')
+                    if self.graph_search is None:
+                        self.current_path = None
+                        self.goal_q = None
+                        self.path_source = None
+                        self.path_sent = False
+                        self.graph_search = GraphSearch(
+                            self.graph_workspace, self.planner.collision_filter,
+                            self.current_q, self.target_base, self.target_generation,
+                            self.goal_tolerance, self.target_clearance, self.astar_config,
+                            search_graph=self.planner_mode != 'rrt')
+                    job = self.graph_search
+                    if not job.done:
+                        self.planning_required = True
+                        return self._decision(status=('GOAL_SEARCHING' if self.planner_mode == 'rrt'
+                                                      else 'ASTAR_SEARCHING'))
+                    self.graph_search = None
+                    self.last_graph_search = job.statistics()
+                    if job.error is not None:
+                        raise job.error
+                    self.planner.goal_selector.adopt(job.planner.goal_selector)
+                    if self.planner_mode == 'rrt' and job.goal is not None:
+                        return self._start_primary_rrt(job.goal)
+                    # A stale snapshot cannot establish failure in the live scene.
+                    # Successful routes retain the snapshot revision and go through
+                    # the existing live guard and execution validation before Motion.
+                    retry = (job.retry_reason(self.planner.collision_filter)
+                             if not job.planned else None)
+                    if retry is not None:
+                        self.planning_required = True
+                        self.last_graph_search['reason'] = retry
+                        return self._decision(status='ASTAR_REPLANNING')
+                    goal, planned = job.goal, job.planned
+                    if goal is None:
+                        self._remember_human_block()
+                        return self._decision(status='GOAL_UNREACHABLE')
+                    self.planner.last_plan_failure = job.planner.last_plan_failure
+                    self.planner.current_path = (None if job.planner.current_path is None
+                                                 else job.planner.current_path.copy())
+                    self.planner.goal_q = np.asarray(goal).copy()
+                    self.planner.path_revision = job.planner.path_revision
+                else:
+                    goal = self.profiler.call(
+                        "goal_selection", self.planner.select_goal,
+                        self.target_base,
+                        self.goal_tolerance,
+                        self.target_clearance,
+                    )
 
-                if goal is None:
-                    self._remember_human_block()
-                    return self._decision(
-                        status=(
-                            "GOAL_UNREACHABLE" if self.planner.human_data_ready()
-                            else "HUMAN_VISION_UNKNOWN"
+                    if goal is None:
+                        self._remember_human_block()
+                        return self._decision(
+                            status=(
+                                "GOAL_UNREACHABLE" if self.planner.human_data_ready()
+                                else "HUMAN_VISION_UNKNOWN"
+                            )
                         )
-                    )
 
-                planned = self.profiler.call(
-                    "path_search", self.planner.plan, self.current_q.copy(), goal)
-                if not planned and self.planner.last_plan_failure == "NO_GRAPH_PATH":
-                    alternative = self.profiler.call(
-                        "alternative_goal_search", self.planner.find_alternative_goal_path,
-                        self.current_q.copy(), self.target_base, goal,
-                        self.goal_tolerance, self.target_clearance,
-                    )
-                    if alternative is not None:
-                        goal, planned = alternative, True
+                    if self.planner_mode == 'rrt':
+                        return self._start_primary_rrt(goal)
+                    planned = self.profiler.call(
+                        "path_search", self.planner.plan, self.current_q.copy(), goal)
+                    if not planned and self.planner.last_plan_failure == "NO_GRAPH_PATH":
+                        alternative = self.profiler.call(
+                            "alternative_goal_search", self.planner.find_alternative_goal_path,
+                            self.current_q.copy(), self.target_base, goal,
+                            self.goal_tolerance, self.target_clearance,
+                        )
+                        if alternative is not None:
+                            goal, planned = alternative, True
                 if not planned:
                     if self.planner.last_plan_failure == "NO_GRAPH_PATH":
                         self.last_graph_failure = {
@@ -1791,7 +2012,7 @@ class PlanningManager:
 
                     if self.planner.last_plan_failure == "NO_GRAPH_PATH":
                         if self._request_rrt_fallback():
-                            return self._decision(status='RRT_SEARCHING')
+                            return self._rrt_pending_decision()
                         if self._defer_rrt_for_inputs():
                             return self._rrt_refresh_wait()
                         # One failed batch already exhausted all configured goal
@@ -1827,6 +2048,7 @@ class PlanningManager:
                 return self._decision(status="PATH_READY")
 
             except Exception as error:
+                self._cancel_graph_search('PLANNING_ERROR')
                 self._record_error("planning", error)
                 self.current_path = None
                 self.goal_q = None

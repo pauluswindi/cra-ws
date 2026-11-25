@@ -1,12 +1,20 @@
 # RRT-Connect fallback in MuJoCo
 
+The default `planning.planner_mode: combined` retains the fallback behavior
+below. `gng` disables RRT execution and `rrt` selects direct primary RRT search
+with the same worker/certification gates. See [PLANNER_MODES.md](PLANNER_MODES.md).
+
 GNG+A* remains the primary planner. After ordinary graph search and its
 configured alternative joint goals fail with `NO_GRAPH_PATH`, one bounded
-RRT-Connect attempt may supply the next path. `planning.rrt.mode: fallback`
+RRT-Connect attempt may supply the next path. `planning.planner_mode: combined`
 enables this for simulation only. It is not RRT-only planning, a replacement
 for recovery from an invalid start, or evidence of tested live-human avoidance.
 
 ## Algorithm and execution ownership
+
+Goal selection can additionally supply a collision-validated IK endpoint when
+retained/graph goals are unavailable. That endpoint still goes through A* first;
+only NO_GRAPH_PATH admits RRT. See [GOAL_SELECTION.md](GOAL_SELECTION.md).
 
 GNG+A* searches stored joint configurations and connections. A disconnected
 roadmap may fail even when free joint-space motion exists. RRT-Connect can
@@ -31,8 +39,9 @@ parallel search backlog:
 4. A prepared result carries attempt/target identifiers, start configuration,
    scene revision and an expiry capped by the original request deadline.
    Target/attempt changes, active Motion/recovery, stale inputs, moved start,
-   scene changes during validation, expired deadlines and malformed paths reject
-   the result. New observations never extend an outstanding request's deadline.
+   expired deadlines and malformed paths reject the result. A scene change
+   preserves the prepared candidate with its ORIGINAL revision, not a current
+   safety certificate. New observations never extend an admitted request's deadline.
 5. The node delivers a mailbox result only. The regular PlanningManager step
    adopts it as RRT_PATH_READY, source RRT_CONNECT. It then follows the existing
    execution preparation, final collision validation and feedback gates. A
@@ -49,6 +58,44 @@ original expiry. Human collision and path revalidation during execution still
 use the existing manager. Invalid starts, human-margin intrusions, unreachable
 goals and Motion faults retain their existing handling; they do not authorize
 ordinary RRT to escape a collision.
+
+## Changing human geometry during RRT handoff
+
+Both primary `rrt` and the RRT phase of `combined` retain a successful worker
+candidate when the scene changes during validation or mailbox delivery.
+`CANDIDATE_REVALIDATION_REQUIRED` identifies a worker result whose revision
+already differs from the live scene. The manager compares revisions again
+at adoption, so changes after delivery receive the same treatment.
+
+The serialized manager callback calls the real `prepare_execution_path()` on
+the latest live scene before adopting such a candidate. It temporarily retains
+RRT's finer edge sampling (`min(0.01, original max_joint_step)`) and restores
+the checker afterward. It rejects collisions, stale feedback/obstacles/human
+data, target/start/context changes, a further revision change and expired
+deadlines. Only successful current-scene certification produces RRT_PATH_READY;
+the normal preparation, final validation and STOP/RELEASE gates still follow.
+This does not change the GNG/A* search or its adoption policy.
+
+The existing `validation_budget` also caps manager handoff validation within
+the ORIGINAL admitted request/certificate deadline. This is a soft limit:
+a native collision call cannot be interrupted, but an overrun cannot be adopted.
+Profiles include `rrt_handoff_validation` (reason, old/new revisions, elapsed_ms).
+No persistent path pool, extra worker or repeated worker validation loop is added.
+
+During retry cooldown, retain ONE pending request with RRT_WAITING_RETRY /
+WAITING_RETRY instead of producing RETRY_COOLDOWN failures or new attempts.
+Waiting ends no later than `retry_not_before + fallback_budget`; a missed
+deadline rejects it. Admission uses a fresh scene and checks target, start,
+fresh inputs and Motion ownership. The search allowance starts on actual
+admission, once; subsequent human observations cannot extend it. Human Retreat,
+manual STOP, invalid data and active recovery retain priority.
+
+`verify_rrt_fallback_simulation.py --changing-human` changes a distant synthetic
+capsule at 20 Hz while using real Planning, C++ Motion and headless MuJoCo.
+It requires successful changed-revision handoff, completed motion and STOP
+on invalid human input. Markers can remain as explicitly labeled historical search data; they never
+certify execution. See [RRT_VISUAL_MODES.md](RRT_VISUAL_MODES.md). This is not a live Kinect,
+near-human avoidance, or worst-case latency test.
 
 ## Input refresh after a slow failed primary search
 
@@ -182,3 +229,9 @@ Recorded results and source hashes are in
 not a Cartesian target-distance or human-clearance measurement. Live Kinect,
 moving-human detours during RRT execution, production full-graph failure
 scenarios, interactive RViz and physical-robot execution remain unverified.
+# A* scheduling selection
+
+Primary graph search can run in `blocking` or `incremental` mode through
+`planning.astar.mode` in YAML. Both keep graph-first RRT admission: a pending
+slice is not a graph failure. See [ASTAR_EXECUTION_MODES.md](ASTAR_EXECUTION_MODES.md)
+for configuration, snapshot ownership and verification limits.

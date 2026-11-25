@@ -45,6 +45,17 @@ def segment_distances(starts, ends, other_start, other_end):
     return np.sqrt(np.minimum.reduce(candidates))
 
 
+def workspace_graph_period(planning):
+    settings = planning.get('visualization', {})
+    if not isinstance(settings, dict):
+        raise ValueError('planning.visualization must be a mapping')
+    rate = settings.get('workspace_graph_rate_hz', 2.)
+    if (isinstance(rate, bool) or not isinstance(rate, (int, float))
+            or not np.isfinite(rate) or rate <= 0.):
+        raise ValueError('planning.visualization.workspace_graph_rate_hz must be positive')
+    return 1. / float(rate)
+
+
 class WorkspaceGraphMask:
     """Cache immutable graph geometry and one obstacle signature.
 

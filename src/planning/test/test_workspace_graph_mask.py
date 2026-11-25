@@ -9,11 +9,23 @@ import numpy as np
 import yaml
 
 from planning.planning_node import PlanningNode
-from planning.visualization.workspace_graph_mask import WorkspaceGraphMask, segment_distances
+from planning.visualization.workspace_graph_mask import (
+    WorkspaceGraphMask, segment_distances, workspace_graph_period,
+)
 from test_robot_visualization import load_visualizer, Node, ROOT, Marker
 
 
 class GeometryTests(unittest.TestCase):
+    def test_display_rate_configuration_is_validated(self):
+        self.assertEqual(workspace_graph_period({}), .5)
+        self.assertEqual(workspace_graph_period({'visualization': {
+            'workspace_graph_rate_hz': 4.}}), .25)
+        for value in (0., -1., True, float('inf'), float('nan'), '2'):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                workspace_graph_period({'visualization': {'workspace_graph_rate_hz': value}})
+        with self.assertRaises(ValueError):
+            workspace_graph_period({'visualization': []})
+
     def setUp(self):
         self.positions = np.array([[-1., 0., 0.], [1., 0., 0.], [0., 0., 0.],
                                    [-1., 1., 0.], [1., 1., 0.]])
@@ -117,6 +129,10 @@ class GeometryTests(unittest.TestCase):
 class DisplayIntegrationTests(unittest.TestCase):
     def setUp(self):
         self.transport = Node()
+        self.now = 100.
+        clock = patch('time.monotonic', side_effect=lambda: self.now)
+        clock.start()
+        self.addCleanup(clock.stop)
         self.visualizer = object.__new__(load_visualizer())
         self.visualizer.node = self.transport
         self.visualizer.frame_id = 'base_link'
@@ -138,6 +154,7 @@ class DisplayIntegrationTests(unittest.TestCase):
             workspace_graph_mask=WorkspaceGraphMask(self.visualizer.gng_nodes,
                                                     self.visualizer.gng_edges),
             workspace_mask_scene_key=None, visualizer=self.visualizer,
+            workspace_mask_period=.5, workspace_mask_last_attempt=None,
             workspace_mask_status_pub=SimpleNamespace(publish=self.status.append),
             planner=SimpleNamespace(collision_filter=self.checker),
             manager=SimpleNamespace(obstacle_data_ready=lambda: True,
@@ -147,8 +164,31 @@ class DisplayIntegrationTests(unittest.TestCase):
         self.node.update_workspace_graph_mask = lambda: PlanningNode.update_workspace_graph_mask(
             self.node)
 
-    def update(self):
+    def update(self, advance=.5):
+        self.now += advance
         PlanningNode.update_graph_visualization(self.node)
+
+    def test_display_coalesces_updates_at_two_hz_and_uses_only_latest_geometry(self):
+        self.update(0.)
+        self.checker.human_capsules = (((0, 0), (1., 0., -.5), (1., 0., .5), .1),)
+        self.update(.1)
+        self.checker.human_capsules = (((0, 0), (10., 0., 0.), (10., 0., 1.), .1),)
+        self.update(.1)
+        self.assertEqual(len(self.messages), 1)
+        self.assertEqual(self.node.workspace_graph_mask.calculations, 1)
+        self.update(.301)
+        self.assertEqual(len(self.messages), 2)
+        self.assertEqual(self.node.workspace_graph_mask.calculations, 2)
+        self.assertEqual(len(self.messages[-1].markers[0].points), 3)
+        self.assertIsNone(self.node.manager.pending_action)
+
+    def test_no_subscribers_do_not_consume_the_display_slot(self):
+        self.interested = False
+        self.update(0.)
+        self.assertIsNone(self.node.workspace_mask_last_attempt)
+        self.interested = True
+        self.update(.01)
+        self.assertEqual(len(self.messages), 1)
 
     def test_marker_visibility_and_persistent_lifetime(self):
         self.update()
@@ -264,7 +304,11 @@ class DisplayIntegrationTests(unittest.TestCase):
         self.assertNotIn('Joint graph - filtered', displays)
         self.assertFalse(displays['GNG - original']['Enabled'])
         masked = displays['Workspace graph - obstacle mask']
-        self.assertTrue(masked['Enabled'])
+        # The RRT-focused preset keeps both workspace overlays opt-in.
+        self.assertFalse(masked['Enabled'])
+        self.assertFalse(masked['Value'])
+        self.assertTrue(displays['RRT - Start Tree']['Enabled'])
+        self.assertTrue(displays['RRT - Goal Tree']['Enabled'])
         self.assertEqual(masked['Topic']['Value'], '/planning/workspace_graph_mask')
 
 

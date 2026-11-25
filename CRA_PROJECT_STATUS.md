@@ -165,6 +165,208 @@ Current Target changes only when valid simulation feedback arrives.
 
 ## 5. Recent Development
 
+### 2026-11-25 — YAML-selectable live / playback RRT process visualization
+
+- Added planning.rrt.visualization settings: playback default, live alternative,
+  10 Hz publication, 2 s playback, 3 s history, 256 nodes/tree, 512 events and
+  optional rejected candidates. Restart launch after changing mode.
+- Playback reveals recorded events and parent-linked trees in order. Live uses
+  a nonblocking one-slot spawned-worker queue and cumulative bounded snapshots;
+  parent FK uses private data and an attempt-local cache. Fast direct connections
+  may show only the result; fake branches are never generated.
+- Blue start, magenta goal, yellow active step, purple candidate path. Original
+  search time, DIRECT CONNECTION, current Planning status and historical-scene
+  labels distinguish presentation from executable-path certification. Workspace
+  graph clutter is hidden by default in RViz; its checkbox remains available.
+- History can outlive a changed/expired scene for display only. New targets clear
+  it; new searches replace it. Candidate admission, freshness, collision checks,
+  Human Retreat and Motion ownership are unchanged. No animation delays Motion.
+- Native Planning -> C++ Motion -> headless MuJoCo completed in both modes with
+  changing distant synthetic human geometry; both published start/goal/path
+  markers and STOPped on invalid human input. Live received two worker progress
+  packets in the fast-direct fixture. GUI readability, live Kinect avoidance
+  and worst-case CPU/latency performance remain unverified.
+- Evidence: src/planning/test/results/rrt_{live,playback}_20261125.json.
+  See src/planning/test/RRT_VISUAL_MODES.md for semantics, bounds and limitations.
+
+### 2026-11-24 — RRT candidate handoff across changing human revisions
+
+- Latest live log exposed a handoff liveness failure: nine RRT searches found
+  candidates, but all were rejected on changed scene revisions (five in the
+  coordinator, four at manager adoption). Cooldown generated 50 rejection events.
+- RRT now retains the prepared candidate with its original certificate revision.
+  A changed revision triggers latest-scene certification in the serialized manager
+  callback before adoption; collisions, stale data, changed context/start/target,
+  deadline expiry and validation overrun still reject it. Existing execution
+  checks, STOP ownership and Human Retreat remain in control. GNG/A* policy is
+  unchanged; the fix covers primary RRT and the RRT phase of combined mode.
+- Manager certification retains RRT's fine edge sampling, restores checker
+  settings, and uses the existing validation budget within the admitted total
+  deadline. This is a soft time bound, not preemptive native-call scheduling.
+- Retry cooldown keeps one pending request with RRT_WAITING_RETRY, using fresh
+  inputs at admission. Its wait has a fixed expiry; the search budget starts once
+  on admission and cannot be extended by later observations.
+- Profiles expose rrt_handoff_validation with reason, revisions and elapsed_ms.
+  The native probe adds --changing-human (20 Hz distant synthetic geometry).
+  Legacy graph-oriented unit fixtures explicitly select combined so the
+  operator's planner_mode: rrt does not silently change their tested algorithm.
+- Verified: 279 unit/native-geometry checks, Python style checks and planning/cra
+  build. Real Planning -> C++ Motion -> headless MuJoCo completed with continuously
+  changing synthetic revisions for both rrt and combined; handoff checks took
+  20.195 ms and 27.821 ms in these small fixtures. Invalid human input caused STOP
+  with no later EXECUTE/RELEASE during the probe's observation window. A separate
+  gng run completed through GNG_ASTAR with no RRT searches.
+- Evidence: src/planning/test/results/rrt_changing_scene_20261124.json,
+  rrt_combined_changing_scene_20261124.json, gng_after_rrt_handoff_20261124.json.
+  No live Kinect, near-human moving-obstacle avoidance, RViz GUI or worst-case
+  callback latency validation is claimed. Camera YAML, 5 cm margin and 2 s policy
+  were not changed. See src/planning/test/RRT_FALLBACK.md.
+
+### 2026-11-24 — Selectable gng / rrt / combined primary planner
+
+- Added `planning.planner_mode` in YAML; default `combined` preserves the
+  previous graph-first behavior. `gng` runs existing GNG/A* and disables the RRT
+  worker. `rrt` bypasses primary A* and requests RRT directly after shared valid
+  goal selection. `combined` admits RRT only after completed NO_GRAPH_PATH.
+- Removed the duplicate normal `rrt.mode` YAML switch; RRT budgets stay in
+  `planning.rrt`. Legacy configs without planner_mode and explicit diagnostic
+  off/shadow/fallback node overrides remain supported. Effective mode is logged.
+- RRT-only requests have a separate primary-goal context and PRIMARY_RRT trigger;
+  no graph failure is fabricated. The existing worker, fresh-scene validation,
+  deadlines, manual-STOP ownership and execution handshake are reused. GNG-only
+  admission remains blocked even if a worker flag is accidentally enabled.
+- Both blocking and incremental scheduling are supported. In RRT-only mode,
+  incremental work is GOAL_SELECTION/GOAL_SEARCHING and never performs primary
+  graph search. Cancelled target/start contexts cannot launch an old request.
+  RRT-only failure does not invoke graph-based safe-position fallback. Existing
+  controller/contact recovery and Human Retreat retain separate roles and must
+  be reported separately in primary-policy comparisons.
+- Profiles/snapshots/events report planner_mode, actual planner_source and
+  rrt_trigger (PRIMARY_RRT or NO_GRAPH_PATH); search submission records its seed.
+  Common goal selection may use workspace/graph samples or IK in all modes, so
+  the comparison concerns primary path search, not independent GNG training or
+  an entirely workspace-free RRT pipeline. Stored graph assets are unchanged.
+- Verification: 251 regression tests plus 44 separate incremental/shadow/visual
+  tests passed (295 distinct checks); changed-file flake8 and Planning/CRA build
+  passed. Native Planning -> C++ Motion -> headless MuJoCo completed the same
+  connected two-node FAR-human fixture in all three modes: gng/combined used
+  GNG_ASTAR without RRT search events, while rrt used RRT_CONNECT with PRIMARY_RRT.
+  All stopped return motion on synthetic input loss without further release.
+  A disconnected control made combined use RRT with NO_GRAPH_PATH.
+- These are controlled routing/execution tests with synthetic humans and a
+  direct RRT connection, not Kinect/moving-human or algorithm-performance
+  rankings. Camera, margins, freshness and experimental execution policy are
+  unchanged. RRT modes remain simulation-only and require valid inputs/goals.
+- Details: `src/planning/test/PLANNER_MODES.md`; native reports are
+  `src/planning/test/results/planner_mode_{gng,rrt,combined,combined_gap}_20261124.json`.
+
+### 2026-11-24 — Goal diagnostics, stable goals and bounded IK fallback
+
+- Added `planning.goal_selection` YAML settings for retaining valid goals,
+  clearance ranking within a four-candidate pool, and simulation-only bounded
+  position IK when retained/graph goals are unavailable. Preserved the user's
+  current `blocking` A* mode; the feature also works in `incremental` mode.
+- Reuses CollisionFilter's state-check clearance and rejection details without
+  repeating geometry queries for diagnostics/ranking. Reports window/checked
+  counts, rejection reasons with three bounded examples, goal origin, IK
+  attempts/cache hits and elapsed time in the existing throttled profile.
+  Five-second snapshots also include `goal_reason` and `goal_origin`.
+- Valid previous goals are collision/window checked before reuse. IK uses
+  damped least-squares position Jacobians in CRA base_link, joint limits and
+  step limiting. Every resulting goal is checked by actual FK/window and
+  whole-arm collision validation. Motion C++ kinematics and ROS interfaces are
+  unchanged. Six seed/point attempts, 80 iterations each and a soft 100 ms IK
+  phase budget are configurable; the rest of goal selection adds its own work.
+- Stores up to four IK configurations for the current target, with live
+  collision revalidation. Target changes clear history/cache. Unchanged failed
+  scene/start attempts are not repeated; changed scenes respect a one-second
+  cooldown. Deferred cooldown can schedule one retry even without another
+  human-pose update. UNKNOWN cannot authorize new IK through the simulation
+  override; fresh OBSERVED or certified EMPTY is required with human avoidance.
+- Both modes attempt A* connectors/graph for IK-origin goals first. Only a
+  completed NO_GRAPH_PATH batch can admit RRT. Invalid/no goals and solver
+  exhaustion do not bypass this gate. Existing Human Retreat, STOP/RELEASE,
+  freshness and final execution checks retain their roles.
+- Verification: 235 targeted regression tests passed, plus a separate native
+  fresh/expired EMPTY test (236 distinct checks total); changed Python flake8
+  and Planning/CRA builds passed. Native Jacobian finite differences, known-FK
+  IK convergence/restoration, blocked graph candidates, goal/cache revalidation,
+  graph-first behavior and input/budget/cooldown cases are covered.
+- Native Planning -> C++ Motion -> headless MuJoCo passed in both scheduling
+  modes using a temporary one-node graph with its goal removed and a tighter
+  fixture-only connector limit. IK produced a validated goal, graph connection
+  failed, and RRT motion completed with joint error about 0.0194 rad. Synthetic
+  invalid human input stopped return motion without further EXECUTE/RELEASE.
+  This is not a live Kinect or 37-candidate moving-human scene replay.
+- Camera settings, 2 s human timeout, 5 cm mandatory margin, 4--12 cm target
+  window, production graph/connector settings and execution/UNKNOWN policy are
+  unchanged. Bounded IK can miss physically possible solutions; all unsafe
+  candidates still require waiting. Stored workspace assets are not regenerated.
+- Details: `src/planning/test/GOAL_SELECTION.md`; native reports:
+  `src/planning/test/results/goal_recovery_simulation_20261124.json` and
+  `src/planning/test/results/goal_recovery_blocking_simulation_20261124.json`.
+
+### 2026-11-24 — Reduce incremental A* scheduling stalls
+
+- Preserved the operator-selected `incremental` mode and 10 ms slice/time
+  period; raised the operation cap from 256 to 2048. Added time/operation-yield
+  counters and checkpoint counts to the existing throttled profile output.
+- Split failed-attempt retry reasons into `SNAPSHOT_EXPIRED`, `SCENE_CHANGED`
+  and `SNAPSHOT_DATA_UNAVAILABLE`, retaining the raw `search_failure`. An expired
+  snapshot failing its initial state check requests a fresh search rather than
+  misclassifying the live start as invalid. Pending slices do not admit RRT.
+- Added YAML `planning.visualization.workspace_graph_rate_hz: 2.0`. Display
+  work reads the latest scene when due, without queuing intermediate frames.
+  Human/collision/Motion processing retains its existing cadence. No subscriber
+  performs no display work and consumes no rate-limit slot.
+- Verification: 214 targeted tests and changed-file flake8 passed; Planning/CRA
+  built. Native Planning -> C++ Motion -> headless MuJoCo completed RRT motion
+  after an artificial graph failure and stopped on synthetic invalid human data.
+- Controlled real-roadmap/native-checker A/B: same route and 16836 checkpoints
+  at both operation caps; 79 -> 24 slices and 61 -> 3 operation-limit yields.
+  Actual work was about 332/334 ms. A virtual timer accounting for native-query
+  overruns modeled about 888 -> 357 ms without competing callbacks. Recorded
+  start/target with FAR synthetic humans is not a replay of the actual live scene.
+- Camera settings, human timeout 2 s, margin 5 cm, execution/UNKNOWN policy and
+  graph-first RRT admission are unchanged. Individual native/display queries
+  can still overrun; moving-human/Kinect/FPS improvement remains unverified.
+- Evidence: `src/planning/test/results/astar_scheduling_ab_20261124.json`,
+  `src/planning/test/results/astar_scheduling_simulation_20261124.json` and
+  `src/planning/test/ASTAR_EXECUTION_MODES.md`.
+
+### 2026-11-24 — YAML-selectable primary A* execution mode
+
+- Added `planning.astar.mode: blocking | incremental`; checked-in default remains
+  `blocking`. Slice time, timer period and operation cap are configured in the
+  same YAML. Normal launch needs no additional arguments. Invalid options fail
+  at startup.
+- Incremental mode preserves the A* frontier and the configured primary,
+  local/intermediate and alternative-goal searches between timer slices. It
+  shares the roadmap and reuses one separate native collision model/data
+  context; it does not generate a new graph or create another worker process.
+- `ASTAR_SEARCHING` is pending work, never a reason to request RRT. Only a
+  completed `NO_GRAPH_PATH` in a matching current scene reaches the existing
+  RRT admission gates. Changed or expired failure snapshots are retried.
+- The private scene retains its original human deadline. Target/static obstacle
+  changes, moved start, stale input, manual stop and Motion recovery/fault cancel
+  pending work. Successful paths retain the snapshot revision and still pass
+  the normal live guard, preparation and Motion checks before execution.
+- Verification: 182 targeted tests passed, changed Python files passed flake8,
+  and `planning`/`cra` built. An isolated Planning -> native C++ Motion ->
+  headless MuJoCo probe completed RRT motion after an artificial graph failure
+  and stopped on synthetic human-data loss. A forced multi-slice variant used
+  11 slices on its recorded final graph attempt and observed four fresh-input
+  opportunities during unfinished searches across the trial. These are
+  controlled fixtures, not live Kinect/FPS or moving-human validation.
+- The cooperative budget can be exceeded by an indivisible collision query.
+  Special recovery, Human Retreat and final execution validation retain their
+  existing scheduling. Camera settings, human timeout/margins and experimental
+  execution/UNKNOWN configuration are unchanged. Rapid scene changes may cause
+  repeated retries; this is not a fix for all `STALLED` or camera timeout cases.
+- Details: `src/planning/test/ASTAR_EXECUTION_MODES.md`; reports:
+  `src/planning/test/results/astar_incremental_simulation_20261124.json` and
+  `src/planning/test/results/astar_incremental_sliced_simulation_20261124.json`.
+
 ### 2026-11-24 — Refresh stale inputs before admitting a failed graph's RRT attempt
 
 After known NO_GRAPH_PATH, transiently stale feedback/obstacles now retain one

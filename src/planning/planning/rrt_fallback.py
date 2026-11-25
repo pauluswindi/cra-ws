@@ -157,8 +157,7 @@ class RRTFallbackCoordinator(ShadowRRTObserver):
                                   return_prepared=True))
                 return dict(event, event='LATEST_VALIDATION_SUBMITTED')
             checker = manager.planner.collision_filter
-            if checker.environment_revision != self.job['scene']['revision']:
-                return self._failure('ENVIRONMENT_CHANGED')
+            changed = checker.environment_revision != self.job['scene']['revision']
             expiry = scene_expiry(checker, self.job['scene'])
             if now >= expiry or now >= self.job['request_deadline']:
                 return self._failure('VALIDATION_SNAPSHOT_EXPIRED')
@@ -168,9 +167,13 @@ class RRTFallbackCoordinator(ShadowRRTObserver):
             self.delivery = dict(
                 sequence=self.attempt['sequence'],
                 target_generation=self.attempt['target_generation'], reason='NONE',
-                scene_revision=checker.environment_revision, expires_at=min(expiry, self.deadline),
+                # Preserve the certificate's actual revision. A changed scene
+                # makes this a candidate, never a certificate for the new scene.
+                scene_revision=self.job['scene']['revision'],
+                expires_at=min(expiry, self.deadline),
                 prepared_path=prepared, start=self.job['start'].copy())
-            return dict(event, event='FALLBACK_VALIDATED', points=len(prepared))
+            return dict(event, event=('CANDIDATE_REVALIDATION_REQUIRED' if changed
+                                      else 'FALLBACK_VALIDATED'), points=len(prepared))
 
         request = manager.rrt_fallback_attempt
         if not manager.rrt_fallback_pending or request is None:
@@ -178,12 +181,21 @@ class RRTFallbackCoordinator(ShadowRRTObserver):
         if request['sequence'] <= self.last_sequence:
             return None
         self.attempt = dict(request)
-        self.last_sequence = request['sequence']
         reason = self.context_reason(manager, self.attempt, self.attempt['start'])
         if reason is not None:
+            self.last_sequence = request['sequence']
             return self._failure(reason)
+        if now >= request['deadline']:
+            self.last_sequence = request['sequence']
+            return self._failure('TIME_BUDGET_EXHAUSTED')
         if now - self.last_started < self.settings['retry_interval']:
-            return self._failure('RETRY_COOLDOWN')
+            # Keep one pending request. Do not manufacture a failed search or
+            # advance last_sequence until it can actually be admitted.
+            return None
+        self.last_sequence = request['sequence']
+        if request.pop('waiting_retry', False):
+            request['deadline'] = now + self.fallback_budget
+        self.attempt = dict(request)
         scene = fallback_scene(manager)
         self.deadline = min(request['deadline'], now + self.fallback_budget,
                             scene_expiry(manager.planner.collision_filter, scene))
@@ -192,6 +204,7 @@ class RRTFallbackCoordinator(ShadowRRTObserver):
             return self._failure('TIME_BUDGET_EXHAUSTED')
         self.discard_reason = None
         self.last_started = now
+        manager.rrt_retry_not_before = now + self.settings['retry_interval']
         self._submit(dict(kind='search', scene=scene, captured_at=now,
                           start=self.attempt['start'].copy(), goal=self.attempt['goal'].copy(),
                           seed=request['sequence'], search_budget=allowance, total_budget=allowance,

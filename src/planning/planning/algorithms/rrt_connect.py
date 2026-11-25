@@ -235,6 +235,7 @@ class RRTConnectPlanner:
                 return self._finish(start[None, :])
             self.last_statistics['nodes'] = 2
             if self._query('edge', start, goal):
+                self._event('DIRECT_CONNECTION')
                 return self._finish(np.vstack((start, goal)))
             self._rejection('start', goal, start, 'edge')
             if not self._alive():

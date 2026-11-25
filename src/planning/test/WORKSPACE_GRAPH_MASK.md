@@ -31,6 +31,13 @@ classification.
 
 ## Update behavior and load
 
+Display work is limited by `planning.visualization.workspace_graph_rate_hz`
+in `robot.yaml` (default 2 Hz). Each due update reads only the latest geometry;
+intermediate visual frames are not queued. Marker geometry may lag by roughly
+one period plus executor delays. This limit does not throttle the human input,
+whole-arm collision checks, STOP decisions or Motion execution. Individual
+display calculations can still be slow; this is a cadence limit.
+
 The static graph endpoints and bounding boxes are cached once. Each changed
 scene first uses bounding-box rejection, then batched NumPy finite-segment
 distances for nearby capsules. Rotated boxes reuse `segment_box_distances()`.

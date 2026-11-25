@@ -450,7 +450,7 @@ Visualization Manager:
         Value: /planning/gng_graph
       Value: false
     - Class: rviz_default_plugins/MarkerArray
-      Enabled: true
+      Enabled: false
       Name: Workspace graph - obstacle mask
       Namespaces:
         {}
@@ -460,7 +460,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /planning/workspace_graph_mask
-      Value: true
+      Value: false
     - Class: rviz_default_plugins/MarkerArray
       Enabled: true
       Name: RRT - Start Tree

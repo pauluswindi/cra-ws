@@ -8,6 +8,7 @@ expiry. New observations never extend it.
 from concurrent.futures import ProcessPoolExecutor
 import multiprocessing
 import os
+import queue
 import time
 
 import numpy as np
@@ -21,6 +22,7 @@ from planning.visualization.projection import project_configuration
 
 
 _CHECKER = None
+_PROGRESS = None
 
 
 def scene_expiry(checker, scene):
@@ -57,8 +59,9 @@ def capture_scene(checker):
     }
 
 
-def _initialize(model_path, joint_names, checker_options):
-    global _CHECKER
+def _initialize(model_path, joint_names, checker_options, progress=None):
+    global _CHECKER, _PROGRESS
+    _PROGRESS = progress
     _CHECKER = CollisionFilter(model_path, joint_names, **checker_options)
 
 
@@ -92,7 +95,37 @@ def run_job(job, checker=None):
             result['reason'] = 'TIME_BUDGET_EXHAUSTED'
             return result
         if job['kind'] == 'search':
-            trace = SearchTrace() if job.get('visualize', False) else None
+            visual = job.get('visualization_settings', {})
+            last_progress = [float('-inf')]
+
+            def progress(record):
+                # Cumulative bounded snapshots tolerate dropped packets. Never
+                # wait for RViz or perform FK/collision queries in this hook.
+                now = time.perf_counter()
+                if _PROGRESS is None or now - last_progress[0] < 1. / visual['publish_rate_hz']:
+                    return
+                last_progress[0] = now
+                packet = dict(trees=record.trees, events=record.events,
+                              rejected=record.rejected, path=[],
+                              dropped_events=record.dropped_events,
+                              dropped_nodes=record.dropped_nodes,
+                              attempt=job['visual_attempt'],
+                              target_generation=job['visual_generation'],
+                              scene_revision=job['scene']['revision'],
+                              expires_at=scene_expiry(checker, job['scene']),
+                              reason='SEARCHING', live_partial=True)
+                try:
+                    # Copy before the queue feeder serializes mutable lists.
+                    import copy
+                    _PROGRESS.put_nowait(copy.deepcopy(packet))
+                except (queue.Full, OSError, ValueError):
+                    pass
+
+            trace = (SearchTrace(
+                max_nodes=visual.get('max_nodes_per_tree', 256),
+                max_events=visual.get('max_events', 512),
+                progress=progress if visual.get('mode') == 'live' else None)
+                if job.get('visualize', False) else None)
             search = RRTConnectPlanner(
                 checker, time_budget=min(job['search_budget'], remaining), trace=trace)
             baseline = search.plan(job['start'], job['goal'], seed=job['seed'])
@@ -148,7 +181,8 @@ def run_job(job, checker=None):
                     projected, scene_revision=job['scene']['revision'],
                     expires_at=scene_expiry(checker, job['scene']),
                     human_data_kind=job['scene'].get('human_data_kind', 'OBSERVED'),
-                    reason=search.last_plan_failure, projection_s=time.perf_counter() - began
+                    reason=search.last_plan_failure, search_elapsed_s=result['elapsed_s'],
+                    projection_s=time.perf_counter() - began
                     - result['elapsed_s'])
             except Exception as error:
                 result['visualization_error'] = f'{type(error).__name__}: {error}'
@@ -166,7 +200,8 @@ class ShadowRRTObserver:
     def __init__(self, model_path, joint_names, checker_options, *,
                  search_budget=.5, selection_budget=2., preference_search_budget=.8,
                  validation_budget=.5, preferred_clearance=.07, retry_interval=3.,
-                 executor=None, projection_bodies=('base_link', 'end_effector')):
+                 executor=None, projection_bodies=('base_link', 'end_effector'),
+                 visualization=None):
         settings = dict(search_budget=search_budget, selection_budget=selection_budget,
                         preference_search_budget=preference_search_budget,
                         validation_budget=validation_budget,
@@ -178,10 +213,16 @@ class ShadowRRTObserver:
             raise ValueError('Shadow preference cannot reduce mandatory human margin')
         self.settings = settings
         self.sample_step = min(.01, checker_options['max_joint_step'])
+        from planning.visualization.rrt_animation import visualization_settings
+        self.visualization_settings = visualization_settings(visualization)
+        context = multiprocessing.get_context('spawn')
+        self.progress_queue = (context.Queue(maxsize=1) if executor is None
+                               and self.visualization_settings['mode'] == 'live' else None)
         self.executor = executor if executor is not None else ProcessPoolExecutor(
-            max_workers=1, mp_context=multiprocessing.get_context('spawn'),
+            max_workers=1, mp_context=context,
             initializer=_initialize,
-            initargs=(str(model_path), list(joint_names), dict(checker_options)))
+            initargs=(str(model_path), list(joint_names), dict(checker_options),
+                      self.progress_queue))
         self.future = None
         self.job = None
         self.attempt = None
@@ -193,6 +234,7 @@ class ShadowRRTObserver:
         self.projection_bodies = tuple(projection_bodies)
         self.visualization_requested = False
         self.visualization_result = None
+        self.live_packets_received = 0
 
     @staticmethod
     def _context_reason(manager, attempt, start):
@@ -219,6 +261,10 @@ class ShadowRRTObserver:
         return None
 
     def _submit(self, job):
+        if job['kind'] == 'search':
+            job.update(visualization_settings=self.visualization_settings,
+                       visual_attempt=self.attempt['sequence'],
+                       visual_generation=self.attempt['target_generation'])
         self.job = job
         self.future = self.executor.submit(run_job, job)
 
@@ -322,8 +368,27 @@ class ShadowRRTObserver:
         return {'event': 'SEARCH_SUBMITTED', 'attempt': attempt['sequence'],
                 'observation_only': True, 'scene_revision': self.job['scene']['revision']}
 
+    def live_progress(self):
+        if self.progress_queue is None:
+            return None
+        latest = None
+        try:
+            while True:
+                latest = self.progress_queue.get_nowait()
+        except queue.Empty:
+            pass
+        if (latest is not None and self.attempt is not None
+                and latest['attempt'] == self.attempt['sequence']
+                and self.discard_reason is None):
+            self.live_packets_received += 1
+            return latest
+        return None
+
     def close(self):
         self.disabled = True
         if self.future is not None:
             self.future.cancel()
         self.executor.shutdown(wait=False, cancel_futures=True)
+        if self.progress_queue is not None:
+            self.progress_queue.close()
+            self.progress_queue.cancel_join_thread()

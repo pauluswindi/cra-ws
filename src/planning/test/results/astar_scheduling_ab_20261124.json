@@ -1,0 +1,94 @@
+{
+  "scope": "Controlled scheduling comparison, not a live-camera or FPS benchmark.\n\nUse the real roadmap/model, frozen far-human geometry and a virtual 10 ms\ntimer. Collision work uses the native checker and real perf_counter budgets.\nNo ROS callbacks, Motion commands or camera devices are involved.\n",
+  "case": "replan",
+  "human_snapshot": {
+    "status": "OBSERVED",
+    "reason": "CAPSULES_PRESENT",
+    "capsules": [
+      {
+        "body_id": 0,
+        "segment_id": 0,
+        "start": [
+          10.0,
+          10.0,
+          10.0
+        ],
+        "end": [
+          10.0,
+          10.0,
+          11.0
+        ],
+        "radius": 0.1
+      }
+    ],
+    "expires_at": null
+  },
+  "start": [
+    1.3624008556443548,
+    -0.8270398164196338,
+    1.3273130924385779,
+    -0.19822505544778982,
+    0.03495262485304699
+  ],
+  "target_base": [
+    0.1532060447883779,
+    -0.09999816339340062,
+    0.3505738206671457
+  ],
+  "roadmap_nodes": 4000,
+  "roadmap_edges": 14923,
+  "trials": [
+    {
+      "settings": {
+        "mode": "incremental",
+        "slice_budget_ms": 10.0,
+        "slice_period_ms": 10.0,
+        "max_operations_per_slice": 256
+      },
+      "planned": true,
+      "slices": 79,
+      "last_slice_ms": 13.22,
+      "max_slice_ms": 27.036,
+      "work_ms": 332.276,
+      "operations_total": 16836,
+      "last_slice_operations": 3,
+      "last_yield_reason": "COMPLETE",
+      "time_budget_yields": 17,
+      "operation_limit_yields": 61,
+      "search_failure": "NONE",
+      "reason": "NONE",
+      "virtual_elapsed_ms": 887.563
+    },
+    {
+      "settings": {
+        "mode": "incremental",
+        "slice_budget_ms": 10.0,
+        "slice_period_ms": 10.0,
+        "max_operations_per_slice": 2048
+      },
+      "planned": true,
+      "slices": 24,
+      "last_slice_ms": 13.692,
+      "max_slice_ms": 24.838,
+      "work_ms": 334.301,
+      "operations_total": 16836,
+      "last_slice_operations": 3,
+      "last_yield_reason": "COMPLETE",
+      "time_budget_yields": 20,
+      "operation_limit_yields": 3,
+      "search_failure": "NONE",
+      "reason": "NONE",
+      "virtual_elapsed_ms": 357.412
+    }
+  ],
+  "equal_routes_when_both_found": true,
+  "source_sha256": {
+    "src/planning/test/benchmark_astar_scheduling.py": "1cad647af36d94839de6be0ced7e47eea9329da4e47c8474134d4026564f45b7",
+    "src/cra/config/robot.yaml": "7afc49b932322915cfccb042ad005e5bda0976012eef2ab815a51aad3d9ced1f",
+    "src/planning/data/workspace_graph.npz": "14b2644bd41bd19dae21f736f358d314bbeaab7e06b06341b8ce84c1c5c0f967",
+    "src/cra/models/robot_model/cognitive_robotics_arm.xml": "ded0e4c4d46098d14c522bb008048f0e41212bb643aea6858d320326a107330e",
+    "src/planning/planning/astar_execution.py": "39c17e2c49408b5b8e5bf9bed9c342bac6464d4d34e8d65af21c077a8a520896",
+    "src/planning/planning/algorithms/a_star.py": "752bd1de2f31c36650cbfb4b0e7ab99b3a30efba3eb5eb3264bc9a36850b6117",
+    "src/planning/planning/path_planner.py": "e7588ee45e8c85a68fcfc290642b76a09eab59a12c54305e2d3a702dc2ff9be8"
+  }
+}

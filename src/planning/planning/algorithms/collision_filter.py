@@ -53,6 +53,7 @@ class CollisionFilter:
         self.human_data_timeout = float(human_data_timeout)
         self.environment_revision = 0
         self.last_state_validation_failure = None
+        self.last_state_validation_clearance = None
         self.last_edge_validation_failure = None
         self.last_path_validation_failure = None
         self.human_report_cache_size = human_report_cache_size
@@ -597,6 +598,7 @@ class CollisionFilter:
 
     def is_state_valid(self, joints):
         self.last_state_validation_failure = None
+        self.last_state_validation_clearance = None
         if (
             self.human_obstacles_enabled
             and not self.human_data_ready()
@@ -631,6 +633,7 @@ class CollisionFilter:
 
         if self.human_obstacles_enabled:
             report = self._human_collision_after_forward()
+            self.last_state_validation_clearance = report.get('clearance')
 
             if report["status"] != "FAR":
                 return self._state_validation_failed(

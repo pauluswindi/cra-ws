@@ -9,8 +9,12 @@ import numpy as np
 import yaml
 
 from planning.algorithms.a_star import AStarPlanner
+from planning.astar_execution import astar_settings
 from planning.algorithms.collision_filter import CollisionFilter
 from planning.execution_progress import OrderedSegmentProgress
+from planning.goal_selection import GoalSelector
+from planning.planner_modes import configured_planner
+from planning.search_steps import complete
 
 
 class PathPlanner:
@@ -67,6 +71,13 @@ class PathPlanner:
             raise ValueError("Invalid joint graph costs")
 
         planning_config = config["planning"]
+        self.planner_mode = configured_planner(planning_config) or 'combined'
+        self.astar_execution_config = astar_settings(planning_config)
+        self.goal_selector = GoalSelector(config)
+        self.goal_seed = None
+        self.goal_empty_until = None
+        self.goal_require_human = bool(planning_config.get('human_avoidance', {}).get(
+            'enabled', False))
         joint_config = planning_config["joint_graph"]
 
         self.max_joint_delta = float(
@@ -141,42 +152,13 @@ class PathPlanner:
         return next(self.goal_candidates(target, goal_tolerance, target_clearance), None)
 
     def goal_candidates(self, target, goal_tolerance, target_clearance):
-        """Yield valid graph configurations in Cartesian-distance order."""
-        if not self.human_data_ready():
-            return
+        for candidate in self.goal_candidates_steps(target, goal_tolerance, target_clearance):
+            if candidate is not None:
+                yield candidate
 
-        target = np.asarray(target, dtype=float)
-
-        if target.shape != (3,) or not np.isfinite(target).all():
-            raise ValueError("Invalid Cartesian target")
-
-        if (
-            not np.isfinite(goal_tolerance)
-            or goal_tolerance <= 0.0
-            or not np.isfinite(target_clearance)
-            or not 0.0 <= target_clearance < goal_tolerance
-        ):
-            raise ValueError("Invalid goal selection tolerances")
-
-        distances = np.linalg.norm(
-            self.joint_eof - target, axis=1
-        )
-
-        for index in np.argsort(distances):
-            distance = float(distances[index])
-
-            if distance > goal_tolerance:
-                break
-
-            if distance < target_clearance:
-                continue
-            if not self.human_data_ready():
-                return
-
-            joints = self.joint_q[index]
-
-            if self.collision_filter.is_state_valid(joints):
-                yield joints.copy()
+    def goal_candidates_steps(self, target, goal_tolerance, target_clearance):
+        yield from self.goal_selector.candidates_steps(
+            self, target, goal_tolerance, target_clearance)
 
     def find_alternative_goal_path(self, start, target, failed_goal,
                                    goal_tolerance, target_clearance):
@@ -340,6 +322,9 @@ class PathPlanner:
         }
 
     def is_path_valid(self, path):
+        return complete(self.is_path_valid_steps(path))
+
+    def is_path_valid_steps(self, path):
         checker = self.collision_filter
         checker.last_path_validation_failure = None
         if not self.human_data_ready():
@@ -358,18 +343,24 @@ class PathPlanner:
         revision = checker.environment_revision
 
         for index, joints in enumerate(path):
+            yield
+            if not self.human_data_ready() or checker.environment_revision != revision:
+                return False
             if not checker.is_state_valid(joints):
                 return checker.record_path_validation_failure(
                     path, revision, "WAYPOINT", checker.last_state_validation_failure,
                     point_index=index)
 
         for index, (start, goal) in enumerate(zip(path[:-1], path[1:])):
+            yield
+            if not self.human_data_ready() or checker.environment_revision != revision:
+                return False
             if not checker.is_edge_valid(start, goal):
                 return checker.record_path_validation_failure(
                     path, revision, "EDGE_SAMPLE", checker.last_edge_validation_failure,
                     edge_index=index)
 
-        return checker.environment_revision == revision
+        return checker.environment_revision == revision and self.human_data_ready()
 
     def find_nearest_safe_configuration(self, current_q):
         current = np.asarray(current_q, dtype=float)
@@ -634,6 +625,9 @@ class PathPlanner:
         )
 
     def find_alternative_path(self, start, goal, revision):
+        return complete(self.find_alternative_path_steps(start, goal, revision, cooperative=False))
+
+    def find_alternative_path_steps(self, start, goal, revision, cooperative=True):
         checker = self.collision_filter
 
         distances = np.linalg.norm(
@@ -643,6 +637,7 @@ class PathPlanner:
         attempts = 0
 
         for index in np.argsort(distances):
+            yield
             if (
                 checker.environment_revision != revision
                 or not self.human_data_ready()
@@ -659,15 +654,16 @@ class PathPlanner:
             if not checker.is_state_valid(intermediate):
                 continue
 
+            yield
             if not checker.is_edge_valid(start, intermediate):
                 continue
 
             attempts += 1
 
-            remainder = self.planner.plan(
-                intermediate,
-                goal,
-            )
+            if cooperative:
+                remainder = yield from self.planner.plan_steps(intermediate, goal)
+            else:
+                remainder = self.planner.plan(intermediate, goal)
 
             if remainder is not None:
                 path = np.vstack(
@@ -676,7 +672,8 @@ class PathPlanner:
 
                 if (
                     checker.environment_revision == revision
-                    and self.is_path_valid(path)
+                    and ((yield from self.is_path_valid_steps(path)) if cooperative
+                         else self.is_path_valid(path))
                 ):
                     return path
 
@@ -717,6 +714,9 @@ class PathPlanner:
         return False
 
     def plan(self, start_q, goal_q):
+        return complete(self.plan_steps(start_q, goal_q, cooperative=False))
+
+    def plan_steps(self, start_q, goal_q, cooperative=True):
         start = np.asarray(start_q, dtype=float)
         goal = np.asarray(goal_q, dtype=float)
 
@@ -744,6 +744,7 @@ class PathPlanner:
                 "Human Vision data unavailable",
             )
 
+        yield
         if not checker.is_state_valid(start):
             return self._plan_failed(
                 "START_INVALID",
@@ -751,6 +752,7 @@ class PathPlanner:
                 joints=start,
             )
 
+        yield
         if not checker.is_state_valid(goal):
             return self._plan_failed(
                 "GOAL_INVALID",
@@ -764,7 +766,10 @@ class PathPlanner:
                 "environment changed",
             )
 
-        path = self.planner.plan(start, goal)
+        if cooperative:
+            path = yield from self.planner.plan_steps(start, goal)
+        else:
+            path = self.planner.plan(start, goal)
 
         if not self.human_data_ready():
             return self._plan_failed(
@@ -773,11 +778,10 @@ class PathPlanner:
             )
 
         if path is None:
-            path = self.find_alternative_path(
-                start,
-                goal,
-                revision,
-            )
+            if cooperative:
+                path = yield from self.find_alternative_path_steps(start, goal, revision)
+            else:
+                path = self.find_alternative_path(start, goal, revision)
 
         if not self.human_data_ready():
             return self._plan_failed(
@@ -799,7 +803,8 @@ class PathPlanner:
 
         valid = (
             checker.environment_revision == revision
-            and self.is_path_valid(path)
+            and ((yield from self.is_path_valid_steps(path)) if cooperative
+                 else self.is_path_valid(path))
         )
         if not self.human_data_ready():
             return self._plan_failed(
@@ -817,6 +822,7 @@ class PathPlanner:
         ).copy()
 
         self.path_revision = revision
+        self.goal_selector.remember(goal)
 
         print(
             "[PathPlanner] PATH_READY: "

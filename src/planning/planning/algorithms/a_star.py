@@ -6,6 +6,8 @@ from pathlib import Path
 
 import numpy as np
 
+from planning.search_steps import complete
+
 
 class AStarPlanner:
     def __init__(
@@ -191,7 +193,10 @@ class AStarPlanner:
             for i in order
         ]
 
-    def _search(
+    def _search(self, *args, **kwargs):
+        return complete(self._search_steps(*args, **kwargs))
+
+    def _search_steps(
         self,
         start,
         goal,
@@ -232,6 +237,7 @@ class AStarPlanner:
             ] = True
 
         while queue:
+            yield
             self._check_revision()
             if not self._human_data_ready():
                 return None, expanded
@@ -285,6 +291,8 @@ class AStarPlanner:
             current_q = configuration(current)
 
             for neighbor, edge_cost in neighbors:
+                yield
+                self._check_revision()
                 if neighbor in expanded:
                     continue
 
@@ -303,6 +311,7 @@ class AStarPlanner:
                 else:
                     if not self._state_valid(neighbor, neighbor_q):
                         continue
+                    yield
                     if not self._edge_valid(current, neighbor, current_q, neighbor_q):
                         continue
 
@@ -325,6 +334,9 @@ class AStarPlanner:
         return None, expanded
 
     def _lazy_search(self, start, goal, extra):
+        return complete(self._lazy_search_steps(start, goal, extra))
+
+    def _lazy_search_steps(self, start, goal, extra):
         """Run A* on optimistic edges, certifying every returned path edge.
 
         A failed state/edge is cached for this environment revision and removed
@@ -342,14 +354,25 @@ class AStarPlanner:
             self._check_revision()
             if not self._human_data_ready():
                 return None, set()
-            indices, expanded = self._search(start, goal, extra, lazy_edges=True)
+            indices, expanded = yield from self._search_steps(
+                start, goal, extra, lazy_edges=True)
             if indices is None:
                 return None, expanded
             self.last_candidate_count += 1
-            if not all(self._state_valid(index, configuration(index)) for index in indices):
+            valid = True
+            for index in indices:
+                yield
+                if not self._state_valid(index, configuration(index)):
+                    valid = False
+                    break
+            if not valid:
                 continue
-            if not all(self._edge_valid(a, b, configuration(a), configuration(b))
-                       for a, b in zip(indices[:-1], indices[1:])):
+            for a, b in zip(indices[:-1], indices[1:]):
+                yield
+                if not self._edge_valid(a, b, configuration(a), configuration(b)):
+                    valid = False
+                    break
+            if not valid:
                 continue
             if not self._human_data_ready():
                 return None, expanded
@@ -357,6 +380,9 @@ class AStarPlanner:
         return None, set()
 
     def plan(self, start_q, goal_q):
+        return complete(self.plan_steps(start_q, goal_q))
+
+    def plan_steps(self, start_q, goal_q):
         start = np.asarray(start_q, dtype=float)
         goal = np.asarray(goal_q, dtype=float)
 
@@ -394,10 +420,12 @@ class AStarPlanner:
         self.last_used_local_connections = False
         self.last_candidate_count = 0
 
+        yield
         if not self._state_valid(start_id, start):
             print("[A*] NO_PATH: invalid start", flush=True)
             return None
 
+        yield
         if not self._state_valid(goal_id, goal):
             print("[A*] NO_PATH: invalid goal", flush=True)
             return None
@@ -475,9 +503,9 @@ class AStarPlanner:
                 (start_id, distance)
             )
 
-        result, reached = self._lazy_search(start, goal, extra)
+        result, reached = yield from self._lazy_search_steps(start, goal, extra)
         if result is None and self._human_data_ready():
-            result, reached = self._search(
+            result, reached = yield from self._search_steps(
                 start, goal, extra,
             )
         if not self._human_data_ready():
@@ -497,7 +525,7 @@ class AStarPlanner:
             )
             return result
 
-        result, reached_local = self._search(
+        result, reached_local = yield from self._search_steps(
             start,
             goal,
             extra,

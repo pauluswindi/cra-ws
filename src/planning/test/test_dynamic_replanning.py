@@ -62,6 +62,12 @@ class DynamicReplanningTests(unittest.TestCase):
             ROOT / 'src/cra/models/robot_model/cognitive_robotics_arm.xml',
             ROOT / 'src/cra/config/robot.yaml',
         )
+        # These synchronous protocol tests must not depend on the operator's YAML mode.
+        planner.planner_mode = 'combined'
+        planner.astar_execution_config = {**planner.astar_execution_config, 'mode': 'blocking'}
+        # Keep legacy protocol fixtures deterministic; goal recovery has its own tests.
+        planner.goal_selector.settings.update(
+            retain_valid_goal=False, clearance_candidates=1, ik_enabled=False)
         checker = planner.collision_filter
         base = checker.data.xpos[checker.base_id].copy()
         rotation = checker.data.xmat[checker.base_id].reshape(3, 3).copy()

@@ -20,12 +20,14 @@ from visualization_msgs.msg import Marker
 
 from planning.human_capsule_monitor import HumanCapsuleMonitor
 from planning.path_planner import PathPlanner
+from planning.planner_modes import planner_selection
 from planning.planning_manager import PlanningManager
 from planning.rrt_shadow import ShadowRRTObserver
 from planning.rrt_fallback import RRTFallbackCoordinator, rrt_settings
 from planning.visualization.planning_visualizer import PlanningVisualizer
 from planning.visualization.rrt_display import RRTDisplay
-from planning.visualization.workspace_graph_mask import WorkspaceGraphMask
+from planning.visualization.rrt_animation import LiveProjection
+from planning.visualization.workspace_graph_mask import WorkspaceGraphMask, workspace_graph_period
 from simulation.frame_transform import FrameTransform
 
 
@@ -73,8 +75,14 @@ class PlanningNode(Node):
             config = yaml.safe_load(file)
 
         robot = config["robot"]
+        self.workspace_mask_period = workspace_graph_period(config.get('planning', {}))
+        self.workspace_mask_last_attempt = None
+        self.planner_mode, worker_override = planner_selection(
+            config.get('planning', {}), get('rrt_mode'))
         self.rrt_mode, self.rrt_visualization_enabled, rrt_options = rrt_settings(
-            config.get('planning', {}), robot.get('mode'), get('rrt_mode'))
+            config.get('planning', {}), robot.get('mode'), worker_override)
+        self.planner_mode = self.planner_mode or (
+            'combined' if self.rrt_mode == 'fallback' else 'gng')
 
         self.joint_names = list(robot["joints"])
         self.base_frame = robot["frames"]["base"]
@@ -119,6 +127,7 @@ class PlanningNode(Node):
             paths["model_path"],
             paths["config_path"],
         )
+        self.planner.planner_mode = self.planner_mode
 
         checker = self.planner.collision_filter
         checker.human_data_timeout = human_timeout
@@ -249,8 +258,15 @@ class PlanningNode(Node):
             self.planning_cycle,
         )
 
+        self.graph_search_timer = None
+        if self.manager.astar_config['mode'] == 'incremental':
+            self.graph_search_timer = self.create_timer(
+                self.manager.astar_config['slice_period_ms'] / 1000.,
+                self.manager.advance_graph_search)
+
         self.rrt_shadow = None
-        self.rrt_display = RRTDisplay(self, self.visualizer)
+        self.rrt_display = RRTDisplay(self, self.visualizer, rrt_options.get('visualization'))
+        self.rrt_live_projection = None
         self.workspace_graph_mask = (WorkspaceGraphMask(
             self.visualizer.gng_nodes, self.visualizer.gng_edges)
             if self.show_workspace_graph_mask else None)
@@ -267,14 +283,19 @@ class PlanningNode(Node):
                     'human_data_timeout', 'human_report_cache_size')},
                 projection_bodies=(self.base_frame, robot['frames']['end_effector']),
                 **rrt_options)
+            if self.rrt_display.settings['mode'] == 'live' and self.rrt_visualization_enabled:
+                self.rrt_live_projection = LiveProjection(
+                    checker, (self.base_frame, robot['frames']['end_effector']))
             self.manager.rrt_fallback_enabled = self.rrt_mode == 'fallback'
             if self.manager.rrt_fallback_enabled:
                 self.manager.rrt_wait_timeout = self.rrt_shadow.fallback_budget
+                self.manager.rrt_validation_budget = self.rrt_shadow.settings['validation_budget']
             self.rrt_shadow_pub = self.create_publisher(String, '/planning/rrt_shadow', 10)
             self.rrt_events_pub = self.create_publisher(String, '/planning/rrt/events', 10)
             self.rrt_shadow_timer = self.create_timer(.05, self.observe_rrt)
-            self.rrt_display.status('RRT ' + self.rrt_mode
-                                    + ': waiting for an eligible GNG/A* failure')
+            self.rrt_display.status('RRT ' + self.planner_mode + (
+                ': waiting for a valid goal' if self.planner_mode == 'rrt'
+                else ': waiting for an eligible GNG/A* failure'))
         else:
             self.rrt_display.status('SHADOW_DISABLED: no RRT searches')
 
@@ -288,6 +309,8 @@ class PlanningNode(Node):
             f"human_safety_margin={human_safety_margin:.3f}m, "
             f"human_geometry_cache={checker.human_report_cache_size}, "
             f"profile_planning={self.manager.profiler.enabled}, "
+            f"planner_mode={self.planner_mode}, "
+            f"astar_mode={self.manager.astar_config['mode']}, "
             f"rrt_shadow={self.rrt_shadow is not None}, "
             f"rrt_mode={self.rrt_mode}, "
             f"segment_progress={self.planner.segment_progress_enabled}, "
@@ -311,18 +334,30 @@ class PlanningNode(Node):
             if event is not None:
                 event['delivered_to_planning'] = delivered
         if event is not None:
+            event['planner_mode'] = self.planner_mode
+            attempt = getattr(self.rrt_shadow, 'attempt', None) or {}
+            event['trigger'] = attempt.get('trigger', getattr(self.manager, 'rrt_trigger', None))
+            if event.get('event') == 'SEARCH_SUBMITTED':
+                event['seed'] = event.get('attempt')
             payload = json.dumps(event, allow_nan=False, separators=(',', ':'))
             self.rrt_shadow_pub.publish(String(data=payload))
             self.rrt_events_pub.publish(String(data=payload))
             self.get_logger().info(f'RRT {self.rrt_mode}: {payload}')
         try:
+            packet = self.rrt_shadow.live_progress()
+            if (packet is not None and self.rrt_live_projection is not None
+                    and self.rrt_shadow.visualization_result is None
+                    and self.rrt_shadow.future is not None
+                    and self.rrt_shadow.job['kind'] == 'search'
+                    and not self.rrt_shadow.future.done()
+                    and packet['target_generation'] == self.manager.target_generation):
+                self.rrt_display.accept(self.rrt_live_projection.project(packet))
             data = self.rrt_shadow.visualization_result
             self.rrt_shadow.visualization_result = None
             if event is not None:
                 status = ('RRT ' + event['event'] + ': '
                           + event.get('disposition', event.get('reason', '')))
-                if event['event'] in ('SEARCH_SUBMITTED', 'DISCARDED', 'DISABLED',
-                                      'FALLBACK_REJECTED'):
+                if event['event'] in ('SEARCH_SUBMITTED', 'DISCARDED', 'DISABLED'):
                     self.rrt_display.clear(status)
                 else:
                     self.rrt_display.status(status)
@@ -334,6 +369,8 @@ class PlanningNode(Node):
             self.rrt_display.clear('VISUALIZATION_ERROR: see console')
 
     def destroy_node(self):
+        if getattr(self, 'manager', None) is not None:
+            self.manager._cancel_graph_search('SHUTDOWN')
         if getattr(self, 'rrt_shadow', None) is not None:
             self.rrt_shadow.close()
         return super().destroy_node()
@@ -531,9 +568,11 @@ class PlanningNode(Node):
             np.linalg.norm(actual - target))
         goal_error = None if goal is None or target is None else float(
             np.linalg.norm(goal - target))
+        selection = getattr(getattr(self.planner, 'goal_selector', None), 'report', None) or {}
         checker = self.planner.collision_filter
         self.get_logger().info(
             f"Planning snapshot: status={manager.status}, motion={manager.motion_status}, "
+            f"planner_mode={self.planner_mode}, "
             f"failure_reason={manager.failure_reason}, fault={manager.fault}, "
             f"stop_owned={manager.stop_owned}, pending={manager.pending_action}, "
             f"planning_required={manager.planning_required}, "
@@ -546,6 +585,7 @@ class PlanningNode(Node):
             f"path_validation={manager.human_path_validation_reason}, "
             f"next_waypoint={manager.execution_next_waypoint}, "
             f"plan_failure={self.planner.last_plan_failure}, "
+            f"goal_reason={selection.get('reason')}, goal_origin={selection.get('source')}, "
             f"target={None if target is None else target.tolist()}, "
             f"eof={None if actual is None else actual.tolist()}, "
             f"target_error_m={actual_error}, selected_goal_error_m={goal_error}, "
@@ -750,6 +790,14 @@ class PlanningNode(Node):
     def update_graph_visualization(self):
         if self.workspace_graph_mask is None:
             return
+        if self.visualizer.workspace_mask_pub.get_subscription_count() == 0:
+            return
+        now = time.monotonic()
+        previous = self.workspace_mask_last_attempt
+        if previous is not None and now - previous < self.workspace_mask_period:
+            return
+        # Read the latest scene only when due; never enqueue intermediate display frames.
+        self.workspace_mask_last_attempt = now
         try:
             self.update_workspace_graph_mask()
         except Exception as error:
@@ -844,7 +892,18 @@ class PlanningNode(Node):
             "status": decision.status,
             "action": decision.action,
             "planner_source": getattr(self.manager, 'path_source', None),
+            "planner_mode": getattr(self.manager, 'planner_mode', 'combined'),
+            "rrt_trigger": getattr(self.manager, 'rrt_trigger', None),
+            "astar_mode": getattr(self.manager, 'astar_config', {}).get('mode', 'blocking'),
+            "goal_selection": (
+                self.manager.graph_search.planner.goal_selector.report
+                if getattr(self.manager, 'graph_search', None) is not None
+                else getattr(getattr(self.planner, 'goal_selector', None), 'report', None)),
+            "astar_search": (self.manager.graph_search.statistics()
+                             if getattr(self.manager, 'graph_search', None) is not None
+                             else getattr(self.manager, 'last_graph_search', None)),
             "rrt_result": getattr(self.manager, 'rrt_last_reason', None),
+            "rrt_handoff_validation": getattr(self.manager, 'rrt_handoff_validation', None),
             "rrt_admission_reason": getattr(self.manager, 'rrt_block_reason', None),
             "rrt_refresh_pending": getattr(self.manager, 'rrt_refresh_attempt', None) is not None,
             "cycle_work_ms": round(work_ms, 3),
